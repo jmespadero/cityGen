@@ -535,7 +535,7 @@ def plotVoronoiData(vertices, regions, extra=[], filename='', show=False, labels
         if filename.endswith('.png') or filename.endswith('.svg') or filename.endswith('.jpg'):
             plt.savefig(filename, dpi=my_dpi)
         else:
-            plt.savefig(filename + '.png', dpi=my_dpi)
+            # plt.savefig(filename + '.png', dpi=my_dpi)
             plt.savefig(filename + '.svg', dpi=my_dpi)
 
     # Interactive plot
@@ -632,4 +632,4 @@ def main():
 # Call the main function
 if __name__ == "__main__":
     main()
-    print ("Ready to run: blender --background --python cg-GenGame01.py");
+    print ("Ready to run: blender --background --python cityGen3D.py");
