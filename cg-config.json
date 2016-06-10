@@ -1,0 +1,19 @@
+{
+"cleanLayer1": true,
+"inputFilename": "city.graph.json",
+"inputFilenameAI": "city.AI.json",
+"inputHouses": "cg-library.blend",
+"inputSkyDome": "cg-skyDomeNight.blend",
+"inputPlayerboy": "cg-playerBoy.blend",
+"inputMonster": "cg-spider.blend",
+"createGlobalLight": true,
+"createDefenseWall": true,
+"createGround": true,
+"createStreets": true,
+"backgroundMusic": "",
+"numMonsters": 4 ,
+"outputCityFilename": "" ,
+"outputTouristFilename": "outputtourist.blend" ,
+"outputGameFilename": "outputgame.blend",
+"debugVisibleTokens": false
+}
