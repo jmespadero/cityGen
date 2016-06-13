@@ -6,41 +6,58 @@ Copyright 2014 Jose M. Espadero <josemiguel.espadero@urjc.es>
 Copyright 2014 Juan Ramos <juanillo07@gmail.com>
 
 Run option 1:
-blender --background --python cg-GenGame01.py
+blender --background --python cityGen3D.py
 
 Run option 2:
 
 Open blender and type this in the python console:
-  exec(compile(open("cg-GenGame01.py").read(), "cg-GenGame01.py", 'exec'))
+  exec(compile(open("cityGen3D.py").read(), "cityGen3D.py", 'exec'))
 
 """
 
-import math, json, random, os
+import bpy
+import math, json, random, os, sys
 from math import sqrt, acos, sin, cos
 from pprint import pprint
 import numpy as np
+from mathutils import Vector
+from datetime import datetime
 
-#default values
-cleanLayer1 = True       # Clean all objects in layer 1
-createGlobalLight = True         # Add new light to scene
-argsFilename = 'cg-config.json'   # Set a filename to read configuration
-inputFilename = 'city.graph.json'  # Set a filename to read 2D city map data
-inputFilenameAI = 'city.AI.json'   # Set a filename to read AI data
-internalPointsFileName = 'cg-internalPoints.json' # Set a filename to write internal points to file.
-inputHouses = 'cg-library.blend'  # Set a filename for houses library.
-inputPlayerboy = 'cg-playerBoy.blend'   # Set a filename for player system.
-inputMonster = 'cg-spider.blend'  # Set a filename for monster.
-createDefenseWall = True  # Create exterior boundary of the city
-createGround = True       # Create ground boundary of the city
-createStreets = True      # Create streets of the city
-numMonsters = 4
-outputCityFilename = 'outputcity.blend' #Output file with just the city
-outputTouristFilename = 'outputtourist.blend' #Output file with complete game
-outputGameFilename = 'outputgame.blend' #Output file with complete game
+
+# Set a default filename to read configuration
+argsFilename = 'cg-config.json'   
+
+#Set default values for args
+args={
+'cleanLayer1' : True,       # Clean all objects in layer 1
+'createGlobalLight' : True,         # Add new light to scene
+'inputFilename' : 'city.graph.json',  # Set a filename to read 2D city map data
+'inputFilenameAI' : 'city.AI.json',   # Set a filename to read AI data
+'internalPointsFileName' : 'cg-internalPoints.json', # Set a filename to write internal points to file.
+'inputHouses' : 'cg-library.blend',  # Set a filename for houses library.
+'inputPlayerboy' : 'cg-playerBoy.blend',   # Set a filename for player system.
+'inputSkyDome': 'cg-skyDomeNight.blend',   # set a filename for a skyDome
+'inputMonster' : 'cg-spider.blend',  # Set a filename for monster.
+'createDefenseWall' : True,  # Create exterior boundary of the city
+'createGround' : True,       # Create ground boundary of the city
+'createStreets' : True,      # Create streets of the city
+'numMonsters' : 4,
+'outputCityFilename' : 'outputcity.blend', #Output file with just the city
+'outputTouristFilename' : 'outputtourist.blend', #Output file with complete game
+'outputGameFilename' : 'outputgame.blend', #Output file with complete game
+}
+
+#Check if there is arguments after '--'
+if '--' in sys.argv:
+    argv = sys.argv[1+sys.argv.index('--'):]
+    print("argv", argv)
+    if argv:
+        #By now, only use last argument as configuration file
+        argsFilename = argv[-1]
+
 
 #Read options from external file
-args={}
-print("Trying to read options from: %s" % argsFilename)   
+print("Trying to read options from file: %s" % argsFilename)   
 try:
     with open(argsFilename, 'r') as f:
         import json
@@ -49,19 +66,13 @@ try:
         for n in args:
             print("  *",n,"=",args[n])
         #Python documentation say NOT to do this :-)
-        globals().update(args)
+        #globals().update(args)
 except IOError:
     print("Could not read file:", argsFilename)
     pass
                
 #################################################################
 # Functions to create a new cityMap scene (does need run inside blender)
-
-#Check if running inside blender
-
-import bpy
-from mathutils import Vector
-from datetime import datetime
 
 def duplicateObject(sourceObj, objName="copy", select=False, scene=bpy.context.scene):
     """Duplicate a object in the scene.
@@ -361,28 +372,26 @@ def makePolygon(cList, objName="meshObj", meshName="mesh", height=0.0, reduct=0.
 
     # 1. Create a mesh for streets arround this region
     # This is the space between polygons clist and clist2
-    if createGround:
-        me = bpy.data.meshes.new("_Street")
-        ob = bpy.data.objects.new("_Street", me)
-        streetData = []
-        for i in range(nv):
-            streetData.append(((i-1) % nv, i, nv+i, nv+(i-1) % nv))
-        # pprint(streetData)
-        me.from_pydata(cList+cList2, [], streetData)
-        me.update(calc_edges=True)
-        me.materials.append(bpy.data.materials['Floor1'])
-        bpy.context.scene.objects.link(ob)
+    me = bpy.data.meshes.new("_Street")
+    ob = bpy.data.objects.new("_Street", me)
+    streetData = []
+    for i in range(nv):
+        streetData.append(((i-1) % nv, i, nv+i, nv+(i-1) % nv))
+    # pprint(streetData)
+    me.from_pydata(cList+cList2, [], streetData)
+    me.update(calc_edges=True)
+    me.materials.append(bpy.data.materials['Floor1'])
+    bpy.context.scene.objects.link(ob)
 
     # 2. Create a mesh interior of this region
     # This is the space inside polygon clist2
-    if createGround:
-        me = bpy.data.meshes.new("_Region")
-        ob = bpy.data.objects.new("_Region", me)
-        me.from_pydata(cList2, [], [tuple(range(nv))])
-        me.update(calc_edges=True)
-        me.materials.append(bpy.data.materials['Floor2'])
-        #me.materials.append(bpy.data.materials['Grass'])
-        bpy.context.scene.objects.link(ob)
+    me = bpy.data.meshes.new("_Region")
+    ob = bpy.data.objects.new("_Region", me)
+    me.from_pydata(cList2, [], [tuple(range(nv))])
+    me.update(calc_edges=True)
+    me.materials.append(bpy.data.materials['Floor2'])
+    #me.materials.append(bpy.data.materials['Grass'])
+    bpy.context.scene.objects.link(ob)
 
     # 3. Put a tree in the center of the region
     g1 = duplicateObject(bpy.data.objects["Tree"], "_Tree")
@@ -618,7 +627,7 @@ def UNUSEDimportPlayer(vList3D, locPlayer):
     locP = vList3D[locPlayer]
     obj.location = (locP[0],locP[1],0.5)
 
-def distance2D(p1,p2):
+def UNUSEDdistance2D(p1,p2):
      return sqrt( (p2[0]-p1[0])**2+(p2[1]-p1[1])**2)
 
 def UNUSEDxPositionsFar(vList3D, internal, number):   
@@ -635,17 +644,6 @@ def UNUSEDxPositionsFar(vList3D, internal, number):
     #print("internal Sort ", internalSort)
 
     return xPos,internalSort
-    
-def UNUSEDpointSoClose(vList3D, internal, external):
-     soClose=[]
-     for j in internal:
-          for i in external:
-               distance = distance2D(vList3D[i],vList3D[j])
-               if distance < 5:
-                   print("distancia interno ",j, "a externo ",i,": ", distance)   
-                   soClose.append(j)
-     return soClose
-    
             
 def importMonsters(vList3D, number, xPosFar, filename):    
     saveActiveObject=bpy.context.scene.objects.active
@@ -682,8 +680,8 @@ def importMonsters(vList3D, number, xPosFar, filename):
         monsterToken.location = monsterLocation
         monsterToken.name= 'MonsterToken ' + str(w)
         bpy.data.texts['initMonster.py'].name = 'initMonster ' + str(w) + '.py'
-        if debugVisibleTokens:
-            monsterToken.hide_render = False
+        if 'debugVisibleTokens' in args:
+            monsterToken.hide_render = not args['debugVisibleTokens']
 
 
         #Set the name of the monster as a property
@@ -725,7 +723,7 @@ def main():
     for i in range(1, 20):
         bpy.context.scene.layers[i] = False
         
-    if cleanLayer1:
+    if args['cleanLayer1']:
         print("Cleaning Screen, One Second Please")
         #clean objects in layer 0
         bpy.ops.object.select_all(action='SELECT')
@@ -749,7 +747,14 @@ def main():
                 print("Remove action: ", k.name)
                 bpy.data.actions.remove(k)
 
+    # This is a hack to give blender a current working directory. If not, it will
+    # write several warnings of the type "xxxxx can not make relative"
+    print('Saving empty blender model:')
+    bpy.ops.wm.save_as_mainfile(filepath=cwd+'empty.blend', compress=False, copy=False)
+    os.remove(cwd+'empty.blend')
+
     # Read point, vertex and regions from a file
+    inputFilename = args['inputFilename']
     print("Read data from: %s" % inputFilename)
     with open(cwd+inputFilename, 'r') as f:
         data = json.load(f)
@@ -767,6 +772,7 @@ def main():
     bpy.data.texts.load(inputFilename, True)
     
     #Save a copy of input data AI as a buffer in blend file
+    inputFilenameAI = args['inputFilenameAI']
     if inputFilenameAI in bpy.data.texts:
         bpy.data.texts.remove(bpy.data.texts[inputFilenameAI])
     bpy.data.texts.load(inputFilenameAI, True)
@@ -782,18 +788,8 @@ def main():
     #Build list of internal vertex
     internalPoints = [i for i in range(len(vertices)) if i not in externalPoints]
     
-    soClosePoints=[]
-    for j in internalPoints:
-         for i in externalPoints:
-               distance = distance2D(vertices3D[i],vertices3D[j])
-               if distance < 5:
-                   print("distancia interno ",j, "a externo ",i,": ", distance)   
-                   soClosePoints.append(j)
-                   break
-
-    internalPoints = [n for n in internalPoints if n not in soClosePoints]
-
-    #save as a internal text 
+    #save as a internal text
+    internalPointsFileName = args['internalPointsFileName']
     if internalPointsFileName in bpy.data.texts:
         bpy.data.texts.remove(bpy.data.texts[internalPointsFileName])
     txt = bpy.data.texts.new(internalPointsFileName)
@@ -805,10 +801,11 @@ def main():
     # bpy.ops.object.lamp_add(type='SUN', view_align=False, location=(0, 0, 2))
 
     #Read all the assets for buildings from cg-library
+    inputHouses = args['inputHouses']
     importLibrary(cwd+inputHouses, link=False, destinationLayer=1, importScripts=False)
 
     #Insert global ilumination to scene
-    if createGlobalLight:
+    if 'createGlobalLight' in args and args['createGlobalLight']:
         print("Creating Global Light")
         bpy.ops.object.lamp_add(type='SUN', radius=1, view_align=False, location=(0,0,2), rotation=(0,0.175,0))
         bpy.data.lamps[-1].name='ASun1'
@@ -816,8 +813,8 @@ def main():
         bpy.data.lamps[-1].name='ASun2'
     
     #Insert and scale skyDome
-    if inputSkyDome:
-        importLibrary(inputSkyDome, link=False, destinationLayer=0, importScripts=False)
+    if 'inputSkyDome' in args and args['inputSkyDome']:
+        importLibrary(args['inputSkyDome'], link=False, destinationLayer=0, importScripts=False)
         #Compute the radius of the dome and apply scale
         skyDomeRadius = 50+(np.linalg.norm(vertices, axis=1)).max()
         print("Scaling SkyDome object to radius",skyDomeRadius)
@@ -834,7 +831,7 @@ def main():
         #"""
                 
     # Exterior boundary of the city
-    if createDefenseWall:
+    if 'createDefenseWall' in args and args['createDefenseWall']:
         print("Creating External Boundary of the City, Defense Wall")
         numTowers = len(externalPoints)
         axisX = Vector((1.0, 0.0))
@@ -876,11 +873,12 @@ def main():
         print("createDefenseWall: Total Time %s" % totalTime)
 
     # Create a ground around the boundary
-    if createGround:
+    if 'createGround' in args and args['createGround']:
+        createGround = args['createGround']
         groundRadius = 50+(np.linalg.norm(vertices, axis=1)).max()
         makeGround([], '_groundO', '_groundM', radius=groundRadius, material='Floor3')
 
-    if createStreets:
+    if 'createStreets' in args and args['createStreets']:
         # Create paths and polygon for internal regions
         print("Creating Districts")
         for region in regions:
@@ -890,15 +888,16 @@ def main():
         print(".")
 
     #Save the current file, if outputCityFilename is set.
-    if outputCityFilename:
+    if 'outputCityFilename' in args and args['outputCityFilename']:
+        outputCityFilename = args['outputCityFilename']
         print('Saving blender model as:', outputCityFilename)
         bpy.ops.wm.save_as_mainfile(filepath=cwd+outputCityFilename, compress=True, copy=False)
 
     #Import the player system
-    if inputPlayerboy:
-        importLibrary(inputPlayerboy, destinationLayer=0, importScripts=True)
+    if 'inputPlayerboy' in args and args['inputPlayerboy']:
+        importLibrary(args['inputPlayerboy'], destinationLayer=0, importScripts=True)
 
-        #Set the location for the player
+        #locate the object named Player
         player = bpy.data.objects['Player']
 
         #Calculate the vertex nearest to the center of the city
@@ -931,7 +930,8 @@ def main():
         player.game.controllers['cg-ia.json'].text = bpy.data.texts[inputFilenameAI]
 
     #Insert a background music
-    if backgroundMusic:
+    if 'backgroundMusic' in args and args['backgroundMusic']:
+        backgroundMusic = args['backgroundMusic']
         print('Insert background music file:', backgroundMusic)
         #bpy.ops.sequencer.sound_strip_add(filepath=backgroundMusic, relative_path=True, frame_start=1, channel=1)
         bpy.ops.sound.open(filepath=backgroundMusic, relative_path=True)
@@ -940,46 +940,54 @@ def main():
         bpy.ops.logic.actuator_add(name='playMusic', type='SOUND', object='Player') #Try to link to other object...
         player.game.actuators['playMusic'].sound = bpy.data.sounds[os.path.basename(backgroundMusic)]
         player.game.actuators['playMusic'].mode = 'LOOPEND'
-
         player.game.controllers['playMusic'].link(sensor=player.game.sensors['playMusic'], actuator=player.game.actuators['playMusic'])
 
         
     #Save the current file, if outputGameFilename is set.
-    if outputTouristFilename:
+    if 'outputTouristFilename' in args and args['outputTouristFilename']:
+        outputTouristFilename = args['outputTouristFilename']
         print('Saving blender tourist as:', outputTouristFilename)
         bpy.ops.wm.save_as_mainfile(filepath=cwd+outputTouristFilename, compress=True, copy=False)
 
-    AIData={}
-    print("Read AI data from: %s" % inputFilenameAI)
-    with open(cwd+inputFilenameAI, 'r') as f:
-        AIData.update(json.load(f))
-        print("AIData:", [x for x in AIData]);
-    
-    print("Choosing starting points for monsters...")
-    #print("internalPoints=", internalPoints)
-    monsterVertex=[]
-    for i in range(numMonsters):
-        maxDistance = -1
-        maxDistVertex = None
-        for v in [n for n in internalPoints if n not in monsterVertex]:
-            #Sum of distances from vertex v to every other monster/player
-            #distance = sum(AIData["shortestPathMatrix"][v][j] for j in [playerVertex]+monsterVertex)
-            #Minimum distance from vertex v to every other monster/player
-            distance = min(AIData["shortestPathMatrix"][v][j] for j in [playerVertex]+monsterVertex)
-            #Choose the vertex v which maximizes the distance to others
-            if distance > maxDistance and distance < float('Inf'):
-                maxDistance = distance
-                maxDistVertex = v
+    #Insert monsters in the city
+    numMonsters = 0
+    if 'numMonsters' in args:
+        numMonsters = args['numMonsters']
+            
+    if numMonsters > 0:
+        AIData={}
+        print("Read AI data from: %s" % inputFilenameAI)
+        with open(cwd+inputFilenameAI, 'r') as f:
+            AIData.update(json.load(f))
+            print("AIData:", [x for x in AIData]);
+        
+            
+        print("Choosing starting points for monsters...")
+        #print("internalPoints=", internalPoints)
+        monsterVertex=[]
+        for i in range(numMonsters):
+            maxDistance = -1
+            maxDistVertex = None
+            for v in [n for n in internalPoints if n not in monsterVertex]:
+                #Sum of distances from vertex v to every other monster/player
+                #distance = sum(AIData["shortestPathMatrix"][v][j] for j in [playerVertex]+monsterVertex)
+                #Minimum distance from vertex v to every other monster/player
+                distance = min(AIData["shortestPathMatrix"][v][j] for j in [playerVertex]+monsterVertex)
+                #Choose the vertex v which maximizes the distance to others
+                if distance > maxDistance and distance < float('Inf'):
+                    maxDistance = distance
+                    maxDistVertex = v
 
-        #print("  + Selected vertex", maxDistVertex, "at distance", maxDistance)
-        monsterVertex += [maxDistVertex]
-    print("Starting points for monsters", monsterVertex)
-    
-    #Import monsters...
-    importMonsters(vertices3D, numMonsters, monsterVertex, cwd+inputMonster)
+            #print("  + Selected vertex", maxDistVertex, "at distance", maxDistance)
+            monsterVertex += [maxDistVertex]
+        print("Starting points for monsters", monsterVertex)
+        
+        #Import monsters...
+        importMonsters(vertices3D, numMonsters, monsterVertex, args['inputMonster'])
     
     #Save the current file, if outputGameFilename is set.
-    if outputGameFilename:
+    if 'outputGameFilename' in args and args['outputGameFilename']:
+        outputGameFilename = args['outputGameFilename']
         print('Saving blender game as:', outputGameFilename)
         bpy.ops.wm.save_as_mainfile(filepath=cwd+outputGameFilename, compress=True, copy=False)
             

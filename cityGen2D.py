@@ -3,7 +3,7 @@
 """
 Citymap generator from project citygen.
 Functions to create a new cityMap in 2D (does not use blender stuff)
-Save the data as .json file which can be read by run-GenGame01.sh script
+Save the data as .json file which can be read by run-cityGen3D.sh script
   
 Copyright 2014 Jose M. Espadero <josemiguel.espadero@urjc.es>
 Copyright 2014 Juan Ramos <juanillo07@gmail.com>
