@@ -5,7 +5,7 @@
 "inputHouses": "cg-library.blend",
 "inputSkyDome": "cg-skyDomeNight.blend",
 "inputPlayerboy": "cg-playerBoy.blend",
-"inputMonster": "cg-spider.blend",
+"inputMonster": "cg-spectre.blend",
 "createGlobalLight": true,
 "createDefenseWall": true,
 "createGround": true,
