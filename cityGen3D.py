@@ -259,11 +259,7 @@ def duplicateAlongSegmentMix(pt1, pt2, gapSize, objList=None):
     """
     
     
-    #if mix==True:
-    #    objName = objList[0]
-    objName=objList[1]
-    mix = True
-    force= False
+    objName=objList[0]
     #Compute the orientation of segment pt1-pt2
     dx = pt1[0]-pt2[0]
     dy = pt1[1]-pt2[1]
@@ -645,11 +641,13 @@ def UNUSEDxPositionsFar(vList3D, internal, number):
 
     return xPos,internalSort
             
-def importMonsters(vList3D, number, xPosFar, filename):    
+def importMonsters(vList3D, number, xPosFar, filenameList):    
     saveActiveObject=bpy.context.scene.objects.active
     #TODO: use importLibrary instead...
     for w in range(number):
         monsterVertex = xPosFar[w]
+        #Choose a random monsters from the list 
+        filename = random.choice(filenameList)
         monsterLocation=(vList3D[monsterVertex][0], vList3D[monsterVertex][1], 1.0)
         print("Importing Monster", w , "from %s"  % filename, "vertex", monsterVertex, "position", monsterLocation )
         #Read from blender file
@@ -845,10 +843,11 @@ def main():
             # Compute orientation of both walls with axisX
             angL = v_1_2.angle_signed(axisX)
             angR = v_3_2.angle_signed(axisX)
-            # Force angR > angL, so force angL < average < angR
+            # Force angR > angL, so ensure that angL < average < angR
             if (angL > angR):
                 angR += 6.283185307
 
+            # Compute the average of angL , angR
             ang = (angL+angR)*0.5
             
             # Place a new tower on point v2
@@ -981,7 +980,11 @@ def main():
             #print("  + Selected vertex", maxDistVertex, "at distance", maxDistance)
             monsterVertex += [maxDistVertex]
         print("Starting points for monsters", monsterVertex)
-        
+
+        #If we have only a monster, build a list of just one element
+        if not isinstance(args['inputMonster'], list):
+            args['inputMonster'] = [args['inputMonster']]
+            
         #Import monsters...
         importMonsters(vertices3D, numMonsters, monsterVertex, args['inputMonster'])
     
