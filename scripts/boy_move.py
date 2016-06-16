@@ -2,10 +2,9 @@ import bge
 import numpy as np
 import json, math, random
 from math import sqrt
+from mathutils import Vector
 
-#Filenames for output
-rootFilename = 'city'
-graphFilename = rootFilename+'.graph.json'
+import AI_controller
 
 g= bge.logic
 co= bge.logic.getCurrentController()
@@ -35,19 +34,19 @@ def whereIgo(Player,Origin):
             afterDist.clear()
         else:      
             counter = -2
-            for thisreg in regions:   #go over regions
+            for thisreg in regions:   # go over regions
                 if Origin in thisreg:   
                     counter = counter + 2
-                    posList = thisreg.index(Origin)   #find index in region for Origin point
+                    posList = thisreg.index(Origin)   # find index in region for Origin point
                     if posList != len(thisreg)-1:
                         next=posList+1
                     else: 
                         next = 0
                     past = posList-1
-                    if len(afterDist) <= counter+1:  #add points to calculate distances
+                    if len(afterDist) <= counter+1:  # add points to calculate distances
                         afterDist.append(Player.getDistanceTo(vertices3D[thisreg[next]]))
                         afterDist.append(Player.getDistanceTo(vertices3D[thisreg[past]]))
-                    else:    #When have the points calculate them
+                    else:    # When have the points calculate them
                         if afterDist[counter]>Player.getDistanceTo(vertices3D[thisreg[next]]):
                             nextPoint=thisreg[next]
                             afterDist[counter]=Player.getDistanceTo(vertices3D[thisreg[next]])
@@ -66,10 +65,11 @@ def whereIgo(Player,Origin):
 def distTo(obj1,obj2):
     dist = obj2.position[0]-obj1.position[0]+obj2.position[1]-obj1.position[1]
     dist = sqrt(dist*dist)
-    #print("obj dist", dist)
+    # print("obj dist", dist)
     return dist
 
 def myDist(obj, node):
+    # BUG ! Esto esta mal calculado!!!!
     dist = node[0]-obj[0]+node[1]-obj[1]
     dist = sqrt(dist*dist)
     return dist
@@ -77,33 +77,7 @@ def myDist(obj, node):
 def die():
     print("U Have Been Destroy!")
     return
-
-def hideMiniMap():
-    bge.logic.getCurrentScene().objects['MiniMap'].useViewport = False
-    
-def showMiniMap():
-    import Rasterizer
-    height = Rasterizer.getWindowHeight()
-    width = Rasterizer.getWindowWidth()
-    #Compute position of miniMap viewport
-    left = int(width * 1/4)
-    bottom = int(height * 3/4)
-    right = int(width * 3/4)
-    top = int(height * 95/100)
-    
-    # set the viewport coordinates
-    camMiniMap=bge.logic.getCurrentScene().objects['MiniMap']
-    camMiniMap.setViewport(left, bottom, right, top)
-    
-    # use rear view mirror
-    camMiniMap.useViewport = True
-
-    # move camera to position player
-    myPlayer=bge.logic.getCurrentScene().objects['Player']
-    camMiniMap.position[0] = myPlayer.position[0]
-    camMiniMap.position[1] = myPlayer.position[1]
-    
-    
+        
 def activateMonsters(numMonsters):
     myscene=bge.logic.getSceneList()
     if numMonsters !=4:
@@ -114,7 +88,7 @@ def activateMonsters(numMonsters):
                     mostPostLabel = 'MonsterTokenPos'+str(m)
                     lastLabel = mostPostLabel+str("last") 
                     vertices=globalDict['vertices3D']
-                    if (mostPostLabel not in globalDict): #Where is the monster
+                    if (mostPostLabel not in globalDict): # Where is the monster
                         farfaraway=99999                
                         for k in range(len(vertices)):
                             dist = (vertices[k][0]-obj.position[0]+vertices[k][1]-obj.position[1])
@@ -134,7 +108,7 @@ def activateMonsters(numMonsters):
                         distTo1 = myDist(obj.position,pos)
                         distTo2 = myDist(obj.position,vertices[int(point)])
                         if (distTo1 < 0.5 or distTo2 < 0.5):
-                            #print(nameMonst,"I stay in", point," I go to: ", goto)
+                            # print(nameMonst,"I stay in", point," I go to: ", goto)
                             obj.position[0]= pos[0]
                             obj.position[1]= pos[1]
                             if globalDict[lastLabel] == 99999:
@@ -145,12 +119,12 @@ def activateMonsters(numMonsters):
                                 if dist < 0.5:
                                     globalDict[mostPostLabel] = goto
                                     globalDict[lastLabel] = goto
-                                    #print("reload position")
+                                    # print("reload position")
 
-                        #obj.position[vertices[int(globalDict[mostPostLabel])]]   
-                        #pos = (globalDict['vertices'][globalDict['positionI']])
-                        #obj.position[0]= pos[0]
-                        #obj.position[1]= pos[1]
+                        # obj.position[vertices[int(globalDict[mostPostLabel])]]   
+                        # pos = (globalDict['vertices'][globalDict['positionI']])
+                        # obj.position[0]= pos[0]
+                        # obj.position[1]= pos[1]
     else:
         #for m in range(0,numMonsters):
         #    obj = myscene[0].objects
@@ -178,7 +152,7 @@ def activateMonsters(numMonsters):
                 globalDict[lastLabel] = 99999 
                 
                 
-        #Monster 0 Direct:
+        # Monster 0 Direct:
         decisionMatrix = globalDict['decisionMatrix']
         mon0=obj['MonsterToken 0']
         realMon0 = obj['Monster 0']
@@ -192,14 +166,14 @@ def activateMonsters(numMonsters):
         #print("tokpos", mon0.position)
         #print("monpos", realMon0.position)
         pos = vertices[int(fromto)]  
-        distTo1 = myDist(realMon0.position,pos) #distance Monster to vertice Dest
+        distTo1 = myDist(realMon0.position,pos) # distance Monster to vertice Dest
         pos = vertices[int(point)]
-        distTo2 = myDist(realMon0.position,pos) #distance Monster to vertice Orig
+        distTo2 = myDist(realMon0.position,pos) # distance Monster to vertice Orig
         myPlayer = obj['Player']
         positionI=int(globalDict['positionI'])
         positionF=int(globalDict['positionF'])
-        distPlayerToF = myDist(myPlayer.position,vertices[positionF]) #distance Player to vertice Dest
-        distPlayerToI = myDist(myPlayer.position,vertices[positionI]) #distance Player to vertice Orig
+        distPlayerToF = myDist(myPlayer.position,vertices[positionF]) # distance Player to vertice Dest
+        distPlayerToI = myDist(myPlayer.position,vertices[positionI]) # distance Player to vertice Orig
         dist1F=distTo1 + shortestMatrix[fromto][positionF] + distPlayerToF
         dist1I=distTo1 + shortestMatrix[fromto][positionI] + distPlayerToI
         dist2F=distTo2 + shortestMatrix[point][positionF] + distPlayerToF
@@ -351,7 +325,7 @@ def activateMonsters(numMonsters):
                     globalDict['MonsterTokenPos0'] = goto
                     globalDict['MonsterTokenPos0last'] = goto
         """          
-        #Near
+        # Check if any monster is near of the player
         for j in range(0,numMonsters):
             nameM = 'Monster ' +str(j)
             mon = obj[nameM]
@@ -363,7 +337,7 @@ def activateMonsters(numMonsters):
             if distToPlayer < 0.5:
                 die()
         
-        #Jump Monster to Monster and Stay Together
+        # Jump Monster to Monster and Stay Together
         for j in range(0,numMonsters):
             nameM1 = 'Monster ' +str(j)
             mon1 = obj[nameM1]
@@ -391,7 +365,7 @@ def activateMonsters(numMonsters):
                         mon2.position[1] = mon2.position[1] - sep
 
                    
-        #Monster 1 Forward:
+        # Monster 1 Forward:
         mon1=obj['MonsterToken 1']
         realMon1 = obj['Monster 1']
         if distTo(mon1,realMon1)<0.5:
@@ -405,7 +379,7 @@ def activateMonsters(numMonsters):
             globalDict['MonsterTokenPos1'] = goto
             #print("go 1", goto)
         
-        #Monster 2 Back:
+        # Monster 2 Back:
         mon2=obj['MonsterToken 2']
         realMon2 = obj['Monster 2']
         if distTo(mon2,realMon2)<0.5:
@@ -419,14 +393,14 @@ def activateMonsters(numMonsters):
             globalDict['MonsterTokenPos2'] = goto
             #print("go 2",goto)
         
-        #Monster 3 Random:
+        # Monster 3 Random:
         mon3=obj['MonsterToken 3']
         realMon3 = obj['Monster 3']
         dist = distTo(mon3,realMon3)
         if dist < 0.5:
             decisionMatrix = globalDict['decisionMatrix']
             point = int(globalDict['MonsterTokenPos3'])
-            #Choose a random vertex from the list of internalPoints
+            # Choose a random vertex from the list of internalPoints
             myRand = random.choice(globalDict['internalPoints'])
             goto = decisionMatrix[point][myRand]
             #print("I'm, M3 and i go to", goto)
@@ -446,105 +420,9 @@ def activateMonsters(numMonsters):
 
 ##Main
 
-#Check if we need to inicialize the globalDict
-if 'playerInit' not in globalDict or not globalDict['playerInit'] :
-    globalDict['playerInit'] = True
-    
-    if 'numMonster' not in globalDict : 
-        globalDict['numMonster'] = 0
-    
-    #Try to read from cg-data.json controller
-    if 'cg-data.json' in Player.controllers:
-        print("Reading values from cg-data.json controller")
-        data = json.loads(Player.controllers['cg-data.json'].script)
-        globalDict.update(data)
-        print ("Read:",[x for x in data])
-        globalDict['cg-data.json'] = 'From internal text'
-    else:
-        print("cg-data.json controller not found. Trying external file...")
-        #This is the same, but reading from an external file
-        print("Read data from: %s" % graphFilename)
-        with open(graphFilename, 'r') as f:
-            data = json.load(f)
-            globalDict.update(data)
-            print ("Read:",[x for x in data])
-            globalDict['cg-data.json'] = 'From file '+graphFilename
-    if 'cityName' in globalDict:
-        print("City name: %s" % globalDict['cityName'])
-
-    #Try to read from cg-ia.json controller
-    if 'cg-ia.json' in Player.controllers:
-        print("Reading values from cg-ia.json controller")
-        ia = json.loads(Player.controllers['cg-ia.json'].script)
-        globalDict.update(ia)
-        print ("Read:",[x for x in ia])
-        globalDict['cg-ia.json'] = 'From internal text'
-    else:
-        print("cg-ia.json controller not found. Try external file...")
-        #This is the same, but reading from an external file
-        iaFilename = cwd+'city.AI.json'    # Set a filename to read from file.
-        print("Read ia from: %s" % iaFilename)
-        with open(iaFilename, 'r') as f:
-            ia = json.load(f)
-            globalDict.update(ia)
-            print ("Read:",[x for x in ia])
-            globalDict['cg-ia.json'] = 'From file '+iaFilename
-
-    #Build InternalPoints, if nor supplied by the cg-ia.json data
-    if 'internalPoints' not in globalDict : 
-        #Build list of internal vertex
-        nv = len(globalDict['vertices'])
-        internalPoints = [i for i in range(nv) if i not in globalDict['externalPoints']]
-
-        #Remove the vertex too near of the boundary (external points)
-        nearToBoundary=[]
-        for j in internalPoints:
-             for i in globalDict['externalPoints']:
-                   #Compute distance in 2D
-                   vi=globalDict['vertices'][i]
-                   vj=globalDict['vertices'][j]
-                   dx = vi[0]-vj[0]
-                   dy = vi[1]-vj[1]
-                   distance = sqrt(dx*dx+dy*dy)
-                   if distance<5:
-                       nearToBoundary.append(j)
-                       break
-        #Remove vertex that are too near from boundary
-        internalPoints = [i for i in internalPoints if i not in nearToBoundary]
-        globalDict['internalPoints'] = internalPoints
-        print('Debug: nearToBoundary=',nearToBoundary)
-        print('Debug: internalPoints=', internalPoints)
-
-    #convert 2D vertices to 3D
-    vertices3D = []
-    for v in globalDict['vertices']:
-        vertices3D.append((v[0], v[1], 0.0))
-    globalDict['vertices3D'] = vertices3D
-
-    #Other stuff...
-    globalDict['afterDist'] = []
-    globalDict['comeBack'] = 0
-    globalDict['timeToWhereIGo'] = 0
-    globalDict['timeGame']=0
-
-    #Search the index of the vertex nearest to player position
-    minDist = float("Inf")
-    playerVertex=None
-    for k,vk in enumerate(vertices3D):
-        distance=Player.getDistanceTo(vk)
-        if distance < minDist:
-            playerVertex = k
-            minDist = distance
-        
-    globalDict['positionI'] = playerVertex
-    globalDict['positionF'] = playerVertex
-    globalDict['nextPoint'] = playerVertex
-
-    #Minimap
-    if 'MiniMapOn' not in globalDict:
-        globalDict['MiniMapOn']= False
-    
-    #End of initialization 
+if 'playerInit' not in globalDict or not globalDict['playerInit']:
+    print("Force call to AI_controller.init()")
+    AI_controller.init()
     
 positionI = globalDict['positionI'] 
 positionF = globalDict['positionF']
@@ -559,12 +437,11 @@ if ('playerPosition' in globalDict) :
 #print("mi posicion" , myPosition)
 
 
-#Sensors
+# Sensors
 
-keysensor = co.sensors ["Keyboard"]
+keysensor = co.sensors["Keyboard"]
 
-#Actuators
-
+# Actuators
 actmot = co.actuators["Move"]
 actrot = co.actuators["Rotation"]
 actani = co.actuators["Animate"]
@@ -588,31 +465,27 @@ Spacekey = keysensor.getKeyStatus(32)
 #print("W, ", Wkey)
 
 
-#Return to Center or Random Point
+# Return to Center or Random Point
 if Ckey == 1:
     print("Player traslated to position (0,0,0)")    
     myPlayer=scene.objects['Player']
     myPlayer.position=(0.0, 0.0, 1.0)
 
 if Rkey == 1:
-    #Choose a random element from globalDict['internalPoints']
+    # Choose a random element from globalDict['internalPoints']
     newVertex = random.choice(globalDict['internalPoints'])
     pos = globalDict['vertices3D'][newVertex]
     print("Player traslated to vertex", newVertex, "position", pos)    
     myPlayer=scene.objects['Player']
     myPlayer.position=(pos[0], pos[1], 1.0)
 
-#MiniMap
+# MiniMap
 if Mkey == (1 or 2 or 3):
-    #Change status of minimap
+    # Change status of minimap
     globalDict['MiniMapOn'] = not globalDict['MiniMapOn']
-    if globalDict['MiniMapOn']:
-        showMiniMap()
-    else:
-        hideMiniMap()
-    
-
-#Jump
+    bge.logic.getCurrentScene().objects['MiniMap'].useViewport = globalDict['MiniMapOn']
+        
+# Jump
 
 #print (Spacekey)
 
@@ -620,7 +493,7 @@ if Spacekey == 1:
     #actmot.force = (0.0, 0.0, 400.0)
     a = actjmp.dLoc[2] + 0.15
     actjmp.dLoc = (0.0, 0.0, a)
-    co.activate("Jump")
+    co.activate("Jump")    
 
 if Spacekey == 2: 
     #a = actmot.force[2] - 2.5
@@ -683,7 +556,7 @@ if Skey == 1:
         globalDict['positionI'] = positionI
         globalDict['positionF'] = positionF
 
-#Calculate Direction
+# Calculate Direction
 if Skey == 2 or Wkey ==2:
     timeToWhereIGo = timeToWhereIGo +1
     if timeToWhereIGo==timeToAsk:
@@ -707,7 +580,7 @@ if timeGame == timeToAsk:
 globalDict['timeToWhereIGo'] = timeToWhereIGo
 globalDict['timeGame'] = timeGame
 
-#NoMov
+# NoMov
 if Skey == 3 and Wkey == 3:
     actmot.dLoc=(0.0,0.0,0.0)
     co.activate("Move")
@@ -745,20 +618,20 @@ if Skey == 3 and Wkey == 0:
     co.activate("Animate")
 
 
-#Rotation
+# Rotation
 
-#RotLeft
+# RotLeft
 rotValue=0.05
 if Akey == 1:
     actrot.dRot=(0.0,0.0,rotValue)
     co.activate("Rotation")
     
-#RotRight
+# RotRight
 if Dkey == 1:
     actrot.dRot=(0.0,0.0,-rotValue)
     co.activate("Rotation")
     
-#NotRot
+# NotRot
 if Dkey==3 and Akey==3:
     actrot.dRot=(0.0,0.0,0.0)
     co.activate("Rotation")
