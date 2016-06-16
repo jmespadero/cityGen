@@ -127,10 +127,16 @@ def initMiniMap():
     height = Rasterizer.getWindowHeight()
     width = Rasterizer.getWindowWidth()
     # Compute position of miniMap viewport
-    left = int(width * 1/4)
-    bottom = int(height * 3/4)
-    right = int(width * 3/4)
-    top = int(height * 95/100)
+    #left = int(width * 1/4)
+    #bottom = int(height * 3/4)
+    #right = int(width * 3/4)
+    #top = int(height * 95/100)
+
+    # Wide map (great for debug game)
+    left = int(width * 3 / 100)
+    bottom = int(height * 3 / 100)
+    right = int(width * 97 / 100)
+    top = int(height * 97 / 100)
     
     # set the viewport coordinates
     camMiniMap=bge.logic.getCurrentScene().objects['MiniMap']
