@@ -562,6 +562,21 @@ def nearestPoint(vList, centerPoint=(0,0) ):
     return meanVertex
 
 
+def updateExternalTexts():
+    """ Check modified external scripts in the scene and update if possible
+    """
+    ctx = bpy.context.copy()
+    ctx['area'] = ctx['screen'].areas[0]
+    for t in bpy.data.texts:
+        if t.is_modified and not t.is_in_memory:
+            print("  * Warning: Updating external script", t.name)
+            # Change current context to contain a TEXT_EDITOR
+            oldAreaType = ctx['area'].type
+            ctx['area'].type = 'TEXT_EDITOR'
+            ctx['edit_text'] = t
+            bpy.ops.text.resolve_conflict(ctx, resolution='RELOAD')
+            #Restore context
+            ctx['area'].type = oldAreaType            
 
 def importLibrary(filename, link=False, destinationLayer=1, importScripts=False):
     """Import all the objects/assets from an external blender file
@@ -592,7 +607,7 @@ def importLibrary(filename, link=False, destinationLayer=1, importScripts=False)
                 else:
                     print('  + Import', filename, '->', textName)
                     data_to.texts.append(textName)
-    
+                        
     #link to scene, and move to layer destinationLayer
     for o in bpy.data.objects :
         if o.users_scene == () :
@@ -602,6 +617,7 @@ def importLibrary(filename, link=False, destinationLayer=1, importScripts=False)
                 o.layers[destinationLayer] = True
                 o.layers[0] = False
 
+    updateExternalTexts()
 
 def UNUSEDimportPlayer(vList3D, locPlayer):
     """Import the player and game system
@@ -902,7 +918,19 @@ def main():
         #Calculate the vertex nearest to the center of the city
         playerVertex = nearestPoint(vertices, (0,0) )        
         locP = vertices[playerVertex]+[3.0]
-        player.location = locP
+        
+        """
+        children = [x for x in bpy.data.objects if x.parent == player]
+        print("player.location", player.location)
+        print([(x.name, x.location) for x in children])
+        
+        delta = Vector(locP) - player.location
+        print("delta", delta)
+        for x in children:
+            x.location -= delta
+        """
+        
+        #player.location = locP
         print('Player starts at vertex:', playerVertex, 'position:', locP)
         
         #Inject a new string property to the object
@@ -940,8 +968,7 @@ def main():
         player.game.actuators['playMusic'].sound = bpy.data.sounds[os.path.basename(backgroundMusic)]
         player.game.actuators['playMusic'].mode = 'LOOPEND'
         player.game.controllers['playMusic'].link(sensor=player.game.sensors['playMusic'], actuator=player.game.actuators['playMusic'])
-
-        
+            
     #Save the current file, if outputGameFilename is set.
     if 'outputTouristFilename' in args and args['outputTouristFilename']:
         outputTouristFilename = args['outputTouristFilename']
@@ -987,7 +1014,11 @@ def main():
             
         #Import monsters...
         importMonsters(vertices3D, numMonsters, monsterVertex, args['inputMonster'])
-    
+
+
+    # Check modified external scripts and update if necessary
+    updateExternalTexts()
+
     #Save the current file, if outputGameFilename is set.
     if 'outputGameFilename' in args and args['outputGameFilename']:
         outputGameFilename = args['outputGameFilename']
