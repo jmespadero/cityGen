@@ -1,11 +1,11 @@
 {
-"cleanLayer1": true,
+"cleanLayer0": true,
 "inputFilename": "city.graph.json",
 "inputFilenameAI": "city.AI.json",
 "inputHouses": "cg-library.blend",
 "inputSkyDome": "cg-skyDomeNight.blend",
-"inputPlayerboy": "cg-playerBoy.blend",
 "inputPlayerboy": "cg-playerScarecrow.blend",
+"inputPlayerboy": "cg-playerBoy.blend",
 "inputMonster": "cg-spectre.blend",
 "inputMonster": ["cg-spectre.blend", "cg-spider.blend"],
 "createGlobalLight": true,

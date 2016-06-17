@@ -29,7 +29,7 @@ argsFilename = 'cg-config.json'
 
 #Set default values for args
 args={
-'cleanLayer1' : True,       # Clean all objects in layer 1
+'cleanLayer0' : True,       # Clean all objects in layer 1
 'createGlobalLight' : True,         # Add new light to scene
 'inputFilename' : 'city.graph.json',  # Set a filename to read 2D city map data
 'inputFilenameAI' : 'city.AI.json',   # Set a filename to read AI data
@@ -737,7 +737,7 @@ def main():
     for i in range(1, 20):
         bpy.context.scene.layers[i] = False
         
-    if args['cleanLayer1']:
+    if args['cleanLayer0']:
         print("Cleaning Screen, One Second Please")
         #clean objects in layer 0
         bpy.ops.object.select_all(action='SELECT')
