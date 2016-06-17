@@ -902,6 +902,19 @@ def main():
             makePolygon(corners, "houseO", "houseM", height=0.5, reduct=1.0)
         print(".")
 
+        # Merge streets meshes in one object
+        streets = [x for x in bpy.data.objects if x.name.startswith("_Street")]
+        for o in bpy.data.objects:
+            o.select = (o in streets)
+        bpy.context.scene.objects.active = streets[0]
+        bpy.ops.object.join()
+        
+        # Merge region meshes in one object
+        for o in bpy.data.objects:
+            o.select = o.name.startswith("_Region")
+        bpy.context.scene.objects.active = bpy.data.objects["_Region"]
+        bpy.ops.object.join()        
+
     #Save the current file, if outputCityFilename is set.
     if 'outputCityFilename' in args and args['outputCityFilename']:
         outputCityFilename = args['outputCityFilename']
