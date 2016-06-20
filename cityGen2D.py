@@ -190,33 +190,35 @@ def newVoronoiData(numSeeds=90, cityRadius=20, numBarriers=12, LloydSteps=2, gat
                                     region[k] = i
 
     # Remove usage of unusedVertex
-    print("Repack unusedVertex", unusedVertex)
-    vertexToReuse = [x for x in unusedVertex if x < nv - len(unusedVertex)]
-    vertexToRemove = [x for x in range(nv) if x not in unusedVertex][-len(vertexToReuse):]
-    # print("vertexToReuse=",vertexToReuse)
-    # print("vertexToRemove=",vertexToRemove)
+    if unusedVertex:
+        print("Repacking unusedVertex", unusedVertex)
+        vertexToReuse = [x for x in unusedVertex if x < nv - len(unusedVertex)]
+        if vertexToReuse:
+            vertexToRemove = [x for x in range(nv) if x not in unusedVertex][-len(vertexToReuse):]
+            print("vertexToReuse=",vertexToReuse)
+            print("vertexToRemove=",vertexToRemove)
 
-    for i, vi in enumerate(vertexToRemove):
-        vj = vertexToReuse[i]
-        print("Using Vertex", vj, "instead vertex", vi)
-        vor.vertices[vj] = vor.vertices[vi]
-        for region in vor.regions:
-            if vi in region:
-                if vj in region:
-                    # print("  * Remove vertex", vi, "in region ", region)
-                    region.remove(vi)
-                else:
-                    # print("  * Usage of vertex", vi, "replaced by", vj, "in region", region)
-                    for k, vk in enumerate(region):
-                        if vk == vi:
-                            region[k] = vj
+            for i, vi in enumerate(vertexToRemove):
+                vj = vertexToReuse[i]
+                print("Using Vertex", vj, "instead vertex", vi)
+                vor.vertices[vj] = vor.vertices[vi]
+                for region in vor.regions:
+                    if vi in region:
+                        if vj in region:
+                            # print("  * Remove vertex", vi, "in region ", region)
+                            region.remove(vi)
+                        else:
+                            # print("  * Usage of vertex", vi, "replaced by", vj, "in region", region)
+                            for k, vk in enumerate(region):
+                                if vk == vi:
+                                    region[k] = vj
 
-    # Remove last vertex from vertices
-    nv -= len(unusedVertex)
-    vor.vertices = vor.vertices[0:nv]
-    print("numVertex", nv)
-    externalRegions = [r for r in vor.regions if -1 in r]
-    externalVertex = set([v for v in sum(externalRegions, []) if v != -1])
+        # Remove last vertex from vertices
+        nv -= len(unusedVertex)
+        vor.vertices = vor.vertices[0:nv]
+        print("numVertex after repacking", nv)
+        externalRegions = [r for r in vor.regions if -1 in r]
+        externalVertex = set([v for v in sum(externalRegions, []) if v != -1])
 
     # Plot data after joining near vertex
     plotVoronoiData(vor.vertices, vor.regions, barrierSeeds, 'tmp2.mergeNears', radius=2 * cityRadius)
@@ -324,18 +326,43 @@ def newVoronoiData(numSeeds=90, cityRadius=20, numBarriers=12, LloydSteps=2, gat
 
     ###########################################################
     # Compute a surrounding polygon (usefull for city walls)
-    externalVertices = np.array([vertices[i] for i in externalPoints])
-    externalLines = list(range(len(externalVertices))) + [0]
-    distancesToOrigin = np.linalg.norm(externalVertices, axis=1)
-    # print(distancesToOrigin)
-    # Grow distances by 4.0 meter
-    scaleFactor = (distancesToOrigin + 4.0) / distancesToOrigin
-    # print("scaleFactor",scaleFactor)
-    externalVertices *= scaleFactor[:, None]
-    # print('New ExternalVertices',externalVertices)
+    print("Creating Wall Vertices")
 
-    # Plot data after recentering
-    plotVoronoiData(vertices, internalRegions, externalVertices, 'tmp4.externalWall', radius=2 * cityRadius)
+    def computeEnvelop(vertexList, distance=4.0):
+        """ Compute the envelop (surrouding polygon at given distance
+        vertexList -- list of coordinates (or an array of  2 columns)
+        distance -- Distance to displace the envelop (negative will work)
+        """
+        nv = len(vertexList)
+        #Create a copy of input as numpy.array
+        envelop = np.array(vertexList)
+        # Compute the vector for each side (vertex to its previous)
+        edgeP = [envelop[i]-envelop[i-1] for i in range(nv)]
+        # Normalice the vector for each side
+        edgeP = [x/np.linalg.norm(x) for x in edgeP]
+        #Compute edge vectors (vertex to its next)
+        edgeN= np.array([-edgeP[(i+1)%nv] for i in range(nv)])
+        # Compute the normal to each side
+        edgeNormals = np.array([(x[1], -x[0]) for x in edgeP])
+
+        # Compute internal angles (as cosines and sines)
+        alphaC = np.array([np.dot(edgeP[i],edgeN[i]) for i in range(nv)])
+        alphaS = np.array([np.cross(edgeN[i],edgeP[i]) for i in range(nv)])
+        # compute tangent weights as tan((pi - alpha) / 2) = sin(alpha)/(1-cos(alpha))
+        w = alphaS / (1.0 - alphaC)
+        
+        #Compute the weighted external bisector for each vertex
+        bisector = edgeNormals + np.array([w[i]*edgeP[i] for i in range(nv)])
+
+        # Displace the external vertices by the bisector
+        envelop += distance * bisector
+        
+        return envelop
+
+    wallVertices = computeEnvelop([vertices[i] for i in externalPoints], 4.0)
+    
+    # Plot data with external wall vertices
+    plotVoronoiData(vertices, internalRegions, wallVertices, 'tmp4.externalWall', radius=2 * cityRadius, extraR=True)
 
     ###########################################################
     # Search places to place gates to the city
@@ -427,8 +454,7 @@ def newVoronoiData(numSeeds=90, cityRadius=20, numBarriers=12, LloydSteps=2, gat
     'vertices': vertices.tolist(),
     'regions': internalRegions,
     'externalPoints': externalPoints,
-    'externalVertices': externalVertices.tolist(),
-    'externalLines': externalLines
+    'wallVertices': wallVertices.tolist(),
     }
     return cityData
 
@@ -491,7 +517,7 @@ def newAIData(regions, vertices):
     return AIData
 
 
-def plotVoronoiData(vertices, regions, extra=[], filename='', show=False, labels=False, radius=None):
+def plotVoronoiData(vertices, regions, extraV=[], filename='', show=False, labels=False, radius=None, extraR=False):
     """Plot a 2D representation of voronoi data as vertices, regions, seeds
     """
     # Check matplotlib.pyplot is installed
@@ -522,7 +548,11 @@ def plotVoronoiData(vertices, regions, extra=[], filename='', show=False, labels
             plt.annotate("r%d" % r, xy=np.average(polygon, axis=0))
 
     # Plot barrierSeeds/extra data
-    plt.scatter([s[0] for s in extra], [s[1] for s in extra], marker='*')
+    plt.scatter([s[0] for s in extraV], [s[1] for s in extraV], marker='*')  
+
+    #Plot Extra vertex as a polygon
+    if extraR:
+        plt.fill(*zip(*extraV), fill=False)
 
     # Choose axis
     if radius:
@@ -556,12 +586,16 @@ def plotCityData(cityData, filename='', show=True, labels=False, radius=None):
     else:
         regions = []
 
-    if 'barrierSeeds' in cityData:
-        extra = cityData['barrierSeeds']
-    else:
-        extra = []
+    extraV = []
+    extraR = False
+    if 'wallVertices' in cityData:
+        extraV = cityData['wallVertices']
+        extraR = True    
+    elif 'barrierSeeds' in cityData:
+        extraV = cityData['barrierSeeds']
+        extraR = False
 
-    plotVoronoiData(vertices, regions, extra, filename, show, labels, radius)
+    plotVoronoiData(vertices, regions, extraV, filename, show, labels, radius, extraR=extraR)
 
 
 ###########################

@@ -110,7 +110,7 @@ def duplicateAlongSegment(pt1, pt2, objName, gapSize, force=False):
 
     # return if pt1 == pt2
     if dx == 0 and dy == 0:
-        return
+        return []
 
     # Compute the angle with the Y-axis
     ang = acos(dy/sqrt((dx**2)+(dy**2)))
@@ -128,7 +128,7 @@ def duplicateAlongSegment(pt1, pt2, objName, gapSize, force=False):
     pathVec.normalize()
 
     if (objSize > pathLen):
-        return
+        return []
 
     #if gapSize is not zero, change the gap to one that adjust the object
     #Compute the num of (obj+gap) segments in the interval (pt1-pt2)
@@ -148,6 +148,7 @@ def duplicateAlongSegment(pt1, pt2, objName, gapSize, force=False):
     #Duplicate the object along the path, numObj times
     iniPoint.resize_3d()
     stepVec.resize_3d()
+    objList=[]
     if force:
         numObj = numObj - 1
     for i in range(numObj):
@@ -155,12 +156,15 @@ def duplicateAlongSegment(pt1, pt2, objName, gapSize, force=False):
         g1 = duplicateObject(ob, "_%s" % (objName))
         g1.rotation_euler = (0, 0, ang)
         g1.location = loc
+        objList.append(g1)
     if force:
             loc = Vector(pt2) - stepVec * 0.5
             g1 = duplicateObject(ob, "_%s" % (objName))
             g1.rotation_euler = (0, 0, ang)
             g1.location = loc
-            
+            objList.append(g1)
+
+    return objList
 
  
 def knapsack_unbounded_dp(items, C, maxofequalhouse):
@@ -847,13 +851,14 @@ def main():
     # Exterior boundary of the city
     if 'createDefenseWall' in args and args['createDefenseWall']:
         print("Creating External Boundary of the City, Defense Wall")
-        numTowers = len(externalPoints)
+        wallVertices = data['wallVertices']        
+        numTowers = len(wallVertices)
         axisX = Vector((1.0, 0.0))
         
         for i in range(numTowers):
-            v1 = vertices3D[externalPoints[i-1]]
-            v2 = vertices3D[externalPoints[i]]
-            v3 = vertices3D[externalPoints[(i+1) % numTowers]]
+            v1 = wallVertices[i-1]
+            v2 = wallVertices[i]
+            v3 = wallVertices[(i+1) % numTowers]
             v_1_2 = Vector((v1[0]-v2[0], v1[1]-v2[1]))
             v_3_2 = Vector((v3[0]-v2[0], v3[1]-v2[1]))
             # Compute orientation of both walls with axisX
@@ -882,7 +887,16 @@ def main():
             g1.rotation_euler = (0, 0, angR)
 
             # print("New StoneWall section", v1, "->", v2)
-            duplicateAlongSegment(v1, v2, "StoneWall", 0.0)
+            sw = duplicateAlongSegment(v1, v2, "StoneWall", 0.0)
+            
+            """
+            # Merge meshes in this wall section in one object
+            if sw:
+                for o in bpy.data.objects:
+                    o.select = (o in sw)
+                bpy.context.scene.objects.active = sw[0]
+                bpy.ops.object.join()
+            """
 
         totalTime = datetime.now()-iniTime
         print("createDefenseWall: Total Time %s" % totalTime)
