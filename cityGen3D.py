@@ -888,16 +888,19 @@ def main():
 
             # print("New StoneWall section", v1, "->", v2)
             sw = duplicateAlongSegment(v1, v2, "StoneWall", 0.0)
-            
-            """
-            # Merge meshes in this wall section in one object
-            if sw:
-                for o in bpy.data.objects:
-                    o.select = (o in sw)
-                bpy.context.scene.objects.active = sw[0]
-                bpy.ops.object.join()
-            """
+            #print("New StoneWall section", v1, "->", v2, "Size: ", len(sw) )
 
+            # Create a quad-mesh for streets near of this section of wall
+            me = bpy.data.meshes.new("_Street")
+            ob = bpy.data.objects.new("_Street", me)
+            # Create a list with the four vertex of this quad
+            myVertex = [(v1[0], v1[1], 0), (v2[0], v2[1], 0), vertices3D[externalPoints[i]], vertices3D[externalPoints[i-1]]]            
+            me.from_pydata(myVertex, [], [(0,1,2,3)])
+            me.update(calc_edges=True)
+            me.materials.append(bpy.data.materials['Floor1'])
+            bpy.context.scene.objects.link(ob)
+
+            
         totalTime = datetime.now()-iniTime
         print("createDefenseWall: Total Time %s" % totalTime)
 
