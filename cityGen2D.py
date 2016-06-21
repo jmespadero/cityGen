@@ -367,46 +367,34 @@ def newVoronoiData(numSeeds=90, cityRadius=20, numBarriers=12, LloydSteps=2, gat
 
     ###########################################################
     # Search places to place gates to the city
-    """
+
     if gates:
         # Search a place to put a gate 1.
-        # Search the external corner with connection to an internal corner
-        # and with the nerest angle to 180
+        # Search the external corner with the angle nearest to 180
+        nv = len(wallVertices)        
+        #Compute edge vectors (vertex to its previous)
+        edgeP = [wallVertices[i]-wallVertices[i-1] for i in range(nv)]
+        # Normalice the vector for each side
+        edgeP = [x/np.linalg.norm(x) for x in edgeP]
+        #Compute edge vectors (vertex to its next)
+        edgeN= np.array([-edgeP[(i+1)%nv] for i in range(nv)])
+        # Compute internal angles (as cosines)
+        alphaC = np.array([np.dot(edgeP[i],edgeN[i]) for i in range(nv)])
+        # Choose minimun cosine. (angle near 180 has cosine -1)
+        bestCorner = alphaC.argmin()
+        print("Best corner ofr a gate", bestCorner, " near external vertex ->", externalPoints[bestCorner])
 
-        # Compute the valence of each vertex (number of region)
-        valence = np.zeros(len(vertices))
-        for region in internalRegions:
-            for v in region:
-                valence[v] += 1
-
-        # Compute the angle at each external vertex
-        numExternalPoints = len(externalPoints)
-        externalAngles = np.zeros(numExternalPoints)
-        bestCorner = 0
-        for i in range(numExternalPoints):
-            i0 = externalPoints[(i - 1) % numExternalPoints];
-            i1 = externalPoints[i % numExternalPoints]
-            i2 = externalPoints[(i + 1) % numExternalPoints];
-            # print("Check corner %d -> %d -> %d . Valence = %d" % (i0, i1, i2, valence[i1]))
-            if valence[i1] > 1:
-                v0 = vertices[i0]
-                v1 = vertices[i1]
-                v2 = vertices[i2]
-                # print("Check Segment %d -> %d -> %d" % (v0, v1, v2))
-                num = np.dot(v0 - v1, v2 - v1)
-                denom = np.linalg.norm(v0 - v1) * np.linalg.norm(v2 - v1)
-                externalAngles[i] = np.arccos(num / denom) * 180 / np.pi
-                if (externalAngles[i] > externalAngles[bestCorner]):
-                    bestCorner = i
-                    # print("angle at vertex %d %s = %f" % (i1, v1, externalAngles[i]))
-        bestCornerPos = vertices[externalPoints[bestCorner]]
-        print("bestCorner: %d %s -> %f" % (
-        externalPoints[bestCorner], bestCornerPos, externalAngles[bestCorner]))
-        plotVoronoiData(vertices, internalRegions, [bestCornerPos], 'tmp4.gatesCorner',
-                        radius=2 * cityRadius)
-    # """
+        gateLen = 13.08 #Size of the gate
+        #Compute the tangent as an average of side vectors
+        tangent = edgeP[bestCorner]-edgeN[bestCorner]
+        tangent /= np.linalg.norm(tangent)
+        #Displace the vertex at the corner in the direction of tangent
+        gateMid = wallVertices[bestCorner]
+        gate1 = wallVertices[bestCorner] - tangent * gateLen/2
+        gate2 = wallVertices[bestCorner] + tangent * gateLen/2
+        wv = [gate2]+wallVertices.tolist()[bestCorner+1:] + wallVertices.tolist()[:bestCorner]+[gate1]
+        plotVoronoiData(vertices, internalRegions, wv, 'tmp4.gatesCorner', radius=2 * cityRadius, extraR=True)    
     
-    # """
     if gates:
         # Search a place to put a gate. Method 2.
         # The midpoint of the longest external wall
@@ -415,7 +403,7 @@ def newVoronoiData(numSeeds=90, cityRadius=20, numBarriers=12, LloydSteps=2, gat
         wallEdges = np.linalg.norm(wallVertices-np.roll(wallVertices,1, axis=0), axis=1)        
         #Search the position of max edge
         longestEdge = wallEdges.argmax()
-        print("longest Wall Edge", longestEdge, " near vertex ->", externalPoints[longestEdge-1],externalPoints[longestEdge])
+        print("longest Wall Edge", longestEdge, " between external vertex ->", externalPoints[longestEdge-1],externalPoints[longestEdge])
         edgeVec = (wallVertices[longestEdge] - wallVertices[longestEdge-1])
         edgeLen = np.linalg.norm(edgeVec)
         edgeVec /= edgeLen
@@ -423,8 +411,8 @@ def newVoronoiData(numSeeds=90, cityRadius=20, numBarriers=12, LloydSteps=2, gat
         gate1 = wallVertices[longestEdge-1] + edgeVec * (edgeLen-gateLen)/2
         gateMid = wallVertices[longestEdge-1] + edgeVec * edgeLen/2
         gate2 = wallVertices[longestEdge-1] + edgeVec * (edgeLen+gateLen)/2
-        wv = wallVertices.tolist()[longestEdge:] + wallVertices.tolist()[:longestEdge]
-        plotVoronoiData(vertices, internalRegions, [gate2]+wv+[gate1], 'tmp4.gatesWall', radius=2 * cityRadius, extraR=True)
+        wv = [gate2]+wallVertices.tolist()[longestEdge:] + wallVertices.tolist()[:longestEdge]+[gate1]
+        plotVoronoiData(vertices, internalRegions, wv, 'tmp4.gatesWall', radius=2 * cityRadius, extraR=True)
 
 
         """ This is the same than previous code, but without using numpy
