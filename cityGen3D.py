@@ -602,6 +602,17 @@ def importLibrary(filename, link=False, destinationLayer=1, importScripts=False)
                     print('Warning: object', objName, 'is already in this file')
                 else:
                     data_to.objects.append(objName)
+        #Import groups
+        for grName in data_from.groups:
+            if grName.startswith('_'):
+                print('  - Ignore', filename, '->', grName, '(name starts with _)')
+            else:
+                print('  + Import group', filename, '->', grName)
+                if grName in [g.name for g in bpy.data.groups]:
+                    print('Warning: group', grName, 'is already in this file')
+                else:
+                    data_to.groups.append(grName)
+                    
         if importScripts:
             #Import all text/scripts
             textNames = [o.name for o in bpy.data.texts]
@@ -854,6 +865,15 @@ def main():
         wallVertices = data['wallVertices']        
         numTowers = len(wallVertices)
         axisX = Vector((1.0, 0.0))
+
+        # Search a place to put a gate 2.
+        # The midpoint of the longest external wall
+        #Compute the lenght of each side of polygon wallVertices
+        wallVertices = np.array(wallVertices)
+        wallEdges = np.linalg.norm(wallVertices-np.roll(wallVertices,1, axis=0), axis=1)        
+        #Search the position of max edge
+        longestEdge = wallEdges.argmax()
+        print("longest Wall Edge", longestEdge, " near vertex ->", externalPoints[longestEdge-1],externalPoints[longestEdge])
         
         for i in range(numTowers):
             v1 = wallVertices[i-1]
@@ -886,10 +906,39 @@ def main():
             g1.location = (v2[0], v2[1], 0)
             g1.rotation_euler = (0, 0, angR)
 
-            # print("New StoneWall section", v1, "->", v2)
-            sw = duplicateAlongSegment(v1, v2, "StoneWall", 0.0)
-            #print("New StoneWall section", v1, "->", v2, "Size: ", len(sw) )
+            if i == longestEdge:
+                #Compute the position of the gate
+                edgeVec = (wallVertices[longestEdge] - wallVertices[longestEdge-1])
+                edgeLen = np.linalg.norm(edgeVec)
+                edgeVec /= edgeLen
+                gateLen = 13.08 #Size of the gate
+                gate1 = wallVertices[longestEdge-1] + edgeVec * (edgeLen-gateLen)/2
+                gateMid = wallVertices[longestEdge-1] + edgeVec * edgeLen/2
+                gate2 = wallVertices[longestEdge-1] + edgeVec * (edgeLen+gateLen)/2
+                
+                #Insert two sections of wall
+                duplicateAlongSegment(v1, gate1, "StoneWall", 0.0)
+                duplicateAlongSegment(gate2, v2, "StoneWall", 0.0)                
 
+                #Insert a gate at position gateMid
+                angGate = angL+math.pi/2
+                for o in bpy.data.groups["StoneGate"].objects:
+                    g1 = duplicateObject(o, "_Gate1_"+o.name)
+                    g1.location = (gateMid[0], gateMid[1], 0)
+                    g1.rotation_euler = (0, 0, angGate)
+                
+                #Insert two tower at both sides of the gate
+                g1 = duplicateObject(bpy.data.objects["StoneTower"], "_Gate1_Tower1")
+                g1.location = (gate1[0], gate1[1], 0)
+                g1.rotation_euler = (0, 0, angGate)
+                g1 = duplicateObject(bpy.data.objects["StoneTower"], "_Gate1_Tower2")
+                g1.location = (gate2[0], gate2[1], 0)
+                g1.rotation_euler = (0, 0, angGate)
+
+            else:
+                sw = duplicateAlongSegment(v1, v2, "StoneWall", 0.0)
+                # print("New StoneWall section", v1, "->", v2, "Size: ", len(sw) )
+                
             # Create a quad-mesh for streets near of this section of wall
             me = bpy.data.meshes.new("_Street")
             ob = bpy.data.objects.new("_Street", me)

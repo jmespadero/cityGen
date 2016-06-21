@@ -329,7 +329,7 @@ def newVoronoiData(numSeeds=90, cityRadius=20, numBarriers=12, LloydSteps=2, gat
     print("Creating Wall Vertices")
 
     def computeEnvelop(vertexList, distance=4.0):
-        """ Compute the envelop (surrouding polygon at given distance
+        """ Compute the envelop (surrouding polygon at given distance)
         vertexList -- list of coordinates (or an array of  2 columns)
         distance -- Distance to displace the envelop (negative will work)
         """
@@ -366,8 +366,8 @@ def newVoronoiData(numSeeds=90, cityRadius=20, numBarriers=12, LloydSteps=2, gat
 
     ###########################################################
     # Search places to place gates to the city
+    """
     if gates:
-        # """
         # Search a place to put a gate 1.
         # Search the external corner with connection to an internal corner
         # and with the nerest angle to 180
@@ -398,33 +398,54 @@ def newVoronoiData(numSeeds=90, cityRadius=20, numBarriers=12, LloydSteps=2, gat
                 if (externalAngles[i] > externalAngles[bestCorner]):
                     bestCorner = i
                     # print("angle at vertex %d %s = %f" % (i1, v1, externalAngles[i]))
+        bestCornerPos = vertices[externalPoints[bestCorner]]
         print("bestCorner: %d %s -> %f" % (
-        externalPoints[bestCorner], vertices[externalPoints[bestCorner]], externalAngles[bestCorner]))
-        plotVoronoiData(vertices, internalRegions, [vertices[externalPoints[bestCorner]]], 'tmp4.gates1',
+        externalPoints[bestCorner], bestCornerPos, externalAngles[bestCorner]))
+        plotVoronoiData(vertices, internalRegions, [bestCornerPos], 'tmp4.gatesCorner',
                         radius=2 * cityRadius)
-        # """
+    # """
+    
+    # """
     if gates:
-        # """
         # Search a place to put a gate 2.
         # The midpoint of the longest external wall
+
+        #Compute the lenght of each side of polygon wallVertices
+        wallEdges = np.linalg.norm(wallVertices-np.roll(wallVertices,1, axis=0), axis=1)        
+        #Search the position of max edge
+        longestEdge = wallEdges.argmax()
+        print("longest Wall Edge", longestEdge, " near vertex ->", externalPoints[longestEdge-1],externalPoints[longestEdge])
+        edgeVec = (wallVertices[longestEdge] - wallVertices[longestEdge-1])
+        edgeLen = np.linalg.norm(edgeVec)
+        edgeVec /= edgeLen
+        gateLen = 6 #Size of the gate
+        gate1 = wallVertices[longestEdge-1] + edgeVec * (edgeLen-gateLen)/2
+        gateMid = wallVertices[longestEdge-1] + edgeVec * edgeLen/2
+        gate2 = wallVertices[longestEdge-1] + edgeVec * (edgeLen+gateLen)/2
+        plotVoronoiData(vertices, internalRegions, [gate1,gate2], 'tmp4.gatesWall', radius=2 * cityRadius)
+
+
+        """ This is the same than previous code, but without numpy
         maxdist = -9999
-        max_v1 = 0
-        max_v2 = 0
-        for i in range(len(externalPoints)):
-            v1 = externalPoints[i - 1]
-            v2 = externalPoints[i]
+        max_v1 = None
+        max_v2 = None                
+        for i in range(len(wallVertices)):
+            v1 = wallVertices[i - 1]
+            v2 = wallVertices[i]
             # print("Check Segment %d -> %d" % (v1, v2))
-            dist = np.linalg.norm(np.array(vertices[v1]) - np.array(vertices[v2]))
+            dist = np.linalg.norm(v1 - v2)
             # TODO: Avoid a hardcoded value here. Maybe 2*pi*cityRadius / numSeeds
             if dist > maxdist:
                 maxdist = dist
                 max_v1 = v1
                 max_v2 = v2
-        print("longest external edge: %d %d -> %f" % (max_v1, max_v2, maxdist))
-        midpoint = 0.5 * (np.array(vertices[max_v1]) + np.array(vertices[max_v2]))
+                # print("New max", externalPoints[i-1], externalPoints[i], "=", dist)
+        print("longest external edge:", max_v1, max_v2, "->", maxdist)
+        midpoint = 0.5 * (max_v1 + max_v2)
         print("midpoint %s " % (midpoint))
-        plotVoronoiData(vertices, internalRegions, [midpoint], 'tmp4.gates2', radius=2 * cityRadius)
-        # """
+        plotVoronoiData(vertices, internalRegions, [midpoint], 'tmp4.gatesWall2', radius=2 * cityRadius)
+    # """
+        
 
     """ DEBUG
     # Dump regions to .off file format for external debug
