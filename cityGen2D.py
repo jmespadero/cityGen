@@ -16,7 +16,7 @@ from datetime import datetime
 import numpy as np
 
 
-def newVoronoiData(numSeeds=90, cityRadius=20, numBarriers=12, LloydSteps=2, gates=False, randomSeed=None):
+def newVoronoiData(numSeeds=90, cityRadius=20, numBarriers=12, LloydSteps=2, gates=True, randomSeed=None):
     """Create a new set of regions from a voronoi diagram
     numSeeds   -- Number of seed to be used
     cityRadius -- Approximated radius of the city
@@ -361,8 +361,9 @@ def newVoronoiData(numSeeds=90, cityRadius=20, numBarriers=12, LloydSteps=2, gat
 
     wallVertices = computeEnvelop([vertices[i] for i in externalPoints], 4.0)
     
-    # Plot data with external wall vertices
-    plotVoronoiData(vertices, internalRegions, wallVertices, 'tmp4.externalWall', radius=2 * cityRadius, extraR=True)
+    # Plot data with external wall vertices. Trick to ploat a closed line.
+    # wv = wallVertices.tolist()+[wallVertices[0]]
+    # plotVoronoiData(vertices, internalRegions, wv, 'tmp4.externalWall', radius=2 * cityRadius, extraR=True)
 
     ###########################################################
     # Search places to place gates to the city
@@ -407,7 +408,7 @@ def newVoronoiData(numSeeds=90, cityRadius=20, numBarriers=12, LloydSteps=2, gat
     
     # """
     if gates:
-        # Search a place to put a gate 2.
+        # Search a place to put a gate. Method 2.
         # The midpoint of the longest external wall
 
         #Compute the lenght of each side of polygon wallVertices
@@ -418,14 +419,15 @@ def newVoronoiData(numSeeds=90, cityRadius=20, numBarriers=12, LloydSteps=2, gat
         edgeVec = (wallVertices[longestEdge] - wallVertices[longestEdge-1])
         edgeLen = np.linalg.norm(edgeVec)
         edgeVec /= edgeLen
-        gateLen = 6 #Size of the gate
+        gateLen = 13.08 #Size of the gate
         gate1 = wallVertices[longestEdge-1] + edgeVec * (edgeLen-gateLen)/2
         gateMid = wallVertices[longestEdge-1] + edgeVec * edgeLen/2
         gate2 = wallVertices[longestEdge-1] + edgeVec * (edgeLen+gateLen)/2
-        plotVoronoiData(vertices, internalRegions, [gate1,gate2], 'tmp4.gatesWall', radius=2 * cityRadius)
+        wv = wallVertices.tolist()[longestEdge:] + wallVertices.tolist()[:longestEdge]
+        plotVoronoiData(vertices, internalRegions, [gate2]+wv+[gate1], 'tmp4.gatesWall', radius=2 * cityRadius, extraR=True)
 
 
-        """ This is the same than previous code, but without numpy
+        """ This is the same than previous code, but without using numpy
         maxdist = -9999
         max_v1 = None
         max_v2 = None                
@@ -573,7 +575,8 @@ def plotVoronoiData(vertices, regions, extraV=[], filename='', show=False, label
 
     #Plot Extra vertex as a polygon
     if extraR:
-        plt.fill(*zip(*extraV), fill=False)
+        #plt.fill(*zip(*extraV), fill=False)
+        plt.plot(*zip(*extraV), color='black')
 
     # Choose axis
     if radius:
@@ -610,7 +613,8 @@ def plotCityData(cityData, filename='', show=True, labels=False, radius=None):
     extraV = []
     extraR = False
     if 'wallVertices' in cityData:
-        extraV = cityData['wallVertices']
+        # extraV = cityData['wallVertices'] # Repeat first element to close polygon
+        extraV = list(cityData['wallVertices'])+[cityData['wallVertices'][0]]
         extraR = True    
     elif 'barrierSeeds' in cityData:
         extraV = cityData['barrierSeeds']
@@ -632,8 +636,6 @@ def main():
                         help='Radius of the city (default=150)')
     parser.add_argument('-n', '--cityName', default='city', required=False,
                         help='Name of the city (default="city")')
-    parser.add_argument('-g', '--gate', action='store_true',
-                        help='Search a places to build gates to the city')
     parser.add_argument('-v', '--show', action='store_true',
                         help='Display the map of the city')
     parser.add_argument('--randomSeed', type=int, required=False,
@@ -656,7 +658,7 @@ def main():
 
     if not args.plot:
         # Generate a new city map
-        cityData = newVoronoiData(args.numSeeds, args.cityRadius, gates=args.gate, randomSeed=args.randomSeed)
+        cityData = newVoronoiData(args.numSeeds, args.cityRadius, gates=True, randomSeed=args.randomSeed)
         cityData['cityName'] = args.cityName
         # Save graph data
         graphFilename = args.cityName + '.graph.json'
