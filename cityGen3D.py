@@ -862,7 +862,86 @@ def main():
     # Exterior boundary of the city
     if 'createDefenseWall' in args and args['createDefenseWall']:
         print("Creating External Boundary of the City, Defense Wall")
-        wallVertices = data['wallVertices']        
+        wallVertices = data['wallVertices']
+
+        # place defense wall. Avoid extreme corners
+        axisX = Vector((1.0, 0.0))
+
+        #Compute the position of the gate
+        gate1 = Vector(wallVertices[0])
+        gate2 = Vector(wallVertices[-1])
+        gateMid = (gate1+gate2) * 0.5
+
+        # Compute orientation of gate with axisX
+        angGate = (gate1-gate2).angle_signed(axisX)-math.pi/2
+        #Insert a gate at position gateMid
+        for o in bpy.data.groups["StoneGate"].objects:
+            g1 = duplicateObject(o, "_Gate1_"+o.name)
+            g1.location = (gateMid[0], gateMid[1], 0)
+            g1.rotation_euler = (0, 0, angGate)
+        
+        #Insert one tower at gate1
+        g1 = duplicateObject(bpy.data.objects["StoneTower"], "_Gate1_Tower1")
+        g1.location = (gate1[0], gate1[1], 0)
+        g1.rotation_euler = (0, 0, angGate)
+        
+        # Place a door on point v2, oriented to angR (next section of wall)
+        g1 = duplicateObject(bpy.data.objects["StoneTowerDoor"], "_Door%03d_B" % i)
+        g1.location = (gate1[0], gate1[1], 0)
+        g1.rotation_euler = (0, 0, angGate+math.pi/2)
+                
+        # Close the defense wall around the city
+        for i in range(1, len(wallVertices)):
+            v1 = wallVertices[i-1]
+            v2 = wallVertices[i]
+            v3 = wallVertices[(i+1) % len(wallVertices) ]
+            v_1_2 = Vector((v1[0]-v2[0], v1[1]-v2[1]))
+            v_3_2 = Vector((v3[0]-v2[0], v3[1]-v2[1]))
+            # Compute orientation of both walls with axisX
+            angL = v_1_2.angle_signed(axisX)
+            angR = v_3_2.angle_signed(axisX)
+            # Force angR > angL, so ensure that angL < average < angR
+            if (angL > angR):
+                angR += 6.283185307
+
+            # Compute the average of angL , angR
+            ang = (angL+angR)*0.5
+            
+            # Place a new tower on point v2 (the endpoint of this section of wall)
+            g1 = duplicateObject(bpy.data.objects["StoneTower"], "_Tower%03d" % i)
+            g1.location = (v2[0], v2[1], 0)
+            g1.rotation_euler = (0, 0, ang)
+            # g1.show_name = True #Debug info
+            # Place a new door on point v2, oriented to angL (this section of wall)
+            g1 = duplicateObject(bpy.data.objects["StoneTowerDoor"], "_Door%03d_A" % i)
+            g1.location = (v2[0], v2[1], 0)
+            g1.rotation_euler = (0, 0, angL)
+
+            # Place a second door on point v2, oriented to angR (next section of wall)
+            if i < len(wallVertices)-1:
+                g1 = duplicateObject(bpy.data.objects["StoneTowerDoor"], "_Door%03d_B" % i)
+                g1.location = (v2[0], v2[1], 0)
+                g1.rotation_euler = (0, 0, angR)
+            
+            # Fill this section of wall with wallBlocks
+            sw = duplicateAlongSegment(v1, v2, "StoneWall", 0.0)
+            # print("New StoneWall section", v1, "->", v2, "Size: ", len(sw) )
+                
+            # Create a quad-mesh for streets near of this section of wall
+            me = bpy.data.meshes.new("_Street")
+            ob = bpy.data.objects.new("_Street", me)
+            # Create a list with the four vertex of this quad
+            myVertex = [(v1[0], v1[1], 0), (v2[0], v2[1], 0), vertices3D[externalPoints[i]], vertices3D[externalPoints[i-1]]]            
+            me.from_pydata(myVertex, [], [(0,1,2,3)])
+            me.update(calc_edges=True)
+            me.materials.append(bpy.data.materials['Floor1'])
+            bpy.context.scene.objects.link(ob)
+        
+        
+        
+        
+        
+        """OLD closed wall
         numTowers = len(wallVertices)
         axisX = Vector((1.0, 0.0))
 
@@ -948,7 +1027,7 @@ def main():
             me.update(calc_edges=True)
             me.materials.append(bpy.data.materials['Floor1'])
             bpy.context.scene.objects.link(ob)
-
+        """
             
         totalTime = datetime.now()-iniTime
         print("createDefenseWall: Total Time %s" % totalTime)
