@@ -9,7 +9,7 @@ Copyright 2014 Jose M. Espadero <josemiguel.espadero@urjc.es>
 Copyright 2014 Juan Ramos <juanillo07@gmail.com>
 """
 
-import math, json, importlib
+import math, json, importlib, random
 from math import sqrt, acos
 from pprint import pprint
 from datetime import datetime
@@ -24,6 +24,38 @@ def newVoronoiData(numSeeds=90, cityRadius=20, numBarriers=12, LloydSteps=2, gat
     LloydSteps -- Number of Lloyd's relaxation steps to apply 
     gates      -- Place gates in the external wall
     """
+
+    def pnt2line(pnt, s1, s2):
+        """ Compute coordinates of the nearest point from segment (s1-s2) to point pnt 
+        pnt -- Cordinates of a point (player position, for example)
+        s1  -- Cordinates of the first extreme of a segment
+        s2  -- Cordinates of the second extreme of a segment
+        """
+        # Translate all points, so 's1' is at the origin
+        line_vec = s2-s1
+        pnt_vec = pnt-s1
+        
+        # Compute the length of the segment s1-s2
+        line_len = np.linalg.norm(line_vec)
+        
+        # If segment is really short, give an approximate solution
+        if line_len < 0.001:
+            nearest = (s1+s2)/2
+            return nearest
+        
+        # Use dot product to compute the proyection of pnt_vec over line_vec
+        t = np.dot(line_vec, pnt_vec) / (line_len * line_len)
+        
+        # Clip t to ensure the proyection is in the range 0 to 1.
+        if t < 0.0:
+            t = 0.0
+        elif t > 1.0:
+            t = 1.0
+            
+        # Compute the position using the parameter t
+        # We could also use: nearest = s1 * (1.0-t) + s2 * t
+        nearest = s1 + line_vec * t
+        return nearest
 
     def point_inside_polygon(point, l_poly):
         x = point[0]
@@ -362,15 +394,14 @@ def newVoronoiData(numSeeds=90, cityRadius=20, numBarriers=12, LloydSteps=2, gat
     wallVertices = computeEnvelop([vertices[i] for i in externalPoints], 4.0)
     
     # Plot data with external wall vertices. Trick to ploat a closed line.
-    # wv = wallVertices.tolist()+[wallVertices[0]]
-    # plotVoronoiData(vertices, internalRegions, wv, 'tmp4.externalWall', radius=2 * cityRadius, extraR=True)
+    wv = wallVertices.tolist()+[wallVertices[0]]
+    plotVoronoiData(vertices, internalRegions, wv, 'tmp4.envelope', radius=2 * cityRadius, extraR=True)
 
     ###########################################################
     # Search places to place gates to the city
 
     if gates:
-        # Search a place to put a gate 1.
-        # Search the external corner with the angle nearest to 180
+        # Place a gate in the external corner with angle nearest to 180
         nv = len(wallVertices)        
         #Compute edge vectors (vertex to its previous)
         edgeP = [wallVertices[i]-wallVertices[i-1] for i in range(nv)]
@@ -382,7 +413,7 @@ def newVoronoiData(numSeeds=90, cityRadius=20, numBarriers=12, LloydSteps=2, gat
         alphaC = np.array([np.dot(edgeP[i],edgeN[i]) for i in range(nv)])
         # Choose minimun cosine. (angle near 180 has cosine -1)
         bestCorner = alphaC.argmin()
-        print("Best corner ofr a gate", bestCorner, " near external vertex ->", externalPoints[bestCorner])
+        print("Best corner for a gate", bestCorner, " near external vertex ->", externalPoints[bestCorner])
 
         gateLen = 13.08 #Size of the gate
         #Compute the tangent as an average of side vectors
@@ -393,17 +424,69 @@ def newVoronoiData(numSeeds=90, cityRadius=20, numBarriers=12, LloydSteps=2, gat
         gate1 = wallVertices[bestCorner] - tangent * gateLen/2
         gate2 = wallVertices[bestCorner] + tangent * gateLen/2
         wv = [gate2]+wallVertices.tolist()[bestCorner+1:] + wallVertices.tolist()[:bestCorner]+[gate1]
-        plotVoronoiData(vertices, internalRegions, wv, 'tmp4.gatesCorner', radius=2 * cityRadius, extraR=True)    
+        plotVoronoiData(vertices, internalRegions, wv, 'tmp5.gatesCorner', radius=2 * cityRadius, extraR=True)    
+
+    """ We can also displace the corner to force a 180 angle. Works well, but needs to correct internal nodes
+        # Reuse previous code for select bestCorner = alphaC.argmin()
+        gateLen = 13.08 #Size of the gate
+        # Proyect the corner over a segment to ensure a perfect angle of 180 
+        projection = pnt2line(wallVertices[bestCorner], wallVertices[bestCorner-1], wallVertices[(bestCorner+1)%nv])
+        vertices[externalPoints[bestCorner]] += projection - wallVertices[bestCorner]
+        wallVertices[bestCorner] = projection
+        #Compute the tangent
+        tangent = wallVertices[bestCorner]-wallVertices[bestCorner-1]
+        tangent /= np.linalg.norm(tangent)        
+        #Displace the vertex at the corner in the direction of tangent
+        gateMid = wallVertices[bestCorner]
+        gate1 = wallVertices[bestCorner] - tangent * gateLen/2
+        gate2 = wallVertices[bestCorner] + tangent * gateLen/2
+        wv = [gate2]+wallVertices.tolist()[bestCorner+1:] + wallVertices.tolist()[:bestCorner]+[gate1]
+        plotVoronoiData(vertices, internalRegions, wv, 'tmp5.gatesCorner2', radius=2 * cityRadius, extraR=True)
+    # """
+
+    """ Discarded. Tends to select short sides of external polygon, and needs to correct internal nodes
+    if gates:
+        # Place a gate in the external corner nearest to the projection over
+        # the segment formed  by their two neighbours
+        # Similar to the error used in the Ramer–Douglas–Peucker algorithm
+        # https://en.wikipedia.org/wiki/Ramer–Douglas–Peucker_algorithm
+        minDist = float('Inf')
+        bestCorner = None
+        bestProjection = None
+        nv = len(wallVertices)
+        for i in range(nv):
+            projection = pnt2line(wallVertices[i], wallVertices[i-1], wallVertices[(i+1)%nv])
+            dist = np.linalg.norm(wallVertices[i]-projection)
+            if dist < minDist:
+                minDist = dist
+                bestCorner = i
+                bestProjection = projection
+                print("New minDistance", dist, "at corner", i, "near of", externalPoints[i])
+        print("Best corner for a gate", bestCorner, " near external vertex ->", externalPoints[bestCorner])
+
+        gateLen = 13.08 #Size of the gate
+        # Displace the wallVertex and the nearest vertex inside the city
+        vertices[externalPoints[bestCorner]] += bestProjection - wallVertices[bestCorner]
+        wallVertices[bestCorner] = bestProjection
+        #Compute the tangent at bestCorner
+        tangent = wallVertices[bestCorner]-wallVertices[bestCorner-1]
+        tangent /= np.linalg.norm(tangent)
+        #Displace the vertex at the corner in the direction of tangent
+        gateMid = wallVertices[bestCorner]
+        gate1 = wallVertices[bestCorner] - tangent * gateLen/2
+        gate2 = wallVertices[bestCorner] + tangent * gateLen/2
+        wv = [gate2]+wallVertices.tolist()[bestCorner+1:] + wallVertices.tolist()[:bestCorner]+[gate1]
+        plotVoronoiData(vertices, internalRegions, wv, 'tmp5.gatesCorner2', radius=2 * cityRadius, extraR=True)
+    # """
     
     if gates:
-        # Search a place to put a gate. Method 2.
-        # The midpoint of the longest external wall
+        # Place a gate on the midpoint of the longest external wall
 
         #Compute the lenght of each side of polygon wallVertices
         wallEdges = np.linalg.norm(wallVertices-np.roll(wallVertices,1, axis=0), axis=1)        
         #Search the position of max edge
         longestEdge = wallEdges.argmax()
-        print("longest Wall Edge", longestEdge, " between external vertex ->", externalPoints[longestEdge-1],externalPoints[longestEdge])
+        print("Longest Wall Edge", longestEdge, " between external vertex ->", externalPoints[longestEdge-1],externalPoints[longestEdge])
         edgeVec = (wallVertices[longestEdge] - wallVertices[longestEdge-1])
         edgeLen = np.linalg.norm(edgeVec)
         edgeVec /= edgeLen
@@ -412,8 +495,25 @@ def newVoronoiData(numSeeds=90, cityRadius=20, numBarriers=12, LloydSteps=2, gat
         gateMid = wallVertices[longestEdge-1] + edgeVec * edgeLen/2
         gate2 = wallVertices[longestEdge-1] + edgeVec * (edgeLen+gateLen)/2
         wv = [gate2]+wallVertices.tolist()[longestEdge:] + wallVertices.tolist()[:longestEdge]+[gate1]
-        plotVoronoiData(vertices, internalRegions, wv, 'tmp4.gatesWall', radius=2 * cityRadius, extraR=True)
+        plotVoronoiData(vertices, internalRegions, wv, 'tmp5.gateLongestWall', radius=2 * cityRadius, extraR=True)
 
+    if gates:
+        # Place a gate on the midpoint of a ramdom external wall
+
+        # Choose a random edge and ensure is long enough to put a gate there
+        gateLen = 13.08 #Size of the gate
+        edge = random.randrange(len(wallVertices))
+        while np.linalg.norm(wallVertices[edge] - wallVertices[edge-1]) < 3 * gateLen:
+            edge = random.randrange(len(wallVertices))
+        print("Random Wall Edge", edge, " between external vertex ->", externalPoints[edge-1],externalPoints[edge])
+        edgeVec = (wallVertices[edge] - wallVertices[edge-1])
+        edgeLen = np.linalg.norm(edgeVec)
+        edgeVec /= edgeLen
+        gate1 = wallVertices[edge-1] + edgeVec * (edgeLen-gateLen)/2
+        gateMid = wallVertices[edge-1] + edgeVec * edgeLen/2
+        gate2 = wallVertices[edge-1] + edgeVec * (edgeLen+gateLen)/2
+        wv = [gate2]+wallVertices.tolist()[edge:] + wallVertices.tolist()[:edge]+[gate1]
+        plotVoronoiData(vertices, internalRegions, wv, 'tmp5.gateRandomWall', radius=2 * cityRadius, extraR=True)
 
         """ This is the same than previous code, but without using numpy
         maxdist = -9999
@@ -433,7 +533,7 @@ def newVoronoiData(numSeeds=90, cityRadius=20, numBarriers=12, LloydSteps=2, gat
         print("longest external edge:", max_v1, max_v2, "->", maxdist)
         midpoint = 0.5 * (max_v1 + max_v2)
         print("midpoint %s " % (midpoint))
-        plotVoronoiData(vertices, internalRegions, [midpoint], 'tmp4.gatesWall2', radius=2 * cityRadius)
+        plotVoronoiData(vertices, internalRegions, [midpoint], 'tmp5.gatesWall2', radius=2 * cityRadius)
     # """
         
 
