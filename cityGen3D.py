@@ -397,18 +397,11 @@ def makePolygon(cList, objName="meshObj", meshName="mesh", height=0.0, reduct=0.
     g1 = duplicateObject(bpy.data.objects["Tree"], "_Tree")
     g1.location = (media[0], media[1], 0.0)
 
-    """
-    # 4. Put a stone in each corner of the region
-    for i in range(len(cList2)):
-        g1 = duplicateObject(bpy.data.objects["Stone"], "_Stone%02d"%i)
-        g1.location=(cList2[i][0],cList2[i][1],0.0)
-    """
-
-    # 5. Fill boundary of region with fences
+    # 4. Fill boundary of region with fences
     for i in range(nv):
         duplicateAlongSegment(cList2[i-1], cList2[i], "Curb", 0.1)
     
-    # 6. Create Houses
+    # 5. Create Houses
     
     #Compute new reduced region coordinates
     cList3 = []
@@ -431,7 +424,6 @@ def makePolygon(cList, objName="meshObj", meshName="mesh", height=0.0, reduct=0.
     for i in range(nv):
         duplicateAlongSegmentMix (cList3[i-1], cList3[i], 1 ,("House7", "House3","House4","House5","House6"))
         duplicateAlongSegment(cList4[i-1], cList4[i], "WallHouse", 0, True )
-
 
 
     """
@@ -463,80 +455,6 @@ def makePolygon(cList, objName="meshObj", meshName="mesh", height=0.0, reduct=0.
     #Hide this region
     ob.hide = hide
     """
-
-
-def UNUSEDmakePath(cList, objName="pathObj", curveName="path", guardian=""):
-    """Create a path arround a city block, using a curve.
-    cList     -- A list of 3D points with the vertex of the polygon (corners of the city block)
-    objName   -- the name of the new object
-    curveName -- the name of the new curve
-    guardian  -- The name of an object to be copied and configured to walkarround the path
-    """
-
-    # BlenderGame use keyframes instead paths
-    """
-    #Add a curve as path
-    curve = bpy.data.curves.new(name=curveName, type='CURVE')
-    curve.dimensions = '3D'
-    curve.use_path=True
-
-    obj = bpy.data.objects.new(objName, curve)
-    obj.location = (0,0,0) #object origin
-    bpy.context.scene.objects.link(obj)
-
-    polyline = curve.splines.new('POLY')
-    polyline.points.add(len(cList)-1)
-    polyline.use_cyclic_u = True # Make a closed curve
-    for num in range(len(cList)):
-        x, y, z = cList[num]
-        polyline.points[num].co = (x, y, z, 1)
-    """
-
-    # Add a guardian that walk arround this path
-    if (not guardian):
-        return
-
-    g1 = duplicateObject(bpy.data.objects[guardian], "_"+guardian)
-
-    # BlenderGame use keyframes instead paths
-    """
-    #Create the animation data on the path
-    if (bpy.context.scene.objects.active):
-        bpy.context.scene.objects.active.select = False
-    bpy.context.scene.objects.active = g1
-    g1.select = True
-    #Create a constraint to associate the guardian and the path
-    cn=g1.constraints.new(type='FOLLOW_PATH')
-    cn.target = obj
-    cn.use_curve_follow = True
-    bpy.ops.constraint.followpath_path_animate(constraint="Follow Path", owner='OBJECT')
-    """
-    # TODO:
-    # Compute the lenght of the curve and use to set a fixed speed
-
-    g1.animation_data_create()
-    g1.animation_data.action = bpy.data.actions.new(name="Animate")
-    fcu_x = g1.animation_data.action.fcurves.new(data_path="location", index=0)
-    fcu_y = g1.animation_data.action.fcurves.new(data_path="location", index=1)
-    fcu_z = g1.animation_data.action.fcurves.new(data_path="location", index=2)
-    fcu_x.keyframe_points.add(len(cList))
-    fcu_y.keyframe_points.add(len(cList))
-    fcu_z.keyframe_points.add(len(cList))
-    for i in range(len(cList)):
-        x, y, z = cList[i]
-        # Fixed 50 frames per side of the path -> g1 will change speed
-        # TODO: We should be using the lenght of the side and the path
-        frame = 50 * i
-        fcu_x.keyframe_points[i].co = frame, x
-        fcu_x.keyframe_points[i].handle_left = frame - 1, x
-        fcu_x.keyframe_points[i].handle_right = frame + 1, x
-        fcu_y.keyframe_points[i].co = frame, y
-        fcu_y.keyframe_points[i].handle_left = frame - 1, y
-        fcu_y.keyframe_points[i].handle_right = frame + 1, y
-        fcu_z.keyframe_points[i].co = frame, z
-        fcu_z.keyframe_points[i].handle_left = frame - 1, z
-        fcu_z.keyframe_points[i].handle_right = frame + 1, z
-
 
 def nearestPoint(vList, centerPoint=(0,0) ):
     """Return the position of the point of vlist nearest to centerPoint 
@@ -634,43 +552,8 @@ def importLibrary(filename, link=False, destinationLayer=1, importScripts=False)
 
     updateExternalTexts()
 
-def UNUSEDimportPlayer(vList3D, locPlayer):
-    """Import the player and game system
-    """
-    print("Importing game player from %s" % inputPlayerboy)
-    with bpy.data.libraries.load(cwd+inputPlayerboy, link=False) as (data_from, data_to):                    
-        data_to.objects = [name for name in data_from.objects]
-        data_to.texts = [name for name in data_from.texts]
-
-    #link to scene, on current layer
-    for o in bpy.data.objects :
-        if o.users_scene == () :
-            bpy.context.scene.objects.link(o)
-            
-            
-    obj = bpy.data.objects['Player']
-    # Set active object operator
-    bpy.context.scene.objects.active = obj
-    locP = vList3D[locPlayer]
-    obj.location = (locP[0],locP[1],0.5)
-
 def UNUSEDdistance2D(p1,p2):
      return sqrt( (p2[0]-p1[0])**2+(p2[1]-p1[1])**2)
-
-def UNUSEDxPositionsFar(vList3D, internal, number):   
-    xPos=[]
-    for n in internal:
-         if vList3D[n]!= (0.0,0.0,0.0):
-            xPos.append((vList3D[n][0],vList3D[n][1],n))
-    xPos.sort(key=distance, reverse=True)
-    
-    internalSort = []
-    for n in xPos:
-         internalSort.append(n[2])
-    #print("internal ", internal)
-    #print("internal Sort ", internalSort)
-
-    return xPos,internalSort
             
 def importMonsters(vList3D, number, xPosFar, filenameList):    
     saveActiveObject=bpy.context.scene.objects.active
@@ -936,102 +819,7 @@ def main():
             me.update(calc_edges=True)
             me.materials.append(bpy.data.materials['Floor1'])
             bpy.context.scene.objects.link(ob)
-        
-        
-        
-        
-        
-        """OLD closed wall
-        numTowers = len(wallVertices)
-        axisX = Vector((1.0, 0.0))
-
-        # Search a place to put a gate 2.
-        # The midpoint of the longest external wall
-        #Compute the lenght of each side of polygon wallVertices
-        wallVertices = np.array(wallVertices)
-        wallEdges = np.linalg.norm(wallVertices-np.roll(wallVertices,1, axis=0), axis=1)        
-        #Search the position of max edge
-        longestEdge = wallEdges.argmax()
-        print("longest Wall Edge", longestEdge, " near vertex ->", externalPoints[longestEdge-1],externalPoints[longestEdge])
-        
-        for i in range(numTowers):
-            v1 = wallVertices[i-1]
-            v2 = wallVertices[i]
-            v3 = wallVertices[(i+1) % numTowers]
-            v_1_2 = Vector((v1[0]-v2[0], v1[1]-v2[1]))
-            v_3_2 = Vector((v3[0]-v2[0], v3[1]-v2[1]))
-            # Compute orientation of both walls with axisX
-            angL = v_1_2.angle_signed(axisX)
-            angR = v_3_2.angle_signed(axisX)
-            # Force angR > angL, so ensure that angL < average < angR
-            if (angL > angR):
-                angR += 6.283185307
-
-            # Compute the average of angL , angR
-            ang = (angL+angR)*0.5
-            
-            # Place a new tower on point v2
-            g1 = duplicateObject(bpy.data.objects["StoneTower"], "_Tower%03d" % i)
-            g1.location = (v2[0], v2[1], 0)
-            g1.rotation_euler = (0, 0, ang)
-            # g1.show_name = True #Debug info
-            # Place a new door on point v2, oriented to angL
-            g1 = duplicateObject(bpy.data.objects["StoneTowerDoor"], "_Door%03d_A" % i)
-            g1.location = (v2[0], v2[1], 0)
-            g1.rotation_euler = (0, 0, angL)
-
-            # Place a second door on point v2, oriented to angR
-            g1 = duplicateObject(bpy.data.objects["StoneTowerDoor"], "_Door%03d_B" % i)
-            g1.location = (v2[0], v2[1], 0)
-            g1.rotation_euler = (0, 0, angR)
-
-            if i == longestEdge:
-                #Compute the position of the gate
-                edgeVec = (wallVertices[longestEdge] - wallVertices[longestEdge-1])
-                edgeLen = np.linalg.norm(edgeVec)
-                edgeVec /= edgeLen
-                gateLen = 13.08 #Size of the gate
-                gate1 = wallVertices[longestEdge-1] + edgeVec * (edgeLen-gateLen)/2
-                gateMid = wallVertices[longestEdge-1] + edgeVec * edgeLen/2
-                gate2 = wallVertices[longestEdge-1] + edgeVec * (edgeLen+gateLen)/2
-                
-                #Insert two sections of wall
-                duplicateAlongSegment(v1, gate1, "StoneWall", 0.0)
-                duplicateAlongSegment(gate2, v2, "StoneWall", 0.0)                
-
-                #Insert a gate at position gateMid
-                angGate = angL+math.pi/2
-                for o in bpy.data.groups["StoneGate"].objects:
-                    g1 = duplicateObject(o, "_Gate1_"+o.name)
-                    g1.location = (gateMid[0], gateMid[1], 0)
-                    g1.rotation_euler = (0, 0, angGate)
-                
-                #Insert two tower at both sides of the gate
-                g1 = duplicateObject(bpy.data.objects["StoneTower"], "_Gate1_Tower1")
-                g1.location = (gate1[0], gate1[1], 0)
-                g1.rotation_euler = (0, 0, angGate)
-                g1 = duplicateObject(bpy.data.objects["StoneTower"], "_Gate1_Tower2")
-                g1.location = (gate2[0], gate2[1], 0)
-                g1.rotation_euler = (0, 0, angGate)
-
-            else:
-                sw = duplicateAlongSegment(v1, v2, "StoneWall", 0.0)
-                # print("New StoneWall section", v1, "->", v2, "Size: ", len(sw) )
-                
-            # Create a quad-mesh for streets near of this section of wall
-            me = bpy.data.meshes.new("_Street")
-            ob = bpy.data.objects.new("_Street", me)
-            # Create a list with the four vertex of this quad
-            myVertex = [(v1[0], v1[1], 0), (v2[0], v2[1], 0), vertices3D[externalPoints[i]], vertices3D[externalPoints[i-1]]]            
-            me.from_pydata(myVertex, [], [(0,1,2,3)])
-            me.update(calc_edges=True)
-            me.materials.append(bpy.data.materials['Floor1'])
-            bpy.context.scene.objects.link(ob)
-        """
-            
-        totalTime = datetime.now()-iniTime
-        print("createDefenseWall: Total Time %s" % totalTime)
-
+                    
     # Create a ground around the boundary
     if 'createGround' in args and args['createGround']:
         createGround = args['createGround']
@@ -1077,7 +865,7 @@ def main():
         playerVertex = nearestPoint(vertices, (0,0) )        
         locP = vertices[playerVertex]+[3.0]
         
-        """
+        """ TODO: Try to correct location of children
         children = [x for x in bpy.data.objects if x.parent == player]
         print("player.location", player.location)
         print([(x.name, x.location) for x in children])
@@ -1091,6 +879,10 @@ def main():
         #player.location = locP
         print('Player starts at vertex:', playerVertex, 'position:', locP)
         
+        # Show/hide the token that marks the nearest street point to the player
+        if 'debugVisibleTokens' in args and 'Target' in bpy.data.objects:
+            bpy.data.objects['Target'].hide_render = not args['debugVisibleTokens']
+
         #Inject a new string property to the object
         bpy.context.scene.objects.active = player
         bpy.ops.object.game_property_new(name="playerName", type='STRING')
