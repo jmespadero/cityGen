@@ -624,7 +624,9 @@ def main():
     bpy.context.scene.game_settings.show_fullscreen = True
     bpy.context.scene.game_settings.use_desktop = True
     bpy.context.scene.game_settings.material_mode = 'GLSL'
-    #bpy.context.space_data.viewport_shade = 'MATERIAL'
+    bpy.ops.file.autopack_toggle()
+    #print("bpy.data.use_autopack ", bpy.data.use_autopack )
+
     for a in bpy.data.screens['Default'].areas:
         if a.type == 'VIEW_3D':
             a.spaces[0].viewport_shade = 'MATERIAL'
