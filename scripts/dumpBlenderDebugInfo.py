@@ -72,3 +72,7 @@ for img in bpy.data.images:
         print('Purge image ', img.name)
         img.user_clear()
 """
+
+print("Size of packed images")
+for img in bpy.data.images :
+   print(img.name, img.packed_file.size)

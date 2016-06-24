@@ -29,12 +29,13 @@ argsFilename = 'cg-config.json'
 
 #Set default values for args
 args={
-'cleanLayer0' : True,       # Clean all objects in layer 1
+'cleanLayer0' : True,       # Clean all objects in layer 0
 'createGlobalLight' : True,         # Add new light to scene
 'inputFilename' : 'city.graph.json',  # Set a filename to read 2D city map data
 'inputFilenameAI' : 'city.AI.json',   # Set a filename to read AI data
 'internalPointsFileName' : 'cg-internalPoints.json', # Set a filename to write internal points to file.
-'inputHouses' : 'cg-library.blend',  # Set a filename for houses library.
+'inputLibraries' : 'cg-library.blend',  # Set a filename for assets (houses, wall, etc...) library.
+'inputHouses' : ["House7", "House3","House4","House5","House6"],
 'inputPlayerboy' : 'cg-playerBoy.blend',   # Set a filename for player system.
 'inputSkyDome': 'cg-skyDomeNight.blend',   # set a filename for a skyDome
 'inputMonster' : 'cg-spider.blend',  # Set a filename for monster.
@@ -422,7 +423,7 @@ def makePolygon(cList, objName="meshObj", meshName="mesh", height=0.0, reduct=0.
             cList4.append((cList[i][0]-vecxM,cList[i][1]-vecyM,cList[i][2]))
     
     for i in range(nv):
-        duplicateAlongSegmentMix (cList3[i-1], cList3[i], 1 ,("House7", "House3","House4","House5","House6"))
+        duplicateAlongSegmentMix (cList3[i-1], cList3[i], 1 ,args["inputHouses"])
         duplicateAlongSegment(cList4[i-1], cList4[i], "WallHouse", 0, True )
 
 
@@ -714,9 +715,11 @@ def main():
     # bpy.ops.object.camera_add(view_align=True, enter_editmode=False, location=(0,0,1.5), rotation=((math.radians(90)), 0, 0))
     # bpy.ops.object.lamp_add(type='SUN', view_align=False, location=(0, 0, 2))
 
-    #Read all the assets for buildings from cg-library
-    inputHouses = args['inputHouses']
-    importLibrary(cwd+inputHouses, link=False, destinationLayer=1, importScripts=False)
+    #Read all the assets for buildings from cg-library.blend
+    if not isinstance(args['inputLibraries'], list):
+        args['inputLibraries'] = [args['inputLibraries']]
+    for lib in args['inputLibraries']:
+        importLibrary(lib, link=False, destinationLayer=1, importScripts=False)
 
     #Insert global ilumination to scene
     if 'createGlobalLight' in args and args['createGlobalLight']:
