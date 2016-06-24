@@ -2,11 +2,15 @@
 "cleanLayer0": true,
 "inputFilename": "city.graph.json",
 "inputFilenameAI": "city.AI.json",
+
+"inputHouses": "cg-libraryLite.blend",
 "inputHouses": "cg-library.blend",
+
 "createGlobalLight": true,
 "createDefenseWall": true,
 "createGround": true,
 "createStreets": true,
+"debugVisibleTokens": false,
 
 "inputSkyDome": "cg-skyDomeNight.blend",
 "inputPlayerboy": "cg-playerScarecrow.blend",
@@ -14,14 +18,13 @@
 
 "inputMonster": "cg-spider.blend",
 "inputMonster": ["cg-spectre.blend", "cg-spider.blend"],
+"numMonsters": 4 ,
 
 "backgroundMusic": "sounds/AngevinB.mp3",
 "backgroundMusic": "sounds/DanseMacabre.mp3",
-
-"numMonsters": 4 ,
+"backgroundMusic": "",
 
 "outputCityFilename": "" ,
 "outputTouristFilename": "outputtour.blend" ,
-"outputGameFilename": "outputgame.blend",
-"debugVisibleTokens": false
+"outputGameFilename": "outputgame.blend"
 }
