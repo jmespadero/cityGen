@@ -652,10 +652,10 @@ def plotVoronoiData(vertices, regions, extraV=[], filename='', show=False, label
     # Save to file
     if filename:
         if filename.endswith('.png') or filename.endswith('.svg') or filename.endswith('.jpg'):
-            plt.savefig(filename, dpi=my_dpi)
+            plt.savefig(filename, dpi=my_dpi, bbox_inches='tight')
         else:
-            # plt.savefig(filename + '.png', dpi=my_dpi)
-            plt.savefig(filename + '.svg', dpi=my_dpi)
+            # plt.savefig(filename + '.png', dpi=my_dpi, bbox_inches='tight')
+            plt.savefig(filename + '.svg', dpi=my_dpi, bbox_inches='tight')
 
     # Interactive plot
     if show:

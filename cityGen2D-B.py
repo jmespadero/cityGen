@@ -525,7 +525,7 @@ def newVoronoiData(numSeeds=90, cityRadius=20, numBarriers=12, LloydSteps=2, gat
 
     wallVertices = computeEnvelop([vertices[i] for i in externalPoints], 4.0)
     
-    # Plot data with external wall vertices. Trick to ploat a closed line.
+    # Plot data with external wall vertices. Tricked to plot a closed line.
     wv = wallVertices.tolist()+[wallVertices[0]]
     plotVoronoiData(vertices, internalRegions, wv, 'tmp4.envelope', radius=2 * cityRadius, extraR=True)
 
@@ -783,10 +783,10 @@ def plotVoronoiData(vertices, regions, extraV=[], filename='', show=False, label
     # Save to file
     if filename:
         if filename.endswith('.png') or filename.endswith('.svg') or filename.endswith('.jpg'):
-            plt.savefig(filename, dpi=my_dpi)
+            plt.savefig(filename, dpi=my_dpi, bbox_inches='tight')
         else:
-            # plt.savefig(filename + '.png', dpi=my_dpi)
-            plt.savefig(filename + '.svg', dpi=my_dpi)
+            # plt.savefig(filename + '.png', dpi=my_dpi, bbox_inches='tight')
+            plt.savefig(filename + '.svg', dpi=my_dpi, bbox_inches='tight')
 
     # Interactive plot
     if show:
@@ -840,6 +840,8 @@ def main():
                         help='Initial random seed value')
     parser.add_argument('-p', '--plot', required=False,
                         help='Replot a previous generated city (default="city.grap.json")')
+    parser.add_argument('--background', required=False, action='store_true')
+    parser.add_argument('--python', required=False)
 
     args = parser.parse_args()
     # print(args)
