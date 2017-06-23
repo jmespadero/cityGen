@@ -15,224 +15,6 @@ from pprint import pprint
 from datetime import datetime
 import numpy as np
 
-class Delaunay2D:
-    """
-    Class to compute a Delaunay triangulation in 2D
-    ref: http://en.wikipedia.org/wiki/Bowyer-Watson_algorithm
-    ref: http://www.geom.uiuc.edu/~samuelp/del_project.html
-    """
-
-    def __init__(self, center=(0, 0), radius=9999):
-        """ Init and create a new frame to contain the triangulation
-        center -- Optional position for the center of the frame. Default (0,0)
-        radius -- Optional distance from corners to the center.
-        """
-        center = np.asarray(center)
-        # Create coordinates for the corners of the frame
-        self.coords = [center+radius*np.array((-1, -1)),
-                       center+radius*np.array((+1, -1)),
-                       center+radius*np.array((+1, +1)),
-                       center+radius*np.array((-1, +1))]
-
-        # Create two dicts to store triangle neighbours and circumcircles.
-        self.triangles = {}
-        self.circles = {}
-
-        # Create two CCW triangles for the frame
-        T1 = (0, 1, 3)
-        T2 = (2, 3, 1)
-        self.triangles[T1] = [T2, None, None]
-        self.triangles[T2] = [T1, None, None]
-
-        # Compute circumcenters and circumradius for each triangle
-        for t in self.triangles:
-            self.circles[t] = self.Circumcenter(t)
-
-    def Circumcenter(self, tri):
-        """Compute Circumcenter and circumradius of a triangle in 2D.
-        Uses an extension of the method described here:
-        http://www.ics.uci.edu/~eppstein/junkyard/circumcenter.html
-        """
-        pts = np.asarray([self.coords[v] for v in tri])
-        pts2 = np.dot(pts, pts.T)
-        A = np.bmat([[2 * pts2, [[1],
-                                 [1],
-                                 [1]]],
-                      [[[1, 1, 1, 0]]]])
-
-        b = np.hstack((np.sum(pts * pts, axis=1), [1]))
-        x = np.linalg.solve(A, b)
-        bary_coords = x[:-1]
-        center = np.dot(bary_coords, pts)
-
-        # radius = np.linalg.norm(pts[0] - center) # euclidean distance
-        radius = np.sum(np.square(pts[0] - center))  # squared distance
-        return (center, radius)
-
-    def inCircleFast(self, tri, p):
-        """Check if point p is inside of precomputed circumcircle of tri.
-        """
-        center, radius = self.circles[tri]
-        return np.sum(np.square(center - p)) <= radius
-
-    def inCircleRobust(self, tri, p):
-        """Check if point p is inside of circumcircle around the triangle tri.
-        This is a robust predicate, slower than compare distance to centers
-        ref: http://www.cs.cmu.edu/~quake/robust.html
-        """
-        m1 = np.asarray([self.coords[v] - p for v in tri])
-        m2 = np.sum(np.square(m1), axis=1).reshape((3, 1))
-        m = np.hstack((m1, m2))    # The 3x3 matrix to check
-        return np.linalg.det(m) <= 0
-
-    def AddPoint(self, p):
-        """Add a new point to the current DT, and refine it using Bowyer-Watson.
-        """
-        p = np.asarray(p)
-        idx = len(self.coords)
-        # print("coords[", idx,"] ->",p)
-        self.coords.append(p)
-
-        # Search the triangle(s) whose circumcircle contains p
-        bad_triangles = []
-        for T in self.triangles:
-            # Choose one method: inCircleRobust(T, p) or inCircleFast(T, p)
-            if self.inCircleFast(T, p):
-                bad_triangles.append(T)
-
-        # Find the CCW boundary (star shape) of the bad triangles,
-        # expressed as a list of edges (point pairs) and the opposite
-        # triangle to each edge.
-        boundary = []
-        # Choose a "random" triangle and edge
-        T = bad_triangles[0]
-        edge = 0
-        # get the opposite triangle of this edge
-        while True:
-            # Check if edge of triangle T is on the boundary...
-            # if opposite triangle of this edge is external to the list
-            tri_op = self.triangles[T][edge]
-            if tri_op not in bad_triangles:
-                # Insert edge and external triangle into boundary list
-                boundary.append((T[(edge+1) % 3], T[(edge-1) % 3], tri_op))
-
-                # Move to next CCW edge in this triangle
-                edge = (edge + 1) % 3
-
-                # Check if boundary is a closed loop
-                if boundary[0][0] == boundary[-1][1]:
-                    break
-            else:
-                # Move to next CCW edge in opposite triangle
-                edge = (self.triangles[tri_op].index(T) + 1) % 3
-                T = tri_op
-
-        # Remove triangles too near of point p of our solution
-        for T in bad_triangles:
-            del self.triangles[T]
-            del self.circles[T]
-
-        # Retriangle the hole left by bad_triangles
-        new_triangles = []
-        for (e0, e1, tri_op) in boundary:
-            # Create a new triangle using point p and edge extremes
-            T = (idx, e0, e1)
-
-            # Store circumcenter and circumradius of the triangle
-            self.circles[T] = self.Circumcenter(T)
-
-            # Set opposite triangle of the edge as neighbour of T
-            self.triangles[T] = [tri_op, None, None]
-
-            # Try to set T as neighbour of the opposite triangle
-            if tri_op:
-                # search the neighbour of tri_op that use edge (e1, e0)
-                for i, neigh in enumerate(self.triangles[tri_op]):
-                    if neigh:
-                        if e1 in neigh and e0 in neigh:
-                            # change link to use our new triangle
-                            self.triangles[tri_op][i] = T
-
-            # Add triangle to a temporal list
-            new_triangles.append(T)
-
-        # Link the new triangles each another
-        N = len(new_triangles)
-        for i, T in enumerate(new_triangles):
-            self.triangles[T][1] = new_triangles[(i+1) % N]   # next
-            self.triangles[T][2] = new_triangles[(i-1) % N]   # previous
-
-    def exportTriangles(self):
-        """Export the current list of Delaunay triangles
-        """
-        # Filter out triangles with any vertex in the extended BBox
-        return [(a-4, b-4, c-4)
-                for (a, b, c) in self.triangles if a > 3 and b > 3 and c > 3]
-
-    def exportCircles(self):
-        """Export the circumcircles as a list of (center, radius)
-        """
-        # Remember to compute circumcircles if not done before
-        # for t in self.triangles:
-        #     self.circles[t] = self.Circumcenter(t)
-
-        # Filter out triangles with any vertex in the extended BBox
-        # Do sqrt of radius before of return
-        return [(self.circles[(a, b, c)][0], sqrt(self.circles[(a, b, c)][1]))
-                for (a, b, c) in self.triangles if a > 3 and b > 3 and c > 3]
-
-    def exportDT(self):
-        """Export the current set of Delaunay coordinates and triangles.
-        """
-        # Filter out coordinates in the extended BBox
-        coord = self.coords[4:]
-
-        # Filter out triangles with any vertex in the extended BBox
-        tris = [(a-4, b-4, c-4)
-                for (a, b, c) in self.triangles if a > 3 and b > 3 and c > 3]
-        return coord, tris
-
-    def exportExtendedDT(self):
-        """Export the Extended Delaunay Triangulation (with the frame vertex).
-        """
-        return self.coords, list(self.triangles)
-        
-    def exportVoronoiRegions(self):
-        """Export coordinates and regions of Voronoi diagram as indexed data.
-        """
-        # Remember to compute circumcircles if not done before
-        # for t in self.triangles:
-        #     self.circles[t] = self.Circumcenter(t)
-        useVertex = {i:[] for i in range(len(self.coords))}
-        vor_coors = []
-        index={}
-        # Build a list of coordinates and a index per triangle/region
-        for tidx, (a, b, c) in enumerate(self.triangles):
-            vor_coors.append(self.circles[(a,b,c)][0])
-            # Insert triangle, rotating it so the key is the "last" vertex 
-            useVertex[a]+=[(b, c, a)]
-            useVertex[b]+=[(c, a, b)]
-            useVertex[c]+=[(a, b, c)]
-            # Set tidx as the index to use with this triangles
-            index[(a, b, c)] = tidx;
-            index[(c, a, b)] = tidx;
-            index[(b, c, a)] = tidx;
-            
-        # init regions per coordinate dictionary
-        regions = {}
-        # Sort each region in a coherent order, and substitude each triangle
-        # by its index
-        for i in range (4, len(self.coords)):
-            v = useVertex[i][0][0]  # Get a vertex of a triangle
-            r=[]
-            for _ in range(len(useVertex[i])):
-                # Search the triangle beginning with vertex v
-                t = [t for t in useVertex[i] if t[0] == v][0]
-                r.append(index[t])  # Add the index of this triangle to region
-                v = t[1]            # Choose the next vertex to search
-            regions[i-4]=r          # Store region.
-            
-        return vor_coors, regions
 
 def newVoronoiData(numSeeds=90, cityRadius=20, numBarriers=12, LloydSteps=2, gateLen=0., randomSeed=None):
     """Create a new set of regions from a voronoi diagram
@@ -275,6 +57,50 @@ def newVoronoiData(numSeeds=90, cityRadius=20, numBarriers=12, LloydSteps=2, gat
         nearest = s1 + line_vec * t
         return nearest
 
+    def point_inside_polygon(point, l_poly):
+        x = point[0]
+        y = point[1]
+        inside = False
+        for i in range(len(l_poly)):
+            # get two vertex from the polygon
+            v1 = l_poly[i - 1]
+            v2 = l_poly[i]
+            if (v1[1] < y <= v2[1]) or (v2[1] < y <= v1[1]):
+                if x > v1[0] + (y - v1[1]) / (v2[1] - v1[1]) * (v2[0] - v1[0]):
+                    inside = not inside
+        return inside
+
+    def reorderRegions(vertices, regions, seeds):
+        """Reorder a list of regions to be in the same order than the seeds
+           This is just stetic, because scipy.spatial.Voronoi change
+           the order of the output on each call, and makes the colors
+           in the plot changing in each Lloyd's step.
+        """
+        myRegions = []
+        # Insert internal regions in the same order than seeds
+        for s in seeds:
+            for r in regions:
+                # Reorder the internal regions
+                if r and -1 not in r:
+                    if point_inside_polygon(s, [vertices[i] for i in r]):
+                        myRegions.append(r)
+                        break
+        # Insert external regions at the end
+        for r in regions:
+            if -1 in r:
+                myRegions.append(r)
+
+        return myRegions
+
+    # Check scipy.spatial is instaled
+    try:
+        importlib.import_module('scipy.spatial')
+    except ImportError:
+        print("This method needs module scipy.spatial.Voronoi, but is not available.")
+        return
+
+    # Import Voronoi from scipy
+    from scipy.spatial import Voronoi
     print("createNewScene (numSeeds=%d, cityRadius=%g, numBarriers=%d, LloydSteps=%d" % (
     numSeeds, cityRadius, numBarriers, LloydSteps))
 
@@ -319,51 +145,49 @@ def newVoronoiData(numSeeds=90, cityRadius=20, numBarriers=12, LloydSteps=2, gat
     DistanciaMaxima = 0.7 * DistanciaMaxima
 
     # Compute initial Voronoi Diagram
-    dt = Delaunay2D(radius = 10 * cityRadius)
-    
-    # Insert all seeds and barriers one by one
-    for s in barrierSeeds:
-        dt.AddPoint(s)
-        
-    # Get the voronoi regions
-    vor_vertices, vor_regions = dt.exportVoronoiRegions()
-    internalRegions = [vor_regions[r] for r in range(len(seeds))]
+    vor = Voronoi(barrierSeeds)
+    vor.regions = reorderRegions(vor.vertices, vor.regions, barrierSeeds)
 
     # Plot initial voronoi diagram
-    plotVoronoiData(vor_vertices, internalRegions, barrierSeeds, 'tmp0.initialVoronoi', radius=2 * cityRadius)
+    plotVoronoiData(vor.vertices, vor.regions, barrierSeeds, 'tmp0.initialVoronoi', radius=2 * cityRadius)
 
     ###########################################################        
     # Apply several steps of Lloyd's Relaxation
     # See: https://en.wikipedia.org/wiki/Lloyd's_algorithm
     for w in range(LloydSteps):
         print("Lloyd Iteration", w + 1, "of", LloydSteps)
-        for r,region in enumerate(internalRegions):
+        internalRegions = [r for r in vor.regions if r and -1 not in r]
+        for region in internalRegions:
             # Compute the center of the region
-            vectors = [vor_vertices[i] for i in region]
+            vectors = [vor.vertices[i] for i in region]
             centroid = np.average(vectors, axis=0)
 
-            # Relax the seed for this region
-            newSeed = np.array(0.5 * (seeds[r] + centroid))
+            # Search the seed for this region
+            # TODO: si creamos un vector ordenado relacionando region con seeds, se podria ahorrar tiempo de computo.
+            nearSeed = None
+            for v in range(len(seeds)):
+                if point_inside_polygon(seeds[v], vectors):
+                    nearSeed = v
+                    # print(region, "-> seed: ", nearSeed)
+
+            newSeed = np.array(0.5 * (seeds[nearSeed] + centroid))
             dist = np.linalg.norm(newSeed)
             if dist < DistanciaMaxima:
-                seeds[r] = newSeed
+                seeds[nearSeed] = newSeed
             else:
                 print("dist=", dist, ">= DistanciaMaxima=", DistanciaMaxima)
-
+                # seeds=seeds+(0.0,0.0)
         # Recompute Voronoi Diagram
         barrierSeeds = np.concatenate((seeds, barrier), axis=0)
-        dt = Delaunay2D(radius = 10 * cityRadius)
-        for s in barrierSeeds:
-            dt.AddPoint(s)
-        vor_vertices, vor_regions = dt.exportVoronoiRegions()
-        internalRegions = [vor_regions[r] for r in range(len(seeds))]
+        vor = Voronoi(barrierSeeds)
+        vor.regions = reorderRegions(vor.vertices, vor.regions, barrierSeeds)
+        plotVoronoiData(vor.vertices, vor.regions, barrierSeeds, 'tmp1.Lloyd-Step%d' % (w + 1), radius=2 * cityRadius)
 
-        # Plot initial voronoi diagram
-        plotVoronoiData(vor_vertices, internalRegions, barrierSeeds, 'tmp1.Lloyd-Step%d' % (w + 1), radius=2 * cityRadius)
-    
     # Compute some usefull lists
-    nv = len(vor_vertices)
-    externalRegions = [vor_regions[r] for r in range(numSeeds, numSeeds+numBarriers)]
+    nv = len(vor.vertices)
+    vor.regions = [r for r in vor.regions if r]
+    # internalRegions = [r for r in vor.regions if -1 not in r]
+    externalRegions = [r for r in vor.regions if -1 in r]
     externalVertex = set([v for v in sum(externalRegions, []) if v != -1])
     # internalVertex = set([v for v in sum(internalRegions,[]) if v not in externalVertex])
     # unusedVertex = set([v for v in range(nv) if v not in externalVertex and v not in internalVertex])
@@ -373,29 +197,29 @@ def newVoronoiData(numSeeds=90, cityRadius=20, numBarriers=12, LloydSteps=2, gat
     # Check and solve pairs of vertex too near...
     for i in range(nv):
         for j in range(i + 1, nv):
-            dist = np.linalg.norm(vor_vertices[i] - vor_vertices[j])
+            dist = np.linalg.norm(vor.vertices[i] - vor.vertices[j])
             isExternalEdge = i in externalVertex and j in externalVertex
             # TODO: Avoid a hardcoded value here. Maybe 2*pi*cityRadius / len(externalVertex)
             if dist < (10.0 + 10.0 * isExternalEdge):
                 print("Distance from vertex", i, "to vertex", j, "=", dist, "(external edge)" * isExternalEdge)
                 # Merge voronoi vertex i and j at its center
-                midpoint = 0.5 * (np.array(vor_vertices[i]) + np.array(vor_vertices[j]))
-                vor_vertices[i] = midpoint
-                vor_vertices[j] = midpoint
+                midpoint = 0.5 * (np.array(vor.vertices[i]) + np.array(vor.vertices[j]))
+                vor.vertices[i] = midpoint
+                vor.vertices[j] = midpoint
                 # Mark vertex j as unused
                 unusedVertex.add(j)
                 print("  * Vertex", i, "and vertex", j, "merged at position:", midpoint)
                 # Change all reference to vertex j to vertex i. Vertex j will remain unused.
-                for r in vor_regions:
-                    if j in vor_regions[r]:
-                        if i in vor_regions[r]:
+                for region in vor.regions:
+                    if j in region:
+                        if i in region:
                             # print("  * Remove vertex", j, "in region ", region)
-                            vor_regions[r].remove(j)
+                            region.remove(j)
                         else:
                             # print("  * Usage of vertex", j, "replaced by", i, "in region", region)
-                            for k, v in enumerate(vor_regions[r]):
+                            for k, v in enumerate(region):
                                 if v == j:
-                                    vor_regions[r][k] = i
+                                    region[k] = i
 
     # Remove usage of unusedVertex
     if unusedVertex:
@@ -409,27 +233,27 @@ def newVoronoiData(numSeeds=90, cityRadius=20, numBarriers=12, LloydSteps=2, gat
             for i, vi in enumerate(vertexToRemove):
                 vj = vertexToReuse[i]
                 print("Using Vertex", vj, "instead vertex", vi)
-                vor_vertices[vj] = vor_vertices[vi]
-                for r in vor_regions:
-                    if vi in vor_regions[r]:
-                        if vj in vor_regions[r]:
+                vor.vertices[vj] = vor.vertices[vi]
+                for region in vor.regions:
+                    if vi in region:
+                        if vj in region:
                             # print("  * Remove vertex", vi, "in region ", region)
-                            vor_regions[r].remove(vi)
+                            region.remove(vi)
                         else:
                             # print("  * Usage of vertex", vi, "replaced by", vj, "in region", region)
-                            for k, vk in enumerate(vor_regions[r]):
+                            for k, vk in enumerate(region):
                                 if vk == vi:
-                                    vor_regions[r][k] = vj
+                                    region[k] = vj
 
         # Remove last vertex from vertices
         nv -= len(unusedVertex)
-        vor_vertices = vor_vertices[0:nv]
+        vor.vertices = vor.vertices[0:nv]
         print("numVertex after repacking", nv)
-        externalRegions = [vor_regions[r] for r in range(numSeeds, len(vor_regions))]
+        externalRegions = [r for r in vor.regions if -1 in r]
         externalVertex = set([v for v in sum(externalRegions, []) if v != -1])
 
     # Plot data after joining near vertex
-    plotVoronoiData(vor_vertices, internalRegions, barrierSeeds, 'tmp2.mergeNears', radius=2 * cityRadius)
+    plotVoronoiData(vor.vertices, vor.regions, barrierSeeds, 'tmp2.mergeNears', radius=2 * cityRadius)
 
     ###########################################################
     # compute the centroid of the voronoi set (average of seeds)
@@ -437,41 +261,85 @@ def newVoronoiData(numSeeds=90, cityRadius=20, numBarriers=12, LloydSteps=2, gat
     # centroid = np.average(barrierSeeds, axis=0) #option2
     centroid = np.array((0, 0))  # option3
     # Get the index of the voronoi vertex nearest to the centroid
-    meanPos = (np.linalg.norm(vor_vertices - centroid, axis=1)).argmin()
-    meanVertex = vor_vertices[meanPos]
+    meanPos = (np.linalg.norm(vor.vertices - centroid, axis=1)).argmin()
+    meanVertex = vor.vertices[meanPos]
     print("Current centroid", centroid, "Nearest Vertex", meanVertex)
     # Traslate all voronoi vertex so there is always a vertex in (0,0)
-    vertices = vor_vertices - meanVertex
+    vertices = vor.vertices - meanVertex
     barrierSeeds = barrierSeeds - meanVertex
 
     # Plot data after recentering
-    plotVoronoiData(vertices, internalRegions, barrierSeeds, 'tmp3.recenter', radius=2 * cityRadius)
+    plotVoronoiData(vertices, vor.regions, barrierSeeds, 'tmp3.recenter', radius=2 * cityRadius)
 
     ###########################################################
     # Extract the list of internal and external regions
-    internalRegions = [vor_regions[r] for r in range(numSeeds)]
-    externalRegions = [vor_regions[r] for r in range(numSeeds, len(vor_regions))]
+    internalRegions = []
+    externalRegions = []
+    # regionAreas = []
+    for region in vor.regions:
+        # Ignore degenerate regions
+        if len(region) > 2:
+            # Check if region is external
+            if -1 in region:
+                externalRegions.append(region)
+            else:
+                # Compute the signed area of this region to ensure positive orientation
+                # see https://en.wikipedia.org/wiki/Shoelace_formula
+                signedArea = 0
+                for i in range(len(region)):
+                    x1 = vertices[region[i - 1]][0]
+                    y1 = vertices[region[i - 1]][1]
+                    x2 = vertices[region[i]][0]
+                    y2 = vertices[region[i]][1]
+                    signedArea += 0.5 * (x1 * y2 - x2 * y1)
+                # Use sign of signedArea to determine the orientation
+                if signedArea > 0.0:
+                    # print("positive area region %s" % region)
+                    internalRegions.append(region)
+                else:
+                    # print("negative area region %s" % region)
+                    signedArea = -signedArea
+                    internalRegions.append(region[::-1])
+                    # regionAreas.append(signedArea);
 
     print("internalRegions=", len(internalRegions), " externalRegions=", len(externalRegions))
     # print("internalRegionsAreas=",regionAreas)
 
-    # Build the list of edges in internal regions
-    vor_edges = []
-    for r in internalRegions:
-        # add all edges of regions
-        vor_edges += list(zip(r[-1:]+r[:-1], r))
+    # Create a list of external edges
+    externalEdges = []
+    for region in externalRegions:
+        # pprint(region)
+        for i in range(len(region)):
+            v1 = region[i - 1]
+            v2 = region[i]
+            if (v1 != -1 and v2 != -1):
+                externalEdges.append((v1, v2))
+                # print("New external edge %d %d" % (v1, v2))
 
-    # Build the list of external edges (as a dict)
-    externalEdgesDict = {a:b for (a,b) in vor_edges if (b, a) not in vor_edges}
-
-    # sort the edges in CCW order and extract the external vertex
-    v = next(iter(externalEdgesDict))  # get a random key un the dict
+    # Sort the list of external segments, positive orientation
     externalPoints = []
-    for _ in range(len(externalEdgesDict)):
-        externalPoints.append(v)      # Add vertex to boundary
-        v = externalEdgesDict[v]      # go to next vertex
-    # pprint(externalPoints)
-    
+    v1 = vertices[externalEdges[0][0]]
+    v2 = vertices[externalEdges[0][1]]
+    if (v1[0] * v2[1] > v2[0] * v1[1]):
+        iniPoint = externalEdges[0][0]
+    else:
+        iniPoint = externalEdges[0][1]
+    while externalEdges:
+        for e in externalEdges:
+            if e[0] == iniPoint:
+                # print("Found", iniPoint)
+                externalPoints.append(iniPoint)
+                iniPoint = e[1]
+                externalEdges.remove(e)
+                break
+            if e[1] == iniPoint:
+                # print("Found", iniPoint)
+                externalPoints.append(iniPoint)
+                iniPoint = e[0]
+                externalEdges.remove(e)
+                break
+    # print(externalPoints)
+
     # Compute the signed area to ensure positive orientation of the wall
     cityArea = 0
     for i in range(len(externalPoints)):
@@ -525,7 +393,7 @@ def newVoronoiData(numSeeds=90, cityRadius=20, numBarriers=12, LloydSteps=2, gat
 
     wallVertices = computeEnvelop([vertices[i] for i in externalPoints], 4.0)
     
-    # Plot data with external wall vertices. Tricked to plot a closed line.
+    # Plot data with external wall vertices. Trick to ploat a closed line.
     wv = wallVertices.tolist()+[wallVertices[0]]
     plotVoronoiData(vertices, internalRegions, wv, 'tmp4.envelope', radius=2 * cityRadius, extraR=True)
 
@@ -565,7 +433,7 @@ def newVoronoiData(numSeeds=90, cityRadius=20, numBarriers=12, LloydSteps=2, gat
         wv = [gate2]+wallVertices.tolist()[bestCorner+1:] + wallVertices.tolist()[:bestCorner]+[gate1]
         plotVoronoiData(vertices, internalRegions, wv, 'tmp5.gatesCorner2', radius=2 * cityRadius, extraR=True)
     # """
-
+    
     if gateLen > 0:
         # Place a gate on the midpoint of the longest external wall
 
@@ -759,7 +627,8 @@ def plotVoronoiData(vertices, regions, extraV=[], filename='', show=False, label
             plt.annotate(i, xy=(v[0], v[1]))
 
     # Plot voronoi regions
-    for r, region in enumerate(regions):
+    internalRegions = [r for r in regions if r and -1 not in r]
+    for r, region in enumerate(internalRegions):
         polygon = [(vertices[i][0], vertices[i][1]) for i in region]
         plt.fill(*zip(*polygon), alpha=0.2)
         # plot a label for the region
@@ -840,8 +709,6 @@ def main():
                         help='Initial random seed value')
     parser.add_argument('-p', '--plot', required=False,
                         help='Replot a previous generated city (default="city.grap.json")')
-    parser.add_argument('--background', required=False, action='store_true')
-    parser.add_argument('--python', required=False)
 
     args = parser.parse_args()
     # print(args)

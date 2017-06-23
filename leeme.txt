@@ -45,3 +45,8 @@ cg-SkyDomeNight
   --> Se ha creado un skydome nocturno en cg-skyDomeNight.blend
   --> El generador de escenarios se encarga de importarlo en la capa 0
       y reescalarlo al tamaño adecuado.
+
+cityGen2D.py
+  --> Se ha escrito un generador propio de diagramas de Voronoi para 
+      eliminar la dependencia de scipy. 
+
