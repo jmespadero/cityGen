@@ -432,22 +432,6 @@ def newVoronoiData(numSeeds=90, cityRadius=20, numBarriers=12, LloydSteps=2, gat
     plotVoronoiData(vor_vertices, internalRegions, barrierSeeds, 'tmp2.mergeNears', radius=2 * cityRadius)
 
     ###########################################################
-    # compute the centroid of the voronoi set (average of seeds)
-    # centroid = np.average(vor.vertices, axis=0) #option1
-    # centroid = np.average(barrierSeeds, axis=0) #option2
-    centroid = np.array((0, 0))  # option3
-    # Get the index of the voronoi vertex nearest to the centroid
-    meanPos = (np.linalg.norm(vor_vertices - centroid, axis=1)).argmin()
-    meanVertex = vor_vertices[meanPos]
-    print("Current centroid", centroid, "Nearest Vertex", meanVertex)
-    # Traslate all voronoi vertex so there is always a vertex in (0,0)
-    vertices = vor_vertices - meanVertex
-    barrierSeeds = barrierSeeds - meanVertex
-
-    # Plot data after recentering
-    plotVoronoiData(vertices, internalRegions, barrierSeeds, 'tmp3.recenter', radius=2 * cityRadius)
-
-    ###########################################################
     # Extract the list of internal and external regions
     internalRegions = [vor_regions[r] for r in range(numSeeds)]
     externalRegions = [vor_regions[r] for r in range(numSeeds, len(vor_regions))]
@@ -465,13 +449,45 @@ def newVoronoiData(numSeeds=90, cityRadius=20, numBarriers=12, LloydSteps=2, gat
     externalEdgesDict = {a:b for (a,b) in vor_edges if (b, a) not in vor_edges}
 
     # sort the edges in CCW order and extract the external vertex
-    v = next(iter(externalEdgesDict))  # get a random key un the dict
+    v = next(iter(externalEdgesDict))  # get a random key in the dict
     externalPoints = []
     for _ in range(len(externalEdgesDict)):
         externalPoints.append(v)      # Add vertex to boundary
         v = externalEdgesDict[v]      # go to next vertex
-    # pprint(externalPoints)
+    pprint(externalPoints)
     
+    ###########################################################
+    # Smooth externalPoints to get a rounder shape.
+    externalRadius = 0
+    for i in externalPoints:
+        externalRadius += np.linalg.norm(vor_vertices[i])
+    externalRadius /= len(externalPoints)
+    print("Average external radius", externalRadius)
+    
+    for i in externalPoints:
+        r = np.linalg.norm(vor_vertices[i])
+        # 75% of original position + 25% circle position
+        vor_vertices[i] *= 0.75 + 0.25 * externalRadius / r
+
+    # Plot data after recentering
+    plotVoronoiData(vor_vertices, internalRegions, barrierSeeds, 'tmp3.1.smooth', radius=2 * cityRadius)
+
+    ###########################################################
+    # compute the centroid of the voronoi set (average of seeds)
+    # centroid = np.average(vor.vertices, axis=0) #option1
+    # centroid = np.average(barrierSeeds, axis=0) #option2
+    centroid = np.array((0, 0))  # option3
+    # Get the index of the voronoi vertex nearest to the centroid
+    meanPos = (np.linalg.norm(vor_vertices - centroid, axis=1)).argmin()
+    meanVertex = vor_vertices[meanPos]
+    print("Current centroid", centroid, "Nearest Vertex", meanVertex)
+    # Traslate all voronoi vertex so there is always a vertex in (0,0)
+    vertices = vor_vertices - meanVertex
+    barrierSeeds = barrierSeeds - meanVertex
+
+    # Plot data after recentering
+    plotVoronoiData(vertices, internalRegions, barrierSeeds, 'tmp3.2.recenter', radius=2 * cityRadius)
+
     # Compute the signed area to ensure positive orientation of the wall
     cityArea = 0
     for i in range(len(externalPoints)):
@@ -566,6 +582,7 @@ def newVoronoiData(numSeeds=90, cityRadius=20, numBarriers=12, LloydSteps=2, gat
         plotVoronoiData(vertices, internalRegions, wv, 'tmp5.gatesCorner2', radius=2 * cityRadius, extraR=True)
     # """
 
+    """ OK, but will prefer gates on corners
     if gateLen > 0:
         # Place a gate on the midpoint of the longest external wall
 
@@ -600,6 +617,7 @@ def newVoronoiData(numSeeds=90, cityRadius=20, numBarriers=12, LloydSteps=2, gat
         gate2 = wallVertices[edge-1] + edgeVec * (edgeLen+gateLen)/2
         wv = [gate2]+wallVertices.tolist()[edge:] + wallVertices.tolist()[:edge]+[gate1]
         plotVoronoiData(vertices, internalRegions, wv, 'tmp5.gateRandomWall', radius=2 * cityRadius, extraR=True)
+    # """
         
     if gateLen > 0:
         # Place a gate in the external corner with angle nearest to 180
