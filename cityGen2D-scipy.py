@@ -195,6 +195,7 @@ def newVoronoiData(numSeeds=90, cityRadius=20, numBarriers=12, LloydSteps=2, gat
 
     ###########################################################        
     # Check and solve pairs of vertex too near...
+    print("Check and merge pairs of vertex too near...")
     for i in range(nv):
         for j in range(i + 1, nv):
             dist = np.linalg.norm(vor.vertices[i] - vor.vertices[j])
@@ -202,13 +203,13 @@ def newVoronoiData(numSeeds=90, cityRadius=20, numBarriers=12, LloydSteps=2, gat
             # TODO: Avoid a hardcoded value here. Maybe 2*pi*cityRadius / len(externalVertex)
             if dist < (10.0 + 10.0 * isExternalEdge):
                 print("Distance from vertex", i, "to vertex", j, "=", dist, "(external edge)" * isExternalEdge)
-                # Merge voronoi vertex i and j at its center
+                # Merge voronoi vertex i and j in the midpoint
                 midpoint = 0.5 * (np.array(vor.vertices[i]) + np.array(vor.vertices[j]))
                 vor.vertices[i] = midpoint
                 vor.vertices[j] = midpoint
+                # print("  * Vertex", i, "and vertex", j, "merged at position:", midpoint)
                 # Mark vertex j as unused
                 unusedVertex.add(j)
-                print("  * Vertex", i, "and vertex", j, "merged at position:", midpoint)
                 # Change all reference to vertex j to vertex i. Vertex j will remain unused.
                 for region in vor.regions:
                     if j in region:
@@ -393,7 +394,7 @@ def newVoronoiData(numSeeds=90, cityRadius=20, numBarriers=12, LloydSteps=2, gat
 
     wallVertices = computeEnvelop([vertices[i] for i in externalPoints], 4.0)
     
-    # Plot data with external wall vertices. Trick to ploat a closed line.
+    # Plot data with external wall vertices. Tricked to plot a closed line.
     wv = wallVertices.tolist()+[wallVertices[0]]
     plotVoronoiData(vertices, internalRegions, wv, 'tmp4.envelope', radius=2 * cityRadius, extraR=True)
 
@@ -434,6 +435,7 @@ def newVoronoiData(numSeeds=90, cityRadius=20, numBarriers=12, LloydSteps=2, gat
         plotVoronoiData(vertices, internalRegions, wv, 'tmp5.gatesCorner2', radius=2 * cityRadius, extraR=True)
     # """
     
+    """ OK, but will prefer gates on corners
     if gateLen > 0:
         # Place a gate on the midpoint of the longest external wall
 
@@ -468,6 +470,7 @@ def newVoronoiData(numSeeds=90, cityRadius=20, numBarriers=12, LloydSteps=2, gat
         gate2 = wallVertices[edge-1] + edgeVec * (edgeLen+gateLen)/2
         wv = [gate2]+wallVertices.tolist()[edge:] + wallVertices.tolist()[:edge]+[gate1]
         plotVoronoiData(vertices, internalRegions, wv, 'tmp5.gateRandomWall', radius=2 * cityRadius, extraR=True)
+    # """
         
     if gateLen > 0:
         # Place a gate in the external corner with angle nearest to 180
