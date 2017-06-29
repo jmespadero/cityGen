@@ -509,16 +509,16 @@ def newVoronoiData(numSeeds=90, cityRadius=20, numBarriers=12, LloydSteps=2, gat
     # Compute a surrounding polygon (usefull for city walls)
     print("Creating Wall Vertices")
 
-    def computeEnvelop(vertexList, distance=4.0):
-        """ Compute the envelop (surrouding polygon at given distance)
+    def computeEnvelope(vertexList, distance=4.0):
+        """ Compute the envelope (surrounding polygon at given distance)
         vertexList -- list of coordinates (or an array of  2 columns)
-        distance -- Distance to displace the envelop (negative will work)
+        distance -- Distance to displace the envelope (negative will work)
         """
         nv = len(vertexList)
         #Create a copy of input as numpy.array
-        envelop = np.array(vertexList)
+        envelope = np.array(vertexList)
         # Compute the vector for each side (vertex to its previous)
-        edgeP = [envelop[i]-envelop[i-1] for i in range(nv)]
+        edgeP = [envelope[i]-envelope[i-1] for i in range(nv)]
         # Normalice the vector for each side
         edgeP = [x/np.linalg.norm(x) for x in edgeP]
         #Compute edge vectors (vertex to its next)
@@ -536,11 +536,11 @@ def newVoronoiData(numSeeds=90, cityRadius=20, numBarriers=12, LloydSteps=2, gat
         bisector = edgeNormals + np.array([w[i]*edgeP[i] for i in range(nv)])
 
         # Displace the external vertices by the bisector
-        envelop += distance * bisector
+        envelope += distance * bisector
         
-        return envelop
+        return envelope
 
-    wallVertices = computeEnvelop([vertices[i] for i in externalPoints], 4.0)
+    wallVertices = computeEnvelope([vertices[i] for i in externalPoints], 4.0)
     
     # Plot data with external wall vertices. Tricked to plot a closed line.
     wv = wallVertices.tolist()+[wallVertices[0]]
