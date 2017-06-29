@@ -46,3 +46,7 @@ Thumbs.db
 tmp*
 
 output*blend
+city.AI.json
+city.graph.json
+city.map.svg
+city.map.verbose.svg
