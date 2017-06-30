@@ -1,6 +1,6 @@
 """
 Game generator from project citygen
-Reads a .json file generated with citygen.py, and generate a 3D model for the city
+Reads a .json file generated with cityGen2D.py, and build a 3D model of the city
 
 Copyright 2014 Jose M. Espadero <josemiguel.espadero@urjc.es>
 Copyright 2014 Juan Ramos <juanillo07@gmail.com>
@@ -15,6 +15,15 @@ Open blender and type this in the python console:
 
 """
 
+"""
+TODO:
+  * When importing a blend file (cg-library, etc...) append its "readme.txt" to
+    a "readme.txt" in the output. This will honor all the CC-By resources.
+  * Add cg-Temple to cities.
+  * Build random houses. Create non-rectangular houses for corners.
+  * Procedural generation of starred night sky.
+  * Add roads outside of the city (at least one in near the gate)
+"""
 import bpy
 import math, json, random, os, sys
 from math import sqrt, acos, sin, cos
@@ -501,7 +510,7 @@ def updateExternalTexts():
             #Restore context
             ctx['area'].type = oldAreaType            
 
-def importLibrary(filename, link=False, destinationLayer=1, importScripts=False):
+def importLibrary(filename, link=False, destinationLayer=1, importScripts=True):
     """Import all the objects/assets from an external blender file
     filename -- the name of the blender file to import
     link     -- Choose to copy or link the objects
@@ -719,7 +728,7 @@ def main():
     if not isinstance(args['inputLibraries'], list):
         args['inputLibraries'] = [args['inputLibraries']]
     for lib in args['inputLibraries']:
-        importLibrary(lib, link=False, destinationLayer=1, importScripts=False)
+        importLibrary(lib, link=False, destinationLayer=1, importScripts=True)
 
     #Insert global ilumination to scene
     if 'createGlobalLight' in args and args['createGlobalLight']:
@@ -731,7 +740,7 @@ def main():
     
     #Insert and scale skyDome
     if 'inputSkyDome' in args and args['inputSkyDome']:
-        importLibrary(args['inputSkyDome'], link=False, destinationLayer=0, importScripts=False)
+        importLibrary(args['inputSkyDome'], link=False, destinationLayer=0, importScripts=True)
         #Compute the radius of the dome and apply scale
         skyDomeRadius = 50+(np.linalg.norm(vertices, axis=1)).max()
         print("Scaling SkyDome object to radius",skyDomeRadius)

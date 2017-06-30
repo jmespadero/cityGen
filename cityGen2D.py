@@ -1,12 +1,19 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Citymap generator from project citygen.
-Functions to create a new cityMap in 2D (does not use blender stuff)
+City map generator from project citygen.
+Generate a new cityMap in 2D (does not use blender stuff)
 Save the data as .json file which can be read by run-cityGen3D.sh script
   
 Copyright 2014 Jose M. Espadero <josemiguel.espadero@urjc.es>
 Copyright 2014 Juan Ramos <juanillo07@gmail.com>
+
+Run option 1: (using with system python)
+python3 cityGen2D.py
+
+Run option 2: (using python bundled with blender)
+blender --background --python cityGen2D.py
+
 """
 
 import math, json, importlib, random
@@ -511,7 +518,7 @@ def newVoronoiData(numSeeds=90, cityRadius=20, numBarriers=12, LloydSteps=2, gat
 
     def computeEnvelope(vertexList, distance=4.0):
         """ Compute the envelope (surrounding polygon at given distance)
-        vertexList -- list of coordinates (or an array of  2 columns)
+        vertexList -- list of coordinates (or an array of 2 columns)
         distance -- Distance to displace the envelope (negative will work)
         """
         nv = len(vertexList)
