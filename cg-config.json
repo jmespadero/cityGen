@@ -13,7 +13,9 @@
 "createStreets": true,
 "debugVisibleTokens": false,
 
+"inputSkyDome": "cg-skyDomeDay.blend",
 "inputSkyDome": "cg-skyDomeNight.blend",
+
 "inputPlayerboy": "cg-playerScarecrow.blend",
 "inputPlayerboy": "cg-playerBoy.blend",
 

@@ -9,7 +9,6 @@ Run option 1:
 blender --background --python cityGen3D.py
 
 Run option 2:
-
 Open blender and type this in the python console:
   exec(compile(open("cityGen3D.py").read(), "cityGen3D.py", 'exec'))
 
@@ -17,12 +16,13 @@ Open blender and type this in the python console:
 
 """
 TODO:
-  * When importing a blend file (cg-library, etc...) append its "readme.txt" to
-    a "readme.txt" in the output. This will honor all the CC-By resources.
-  * Add cg-Temple to cities.
+  * Add cg-temple to cities.
   * Build random houses. Create non-rectangular houses for corners.
   * Procedural generation of starred night sky.
   * Add roads outside of the city (at least one in near the gate)
+DONE:
+  * When importing a blend file (cg-library, etc...) append its "readme.txt" to
+    a "readme.txt" in the output. This will honor all the CC-By resources.
 """
 import bpy
 import math, json, random, os, sys
@@ -988,9 +988,11 @@ def main():
         outputGameFilename = args['outputGameFilename']
         print('Saving blender game as:', outputGameFilename)
         bpy.ops.wm.save_as_mainfile(filepath=cwd+outputGameFilename, compress=True, copy=False)
+        print ("Ready to run: blenderplayer", outputGameFilename);
             
-    totalTime = (datetime.now()-iniTime).total_seconds()
-    print("Regions: %d Total Time: %s " % (len(regions), totalTime))
+    # totalTime = (datetime.now()-iniTime).total_seconds()
+    # print("Regions: %d Total Time: %s " % (len(regions), totalTime))
 
 #Call the main function
 main()
+
