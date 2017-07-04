@@ -610,6 +610,8 @@ def importMonsters(vList3D, numMonsters, startPoints, filenameList):
         # monsterObj.location = monsterLocation                   
         monsterToken = bpy.data.objects['MonsterToken']
         monsterToken.location = monsterLocation
+        # Use only if monsterToken is a text
+        monsterToken.data.body = str(w)
         
         #Inject a string property with a json code that can be parsed by a controller
         if 'initPos' not in monsterObj.game.properties:
