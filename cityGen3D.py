@@ -606,9 +606,17 @@ def importMonsters(vList3D, numMonsters, startPoints, filenameList):
                 
         #Configure the monster and token position...
         monsterObj = bpy.data.objects['Monster']
-        monsterObj.location = monsterLocation                   
+        #THIS WILL BREAK THE MONSTER ARMATURE ON BLENDERPLAYER
+        # monsterObj.location = monsterLocation                   
         monsterToken = bpy.data.objects['MonsterToken']
         monsterToken.location = monsterLocation
+        
+        #Inject a string property with a json code that can be parsed by a controller
+        if 'initPos' not in monsterObj.game.properties:
+            bpy.context.scene.objects.active = monsterObj
+            bpy.ops.object.game_property_new(name="initPos", type='STRING')
+        monsterObj.game.properties['initPos'].value=json.dumps(monsterLocation)
+
                     
         if 'debugVisibleTokens' in args:
             monsterToken.hide_render = not args['debugVisibleTokens']
@@ -657,13 +665,15 @@ def main():
     print("Current file: %s" % filepath)
     print("Current dir: %s" % cwd)
 
-    #Ensure configuration of blenderplayer in mode 'GLSL'
+    # Ensure configuration of blenderplayer in mode 'GLSL'
     bpy.context.scene.render.engine = 'BLENDER_GAME'
     bpy.context.scene.game_settings.show_fullscreen = True
     bpy.context.scene.game_settings.use_desktop = True
     bpy.context.scene.game_settings.material_mode = 'GLSL'
     bpy.ops.file.autopack_toggle()
     #print("bpy.data.use_autopack ", bpy.data.use_autopack )
+    # Enable this if you need debug properties on screen
+    # bpy.context.scene.game_settings.show_debug_properties = True
 
     for a in bpy.data.screens['Default'].areas:
         if a.type == 'VIEW_3D':
@@ -917,25 +927,36 @@ def main():
         for x in children:
             x.location -= delta
         """
-        
-        #player.location = locP
+
+
         print('Player starts at vertex:', playerVertex, 'position:', locP)
         
+        #THIS WILL BREAK THE PLAYER ARMATURE ON BLENDERPLAYER
+        #player.location = locP
+        """ IDEA: BUT THIS WORKS WHILE INIT!
+        # get a list objects with the initPos property
+        for o in [x for x in scene.objects if 'initPos' in x]:
+            print('Init position', o, o['initPos'])
+            o.position=Vector(json.loads(o['initPos']))
+        """
+
         # Show/hide the token that marks the nearest street point to the player
         if 'debugVisibleTokens' in args and 'Target' in bpy.data.objects:
             bpy.data.objects['Target'].hide_render = not args['debugVisibleTokens']
 
-        #Inject a new string property to the object
-        bpy.context.scene.objects.active = player
-        bpy.ops.object.game_property_new(name="playerName", type='STRING')
-        player.game.properties['playerName'].value='Askeladden'
+        #Inject a new string property to the player object
+        if 'playerName' not in player.game.properties:
+            bpy.context.scene.objects.active = player
+            bpy.ops.object.game_property_new(name="playerName", type='STRING')
+            player.game.properties['playerName'].value='Askeladden'
 
         #Inject a string property with a json code that can be parsed by a controller
-        bpy.context.scene.objects.active = player
-        bpy.ops.object.game_property_new(name="locP.json", type='STRING')
-        player.game.properties['locP.json'].value=json.dumps(locP)
+        if 'initPos' not in player.game.properties:
+            bpy.context.scene.objects.active = player
+            bpy.ops.object.game_property_new(name="initPos", type='STRING')
+        player.game.properties['initPos'].value=json.dumps(locP)
 
-        #Inject a string property with a json code that can be parsed by a controller
+        #Inject a string property with a code that can be parsed by a controller
         bpy.context.scene.objects.active = player
         bpy.ops.object.game_property_new(name="numMonsters", type='INT')
         player.game.properties['numMonsters'].value=0
