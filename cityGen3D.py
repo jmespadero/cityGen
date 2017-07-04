@@ -45,7 +45,7 @@ args={
 'internalPointsFileName' : 'cg-internalPoints.json', # Set a filename to write internal points to file.
 'inputLibraries' : 'cg-library.blend',  # Set a filename for assets (houses, wall, etc...) library.
 'inputHouses' : ["House7", "House3","House4","House5","House6"],
-'inputPlayerboy' : 'cg-playerBoy.blend',   # Set a filename for player system.
+'inputPlayer' : 'cg-playerBoy.blend',   # Set a filename for player system.
 'inputSkyDome': 'cg-skyDomeNight.blend',   # set a filename for a skyDome
 'inputMonster' : 'cg-spider.blend',  # Set a filename for monster.
 'createDefenseWall' : True,  # Create exterior boundary of the city
@@ -897,8 +897,8 @@ def main():
         bpy.ops.wm.save_as_mainfile(filepath=cwd+outputCityFilename, compress=True, copy=False)
 
     #Import the player system
-    if 'inputPlayerboy' in args and args['inputPlayerboy']:
-        importLibrary(args['inputPlayerboy'], destinationLayer=0, importScripts=True)
+    if 'inputPlayer' in args and args['inputPlayer']:
+        importLibrary(args['inputPlayer'], destinationLayer=0, importScripts=True)
 
         #locate the object named Player
         player = bpy.data.objects['Player']

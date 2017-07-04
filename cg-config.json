@@ -16,8 +16,8 @@
 "inputSkyDome": "cg-skyDomeDay.blend",
 "inputSkyDome": "cg-skyDomeNight.blend",
 
-"inputPlayerboy": "cg-playerScarecrow.blend",
-"inputPlayerboy": "cg-playerBoy.blend",
+"inputPlayer": "cg-playerBoy.blend",
+"inputPlayer": "cg-playerScarecrow.blend",
 
 "inputMonster": "cg-spider.blend",
 "inputMonster": "cg-spectre.blend",
