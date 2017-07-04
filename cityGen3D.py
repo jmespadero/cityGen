@@ -53,7 +53,7 @@ args={
 'createStreets' : True,      # Create streets of the city
 'numMonsters' : 4,
 'outputCityFilename' : 'outputcity.blend', #Output file with just the city
-'outputTouristFilename' : 'outputtourist.blend', #Output file with complete game
+'outputTourFilename' : 'outputtour.blend', #Output file with complete game
 'outputGameFilename' : 'outputgame.blend', #Output file with complete game
 }
 
@@ -517,7 +517,7 @@ def importLibrary(filename, link=False, destinationLayer=1, importScripts=True):
     destinationLayer  -- The destination layer where to copy the objects
     importScripts -- Choose to import also the scripts (texts) 
     """
-    print("Importing objects from file %s" % filename)
+    print('Importing objects from file', filename)
     with bpy.data.libraries.load(filename, link=link) as (data_from, data_to):
         #Import all objects
         objNames = [o.name for o in bpy.data.objects]
@@ -565,52 +565,80 @@ def importLibrary(filename, link=False, destinationLayer=1, importScripts=True):
 def UNUSEDdistance2D(p1,p2):
      return sqrt( (p2[0]-p1[0])**2+(p2[1]-p1[1])**2)
             
-def importMonsters(vList3D, number, xPosFar, filenameList):    
+def importMonsters(vList3D, numMonsters, startPoints, filenameList):    
     saveActiveObject=bpy.context.scene.objects.active
     #TODO: use importLibrary instead...
-    for w in range(number):
-        monsterVertex = xPosFar[w]
+    for w in range(numMonsters):
         #Choose a random monsters from the list 
         filename = random.choice(filenameList)
+        # Choose a vertex as start point for this monster
+        monsterVertex = startPoints[w]
         monsterLocation=(vList3D[monsterVertex][0], vList3D[monsterVertex][1], 1.0)
-        print("Importing Monster", w , "from %s"  % filename, "vertex", monsterVertex, "position", monsterLocation )
+        print('Creating Monster', w , 'from', filename, 'at vertex', monsterVertex)
         #Read from blender file
+        """importLibrary(filename, link=False, destinationLayer=0, importScripts=True)
+        """
+        importedNames=[]
+        ignoredNames=[]
         with bpy.data.libraries.load(filename, link=False) as (data_from, data_to):
             #data_to.objects = [name for name in data_from.objects]
             objNames = [o.name for o in bpy.data.objects]
             for objName in data_from.objects:
                 if objName.startswith('_'):
-                    print('  - Ignore', filename, '->', objName, '(name starts with _)')
+                    # print('  - Ignore', filename, '->', objName, '(name starts with _)')
+                    ignoredNames.append(objName)
                 else:
-                    print('  + Import', filename, '->', objName)
+                    # print('  + Import', filename, '->', objName)
                     if objName in objNames:
-                        print('  * Warning: object', objName, 'is already in this file.')
+                        print('  * Warning: object', objName, 'is already in this file.')                    
                     data_to.objects.append(objName)
-            
+                    importedNames.append(objName)
+          
+            #Import all text/scripts
             data_to.texts = [name for name in data_from.texts]
+        
+        print("Imported:", importedNames)    
+        print("Ignored:", ignoredNames)    
+        
         for o in bpy.data.objects :
             if o.users_scene == ():
-                bpy.context.scene.objects.link(o)  
-        #Configure the monster...
-        obj = bpy.data.objects['Monster']
-        # Set active object operator
-        #bpy.context.scene.objects.active = obj
-        obj.location = monsterLocation
-        obj.name= 'Monster ' + str(w)
-        
+                bpy.context.scene.objects.link(o)
+                
+        #Configure the monster and token position...
+        monsterObj = bpy.data.objects['Monster']
+        monsterObj.location = monsterLocation                   
         monsterToken = bpy.data.objects['MonsterToken']
         monsterToken.location = monsterLocation
-        monsterToken.name= 'MonsterToken ' + str(w)
-        bpy.data.texts['initMonster.py'].name = 'initMonster ' + str(w) + '.py'
+                    
         if 'debugVisibleTokens' in args:
             monsterToken.hide_render = not args['debugVisibleTokens']
 
+        # Rename all parts of the monster to avoid collision names
+        # monsterObj.name= 'Monster ' + str(w)
+        # monsterToken.name= 'MonsterToken ' + str(w)
+        for n in importedNames:
+            o = bpy.data.objects[n]
+            oname = '%s %d' % (n, w)
+            o.name = oname
+            # print("hello", oname)
 
-        #Set the name of the monster as a property
-        bpy.context.scene.objects.active = obj
-        bpy.ops.object.game_property_new(name='monsterName', type='STRING')
-        obj.game.properties['monsterName'].value=obj.name
+        # Rename the initMonster.py script
+        if 'initMonster.py' in bpy.data.texts:
+            bpy.data.texts['initMonster.py'].name = 'initMonster %d.py' % w
 
+        #Set the name of the monster as a property of monster
+        if 'monsterName' not in monsterObj.game.properties:
+            bpy.context.scene.objects.active = monsterObj
+            bpy.ops.object.game_property_new(name='monsterName', type='STRING')
+        monsterObj.game.properties['monsterName'].value=monsterObj.name
+
+        #Set the name of the monster as a property of mosterToken
+        monsterToken = bpy.data.objects['MonsterToken %d' % w]
+        if 'monsterName' not in monsterToken.game.properties:
+            bpy.context.scene.objects.active = monsterToken
+            bpy.ops.object.game_property_new(name = 'monsterName', type='STRING')
+        monsterToken.game.properties['monsterName'].value = monsterObj.name
+                    
     #Restore old active object
     bpy.context.scene.objects.active=saveActiveObject
 
@@ -900,12 +928,17 @@ def main():
         #Inject a new string property to the object
         bpy.context.scene.objects.active = player
         bpy.ops.object.game_property_new(name="playerName", type='STRING')
-        player.game.properties['playerName'].value='Juanillo'
+        player.game.properties['playerName'].value='Askeladden'
 
         #Inject a string property with a json code that can be parsed by a controller
         bpy.context.scene.objects.active = player
         bpy.ops.object.game_property_new(name="locP.json", type='STRING')
         player.game.properties['locP.json'].value=json.dumps(locP)
+
+        #Inject a string property with a json code that can be parsed by a controller
+        bpy.context.scene.objects.active = player
+        bpy.ops.object.game_property_new(name="numMonsters", type='INT')
+        player.game.properties['numMonsters'].value=0
 
         #Inject a new python controller to the object, linked to an existing text
         #This is a trick so BGE can find a text object
@@ -934,10 +967,10 @@ def main():
         player.game.controllers['playMusic'].link(sensor=player.game.sensors['playMusic'], actuator=player.game.actuators['playMusic'])
             
     #Save the current file, if outputGameFilename is set.
-    if 'outputTouristFilename' in args and args['outputTouristFilename']:
-        outputTouristFilename = args['outputTouristFilename']
-        print('Saving blender tourist as:', outputTouristFilename)
-        bpy.ops.wm.save_as_mainfile(filepath=cwd+outputTouristFilename, compress=True, copy=False)
+    if 'outputTourFilename' in args and args['outputTourFilename']:
+        outputTourFilename = args['outputTourFilename']
+        print('Saving blender tourist as:', outputTourFilename)
+        bpy.ops.wm.save_as_mainfile(filepath=cwd+outputTourFilename, compress=True, copy=False)
 
     #Insert monsters in the city
     numMonsters = 0
@@ -945,6 +978,9 @@ def main():
         numMonsters = args['numMonsters']
             
     if numMonsters > 0:
+        #Set the number of monster as a game property of player
+        player.game.properties['numMonsters'].value=numMonsters
+        
         AIData={}
         print("Read AI data from: %s" % inputFilenameAI)
         with open(cwd+inputFilenameAI, 'r') as f:
