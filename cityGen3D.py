@@ -612,7 +612,7 @@ def importMonsters(vList3D, numMonsters, startPoints, filenameList):
         monsterToken = bpy.data.objects['MonsterToken']
         monsterToken.location = monsterLocation
 
-        #Temporal bugfix to cg-monsters.blend
+        #TEMPORAL BUGFIX to cg-monsters.blend
         monsterToken.layers[0] = True
 
         # Use only if monsterToken is a text
@@ -680,7 +680,7 @@ def main():
     bpy.ops.file.autopack_toggle()
     #print("bpy.data.use_autopack ", bpy.data.use_autopack )
     # Enable this if you need debug properties on screen
-    # bpy.context.scene.game_settings.show_debug_properties = True
+    bpy.context.scene.game_settings.show_debug_properties = True
 
     for a in bpy.data.screens['Default'].areas:
         if a.type == 'VIEW_3D':
@@ -968,19 +968,6 @@ def main():
         bpy.ops.object.game_property_new(name="numMonsters", type='INT')
         player.game.properties['numMonsters'].value=0
 
-        #Inject a new python controller to the object, linked to an existing text
-        #This is a trick so BGE can find a text object
-        #http://blenderartists.org/forum/showthread.php?226148-reading-text-datablocks-via-python
-        #See leeme.txt to find an example to search and parse a complex json-text
-        bpy.context.scene.objects.active = player
-        bpy.ops.logic.controller_add(name='cg-data.json', type='PYTHON')
-        player.game.controllers['cg-data.json'].text = bpy.data.texts[inputFilename]        
-        
-        #Inject a new python controller to the object, linked to inputFilenameAI
-        bpy.context.scene.objects.active = player
-        bpy.ops.logic.controller_add(name='cg-ia.json', type='PYTHON')
-        player.game.controllers['cg-ia.json'].text = bpy.data.texts[inputFilenameAI]
-
     #Insert a background music
     if 'backgroundMusic' in args and args['backgroundMusic']:
         backgroundMusic = args['backgroundMusic']
@@ -1006,15 +993,36 @@ def main():
         numMonsters = args['numMonsters']
             
     if numMonsters > 0:
+
+        if 'AI_Manager' not in bpy.data.objects:
+            print("AI_Manager object not found")
+            return
+            
+        AI_Manager = bpy.data.objects['AI_Manager']
+        #Bring AI_Manager to layer 0
+        AI_Manager.layers[0] = True        
+        
         #Set the number of monster as a game property of player
         player.game.properties['numMonsters'].value=numMonsters
+
+        #Inject a new python controller to the object, linked to an existing text
+        #This is a trick so BGE can find a text object
+        #http://blenderartists.org/forum/showthread.php?226148-reading-text-datablocks-via-python
+        #See leeme.txt to find an example to search and parse a complex json-text
+        bpy.context.scene.objects.active = AI_Manager
+        bpy.ops.logic.controller_add(name='cg-data.json', type='PYTHON')
+        AI_Manager.game.controllers['cg-data.json'].text = bpy.data.texts[inputFilename]        
+        
+        #Inject a new python controller to the object, linked to inputFilenameAI
+        bpy.context.scene.objects.active = AI_Manager
+        bpy.ops.logic.controller_add(name='cg-ia.json', type='PYTHON')
+        AI_Manager.game.controllers['cg-ia.json'].text = bpy.data.texts[inputFilenameAI]
         
         AIData={}
         print("Read AI data from: %s" % inputFilenameAI)
         with open(cwd+inputFilenameAI, 'r') as f:
             AIData.update(json.load(f))
-            print("AIData:", [x for x in AIData]);
-        
+            print("AIData:", [x for x in AIData]);       
             
         print("Choosing starting points for monsters...")
         #print("internalPoints=", internalPoints)
