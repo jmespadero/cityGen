@@ -3,8 +3,8 @@
 "inputFilename": "city.graph.json",
 "inputFilenameAI": "city.AI.json",
 
-"inputLibraries": ["cg-libraryLite.blend", "cg-library.blend"],
-"inputLibraries": "cg-libraryLite.blend",
+"inputLibraries": ["cg-libraryLite.blend"],
+"inputLibraries": ["cg-libraryLite.blend", "cg-monsters.blend"],
 "inputHouses" : ["House7", "House3","House4","House5","House6"],
 
 "createGlobalLight": true,

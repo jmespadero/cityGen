@@ -23,6 +23,7 @@ TODO:
 DONE:
   * When importing a blend file (cg-library, etc...) append its "readme.txt" to
     a "readme.txt" in the output. This will honor all the CC-By resources.
+  * Fix armatures when set position to an armatured object (see initPos)
 """
 import bpy
 import math, json, random, os, sys
@@ -610,6 +611,10 @@ def importMonsters(vList3D, numMonsters, startPoints, filenameList):
         # monsterObj.location = monsterLocation                   
         monsterToken = bpy.data.objects['MonsterToken']
         monsterToken.location = monsterLocation
+
+        #Temporal bugfix to cg-monsters.blend
+        monsterToken.layers[0] = True
+
         # Use only if monsterToken is a text
         monsterToken.data.body = str(w)
         
@@ -767,8 +772,8 @@ def main():
     #Read all the assets for buildings from cg-library.blend
     if not isinstance(args['inputLibraries'], list):
         args['inputLibraries'] = [args['inputLibraries']]
-    for lib in args['inputLibraries']:
-        importLibrary(lib, link=False, destinationLayer=1, importScripts=True)
+    for l,lib in enumerate(args['inputLibraries']):
+        importLibrary(lib, link=False, destinationLayer=1+l, importScripts=True)
 
     #Insert global ilumination to scene
     if 'createGlobalLight' in args and args['createGlobalLight']:
