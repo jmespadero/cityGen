@@ -408,9 +408,12 @@ def makePolygon(cList, objName="meshObj", meshName="mesh", height=0.0, reduct=0.
     g1 = duplicateObject(bpy.data.objects["Tree"], "_Tree")
     g1.location = (media[0], media[1], 0.0)
 
-    # 4. Fill boundary of region with fences
+    # 4. Fill boundary of region with Curbs
+    print ("DISABLED: Houses (... )")
+    """
     for i in range(nv):
         duplicateAlongSegment(cList2[i-1], cList2[i], "Curb", 0.1)
+    """
     
     # 5. Create Houses
     
@@ -432,9 +435,12 @@ def makePolygon(cList, objName="meshObj", meshName="mesh", height=0.0, reduct=0.
             cList3.append((cList[i][0]-vecx,cList[i][1]-vecy,cList[i][2]))
             cList4.append((cList[i][0]-vecxM,cList[i][1]-vecyM,cList[i][2]))
     
+    print ("DISABLED: Houses (... )")
+    """
     for i in range(nv):
         duplicateAlongSegmentMix (cList3[i-1], cList3[i], 1 ,args["inputHouses"])
         duplicateAlongSegment(cList4[i-1], cList4[i], "WallHouse", 0, True )
+    """
 
 
     """
@@ -566,7 +572,10 @@ def importLibrary(filename, link=False, destinationLayer=1, importScripts=True):
 def UNUSEDdistance2D(p1,p2):
      return sqrt( (p2[0]-p1[0])**2+(p2[1]-p1[1])**2)
             
-def importMonsters(vList3D, numMonsters, startPoints, filenameList):    
+def importMonsters(vList3D, numMonsters, startPoints, filenameList):
+    print ("DISABLED: importMonster (... )")
+    return 
+    
     saveActiveObject=bpy.context.scene.objects.active
     #TODO: use importLibrary instead...
     for w in range(numMonsters):
