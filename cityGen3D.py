@@ -1053,6 +1053,11 @@ def main():
             monsterVertex += [maxDistVertex]
         print("Starting points for monsters", monsterVertex)
 
+        #Set the list of vertex where monsters spawn as a game property of AI
+        bpy.context.scene.objects.active = AI_Manager
+        bpy.ops.object.game_property_new(name="iniMonsters", type='STRING')
+        AI_Manager.game.properties['iniMonsters'].value=str(monsterVertex)
+
         #If we have only a monster, build a list of just one element
         if not isinstance(args['inputMonster'], list):
             args['inputMonster'] = [args['inputMonster']]

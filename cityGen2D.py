@@ -718,14 +718,14 @@ def newAIData(regions, vertices):
 
     rangoM = (len(vertices), len(vertices))
 
-    # Initialize adjacencyMatrix
-    adjacencyMatrix = np.zeros(rangoM, dtype=np.int)
+    # Initialize adjacencyMatrix as a sparse matrix
+    neighbours = { v:set() for v in range(len(vertices)) }
     # Initialize directDistanceMatrix
     directDistanceMatrix = np.full(rangoM, np.inf)
     np.fill_diagonal(directDistanceMatrix, 0);
     # Initialize decisionMatrix
     decisionMatrix = np.zeros(rangoM, dtype=np.int)
-
+    
     # Fill adjacencyMatrix and directDistanceMatrix
     for a in regions:
         # print("region: %s" % a)
@@ -735,13 +735,16 @@ def newAIData(regions, vertices):
             # print("edge: %d -> %d"%(x,y))
             if directDistanceMatrix[x][y] == np.inf:  # optimization
                 distance = distance2D(vertices[x], vertices[y])
-                adjacencyMatrix[x][y] = 1
-                adjacencyMatrix[y][x] = 1
+                neighbours[x].add(y)
+                neighbours[y].add(x)
                 directDistanceMatrix[x][y] = distance
                 directDistanceMatrix[y][x] = distance
                 decisionMatrix[x][y] = y
                 decisionMatrix[y][x] = x
 
+    # Convert sets to lists
+    neighbours = {int(v):list(neighbours[v]) for v in neighbours}
+    
     # Initialize shortestPathMatrix
     shortestPathMatrix = directDistanceMatrix.copy()
 
@@ -758,7 +761,7 @@ def newAIData(regions, vertices):
                     decisionMatrix[i][j] = decisionMatrix[i][k]
 
     # Assemble all information as a dict of plain python matrices (lists of lists)
-    AIData = {'adjacencyMatrix': adjacencyMatrix.tolist(), 'directDistanceMatrix': directDistanceMatrix.tolist(),
+    AIData = {'neighbours': neighbours, 'directDistanceMatrix': directDistanceMatrix.tolist(),
               'shortestPathMatrix': shortestPathMatrix.tolist(), 'decisionMatrix': decisionMatrix.tolist()}
     return AIData
 
