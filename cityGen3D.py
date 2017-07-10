@@ -381,7 +381,7 @@ def makePolygon(cList, objName="meshObj", meshName="mesh", height=0.0, reduct=0.
             vecy = reduct * dy / dist
             cList2.append((cList[i][0]-vecx,cList[i][1]-vecy,cList[i][2]))
 
-    # 1. Create a mesh for streets arround this region
+    # 1. Create a mesh for streets around this region
     # This is the space between polygons clist and clist2
     me = bpy.data.meshes.new("_Street")
     ob = bpy.data.objects.new("_Street", me)
@@ -933,18 +933,6 @@ def main():
         playerVertex = nearestPoint(vertices, (0,0) )        
         locP = vertices[playerVertex]+[3.0]
         
-        """ TODO: Try to correct location of children
-        children = [x for x in bpy.data.objects if x.parent == player]
-        print("player.location", player.location)
-        print([(x.name, x.location) for x in children])
-        
-        delta = Vector(locP) - player.location
-        print("delta", delta)
-        for x in children:
-            x.location -= delta
-        """
-
-
         print('Player starts at vertex:', playerVertex, 'position:', locP)
         
         #THIS WILL BREAK THE PLAYER ARMATURE ON BLENDERPLAYER
@@ -970,7 +958,7 @@ def main():
         if 'initPos' not in player.game.properties:
             bpy.context.scene.objects.active = player
             bpy.ops.object.game_property_new(name="initPos", type='STRING')
-        player.game.properties['initPos'].value=json.dumps(locP)
+        player.game.properties['initPos'].value=str(locP)
 
         #Inject a string property with a code that can be parsed by a controller
         bpy.context.scene.objects.active = player
