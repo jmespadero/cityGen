@@ -347,7 +347,7 @@ def makeGround(cList=[], objName="meshObj", meshName="mesh", radius=10.0, materi
 
 
 
-def makePolygon(cList, objName="meshObj", meshName="mesh", height=0.0, reduct=0.0, hide=True):
+def makePolygon(cList, objName="meshObj", meshName="mesh", height=0.0, reduct=0.0, hide=True, nr=None):
     """Create a polygon/prism to represent a city block
     cList    -- A list of 3D points with the vertex of the polygon (corners of the city block)
     objName  -- the name of the new object
@@ -404,9 +404,20 @@ def makePolygon(cList, objName="meshObj", meshName="mesh", height=0.0, reduct=0.
     #me.materials.append(bpy.data.materials['Grass'])
     bpy.context.scene.objects.link(ob)
 
-    # 3. Put a tree in the center of the region
-    g1 = duplicateObject(bpy.data.objects["Tree"], "_Tree")
-    g1.location = (media[0], media[1], 0.0)
+    # OK 3. Put a tree in the center of the region
+    #g1 = duplicateObject(bpy.data.objects["Tree"], "_Tree")
+    #g1.location = (media[0], media[1], 0.0)
+    #bpy.ops.object.text_add(location=(media[0], media[1], 0.0))
+    
+    # Debug: Create a text object with the number of the region 
+    textCurve = bpy.data.curves.new(type="FONT",name="_textCurve")
+    textOb = bpy.data.objects.new("_textOb",textCurve)
+    textOb.location = (media[0], media[1], 0.3)
+    textOb.color = (1,0,0,1)
+    textOb.scale = (5,5,5)
+    textOb.data.body = str(nr)
+    bpy.context.scene.objects.link(textOb)
+    
 
     # 4. Fill boundary of region with Curbs
     print ("DISABLED: Houses (... )")
@@ -897,10 +908,10 @@ def main():
     if 'createStreets' in args and args['createStreets']:
         # Create paths and polygon for internal regions
         print("Creating Districts")
-        for region in regions:
+        for nr, region in enumerate(regions):
             print(".", end="")
             corners = [vertices3D[i] for i in region]
-            makePolygon(corners, "houseO", "houseM", height=0.5, reduct=1.0)
+            makePolygon(corners, "houseO", "houseM", height=0.5, reduct=1.0, nr=nr)
         print(".")
 
         # Merge streets meshes in one object
@@ -984,15 +995,23 @@ def main():
         print('Saving blender tourist as:', outputTourFilename)
         bpy.ops.wm.save_as_mainfile(filepath=cwd+outputTourFilename, compress=True, copy=False)
 
-    #Insert monsters in the city
-    numMonsters = 0
-    if 'numMonsters' in args:
-        numMonsters = args['numMonsters']
+    """
+             Create a scape-from-here game
+    """
+    
+    #Read the number of monsters in the city
+    numMonsters = args.get('numMonsters', 0)
             
     if numMonsters > 0:
 
+        #Read all the assets for monsters and non-players
+        if not isinstance(args['inputMonsterLibrary'], list):
+            args['inputMonsterLibrary'] = [args['inputMonsterLibrary']]
+        for l,lib in enumerate(args['inputMonsterLibrary']):            
+            importLibrary(lib, link=False, destinationLayer=10+l, importScripts=True)
+
         if 'AI_Manager' not in bpy.data.objects:
-            print("AI_Manager object not found")
+            print("AI_Manager object not found in libraries")
             return
             
         AI_Manager = bpy.data.objects['AI_Manager']

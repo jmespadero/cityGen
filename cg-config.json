@@ -3,8 +3,8 @@
 "inputFilename": "city.graph.json",
 "inputFilenameAI": "city.AI.json",
 
+"inputLibraries": ["cg-library.blend"],
 "inputLibraries": ["cg-libraryLite.blend"],
-"inputLibraries": ["cg-libraryLite.blend", "cg-monsters.blend"],
 "inputHouses" : ["House7", "House3","House4","House5","House6"],
 
 "createGlobalLight": true,
@@ -19,9 +19,7 @@
 "inputPlayer": "cg-playerScarecrow.blend",
 "inputPlayer": "cg-playerBoy.blend",
 
-"inputMonster": "cg-spider.blend",
-"inputMonster": "cg-spectre.blend",
-"inputMonster": ["cg-spectre.blend", "cg-spider.blend"],
+"inputMonsterLibrary": ["cg-monsters.blend"],
 "numMonsters": 4 ,
 
 "backgroundMusic": "sounds/AngevinB.mp3",
