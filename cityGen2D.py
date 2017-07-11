@@ -698,7 +698,8 @@ def newVoronoiData(numSeeds=90, cityRadius=20, numBarriers=12, LloydSteps=2, gat
     'log': "-s %d -r %f --randomSeed %d %s" % (numSeeds, cityRadius, randomSeed, datetime.now()),
     'barrierSeeds': barrierSeeds.tolist(),
     'vertices': vertices.tolist(),
-    'regions': internalRegions,
+    'regions': vor_regions,    
+    'internalRegions': internalRegions,
     'externalPoints': externalPoints,
     'wallVertices': wallVertices.tolist(),
     }
@@ -825,15 +826,8 @@ def plotVoronoiData(vertices, regions, extraV=[], filename='', show=False, label
 def plotCityData(cityData, filename='', show=True, labels=False, radius=None):
     """Plot a 2D representation of voronoiData dict
     """
-    if 'vertices' in cityData:
-        vertices = cityData['vertices']
-    else:
-        vertices = []
-
-    if 'regions' in cityData:
-        regions = cityData['regions']
-    else:
-        regions = []
+    vertices = cityData.get('vertices', [])
+    regions = cityData.get('internalRegions', [])
 
     extraV = []
     extraR = False
@@ -881,7 +875,7 @@ def main():
     cityData['cityName'] = "Minimal city"
     cityData['barrierSeeds'] = [[-5.0, 0.0],[5.0, 5.0],[5.0, -5.0]]
     cityData['vertices'] = [[-10.0, -10.0],[0.0, -10.0],[10.0, -10.0],[-10.0, 0.0],[0.0, 0.0],[10.0, 0.0],[-10.0, 10.0],[0.0, 10.0],[10.0, 10.0]]
-    cityData['regions'] = [[0, 1, 4, 7, 6, 3], [1,2,5,4], [4,5,8,7]]
+    cityData['internalRegions'] = [[0, 1, 4, 7, 6, 3], [1,2,5,4], [4,5,8,7]]
     cityData['externalPoints'] = [0, 1, 2, 5, 8, 7, 6, 3]
     """
 
@@ -904,7 +898,7 @@ def main():
 
     # Compute matrixes used for AI path finding
     print("Computing matrixes used for AI path finding")
-    AIData = newAIData(cityData['regions'], cityData['vertices'])
+    AIData = newAIData(cityData['internalRegions'], cityData['vertices'])
     AIFilename = args.cityName + '.AI.json'
     print("Save AI matrixes to: %s" % AIFilename)
     with open(AIFilename, 'w') as f:

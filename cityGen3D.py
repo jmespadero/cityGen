@@ -347,32 +347,35 @@ def makeGround(cList=[], objName="meshObj", meshName="mesh", radius=10.0, materi
 
 
 
-def makePolygon(cList, objName="meshObj", meshName="mesh", height=0.0, reduct=0.0, hide=True, nr=None):
+def makePolygon(cList, objName="meshObj", meshName="mesh", height=0.0, reduct=0.0, hide=True, nr=None, seed=None):
     """Create a polygon/prism to represent a city block
     cList    -- A list of 3D points with the vertex of the polygon (corners of the city block)
     objName  -- the name of the new object
     meshName -- the name of the new mesh
     height   -- the height of the prism
     reduct   -- a distance to reduce from corner
+    nr       -- The number if for thiss region
+    seed     -- Coordinates of the seed for this region
     """
     print(".", end="")
     
     nv = len(cList)
 
-    #Compute center of voronoi region
-    media = [0.0,0.0]
-    for v in cList:
-        media[0] += v[0]
-        media[1] += v[1]
-    media[0] /= nv
-    media[1] /= nv
-    #pprint(media)
+    if not seed:
+        #Compute center of voronoi region
+        seed = [0.0,0.0]
+        for v in cList:
+            seed[0] += v[0]
+            seed[1] += v[1]
+        seed[0] /= nv
+        seed[1] /= nv
+    #pprint("seed", seed)
 
     #Compute reduced region coordinates
     cList2 = []
     for i in range(nv):
-        dx = cList[i][0]-media[0]
-        dy = cList[i][1]-media[1]
+        dx = cList[i][0]-seed[0]
+        dy = cList[i][1]-seed[1]
         dist = sqrt(dx*dx+dy*dy)
         if dist < reduct:
             cList2.append(cList[i])
@@ -406,13 +409,13 @@ def makePolygon(cList, objName="meshObj", meshName="mesh", height=0.0, reduct=0.
 
     # OK 3. Put a tree in the center of the region
     #g1 = duplicateObject(bpy.data.objects["Tree"], "_Tree")
-    #g1.location = (media[0], media[1], 0.0)
-    #bpy.ops.object.text_add(location=(media[0], media[1], 0.0))
+    #g1.location = (seed[0], seed[1], 0.0)
+    #bpy.ops.object.text_add(location=(seed[0], seed[1], 0.0))
     
     # Debug: Create a text object with the number of the region 
     textCurve = bpy.data.curves.new(type="FONT",name="_textCurve")
     textOb = bpy.data.objects.new("_textOb",textCurve)
-    textOb.location = (media[0], media[1], 0.3)
+    textOb.location = (seed[0], seed[1], 0.3)
     textOb.color = (1,0,0,1)
     textOb.scale = (5,5,5)
     textOb.data.body = str(nr)
@@ -433,8 +436,8 @@ def makePolygon(cList, objName="meshObj", meshName="mesh", height=0.0, reduct=0.
     cList4 = []
     reduct = reduct * 6
     for i in range(nv):
-        dx = cList[i][0]-media[0]
-        dy = cList[i][1]-media[1]
+        dx = cList[i][0]-seed[0]
+        dy = cList[i][1]-seed[1]
         dist = sqrt(dx*dx+dy*dy)
         if dist < reduct:
             cList3.append(cList[i])
@@ -753,7 +756,10 @@ def main():
         seeds = data['barrierSeeds']
         vertices = data['vertices']
         regions = data['regions']
+        internalRegions = data['internalRegions']
         externalPoints = data['externalPoints']
+        # Convert indexes to int
+        regions = { int(k):v for k,v in regions.items() }
 
     #Save a copy of input data as a buffer in blend file
     if inputFilename in bpy.data.texts:
@@ -908,10 +914,10 @@ def main():
     if 'createStreets' in args and args['createStreets']:
         # Create paths and polygon for internal regions
         print("Creating Districts")
-        for nr, region in enumerate(regions):
+        for nr, region in enumerate(internalRegions):
             print(".", end="")
             corners = [vertices3D[i] for i in region]
-            makePolygon(corners, "houseO", "houseM", height=0.5, reduct=1.0, nr=nr)
+            makePolygon(corners, "houseO", "houseM", height=0.5, reduct=1.0, nr=nr, seed=seeds[nr])
         print(".")
 
         # Merge streets meshes in one object
