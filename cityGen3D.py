@@ -423,11 +423,8 @@ def makePolygon(cList, objName="meshObj", meshName="mesh", height=0.0, reduct=0.
     
 
     # 4. Fill boundary of region with Curbs
-    print ("DISABLED: Houses (... )")
-    """
     for i in range(nv):
         duplicateAlongSegment(cList2[i-1], cList2[i], "Curb", 0.1)
-    """
     
     # 5. Create Houses
     
@@ -449,13 +446,9 @@ def makePolygon(cList, objName="meshObj", meshName="mesh", height=0.0, reduct=0.
             cList3.append((cList[i][0]-vecx,cList[i][1]-vecy,cList[i][2]))
             cList4.append((cList[i][0]-vecxM,cList[i][1]-vecyM,cList[i][2]))
     
-    print ("DISABLED: Houses (... )")
-    """
     for i in range(nv):
         duplicateAlongSegmentMix (cList3[i-1], cList3[i], 1 ,args["inputHouses"])
         duplicateAlongSegment(cList4[i-1], cList4[i], "WallHouse", 0, True )
-    """
-
 
     """
     #Create a mesh for colision
