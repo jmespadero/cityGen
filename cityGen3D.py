@@ -33,17 +33,12 @@ import numpy as np
 from mathutils import Vector
 from datetime import datetime
 
-
-# Set a default filename to read configuration
-argsFilename = 'cg-config.json'   
-
 #Set default values for args
 args={
 'cleanLayer0' : True,       # Clean all objects in layer 0
 'createGlobalLight' : True,         # Add new light to scene
 'inputFilename' : 'city.graph.json',  # Set a filename to read 2D city map data
 'inputFilenameAI' : 'city.AI.json',   # Set a filename to read AI data
-'internalPointsFileName' : 'cg-internalPoints.json', # Set a filename to write internal points to file.
 'inputLibraries' : 'cg-library.blend',  # Set a filename for assets (houses, wall, etc...) library.
 'inputHouses' : ["House7", "House3","House4","House5","House6"],
 'inputPlayer' : 'cg-playerBoy.blend',   # Set a filename for player system.
@@ -57,30 +52,6 @@ args={
 'outputTourFilename' : 'outputtour.blend', #Output file with complete game
 'outputGameFilename' : 'outputgame.blend', #Output file with complete game
 }
-
-#Check if there is arguments after '--'
-if '--' in sys.argv:
-    argv = sys.argv[1+sys.argv.index('--'):]
-    print("argv", argv)
-    if argv:
-        #By now, only use last argument as configuration file
-        argsFilename = argv[-1]
-
-
-#Read options from external file
-print("Trying to read options from file: %s" % argsFilename)   
-try:
-    with open(argsFilename, 'r') as f:
-        import json
-        args.update(json.load(f))
-        #print("Read args:", [x for x in args]);
-        for n in args:
-            print("  *",n,"=",args[n])
-        #Python documentation say NOT to do this :-)
-        #globals().update(args)
-except IOError:
-    print("Could not read file:", argsFilename)
-    pass
                
 #################################################################
 # Functions to create a new cityMap scene (does need run inside blender)
@@ -576,11 +547,8 @@ def importLibrary(filename, link=False, destinationLayer=1, importScripts=True):
 
     updateExternalTexts()
 
-def UNUSEDdistance2D(p1,p2):
-     return sqrt( (p2[0]-p1[0])**2+(p2[1]-p1[1])**2)
-            
 def importMonsters(vList3D, numMonsters, startPoints, filenameList):
-    print ("DISABLED: importMonster (... )")
+    print ("DISABLED: importMonster (... ) Now done in AI_Manager.py")
     return 
     
     saveActiveObject=bpy.context.scene.objects.active
@@ -687,6 +655,33 @@ def main():
     
     print("Current file: %s" % filepath)
     print("Current dir: %s" % cwd)
+    
+    # Set a default filename to read configuration
+    argsFilename = 'cg-config.json'   
+
+    #Check if there is arguments after '--'
+    if '--' in sys.argv:
+        argv = sys.argv[1+sys.argv.index('--'):]
+        print("argv", argv)
+        if argv:
+            #By now, only use last argument as configuration file
+            argsFilename = argv[-1]
+
+
+    #Read options from external file
+    print("Trying to read options from file:", argsFilename)   
+    try:
+        with open(argsFilename, 'r') as f:
+            import json
+            args.update(json.load(f))
+            #print("Read args:", [x for x in args]);
+            for n in args:
+                print("  *",n,"=",args[n])
+            #Python documentation say NOT to do this :-)
+            #globals().update(args)
+    except IOError:
+        print("Could not read file:", argsFilename)
+        pass
 
     # Ensure configuration of blenderplayer in mode 'GLSL'
     bpy.context.scene.render.engine = 'BLENDER_GAME'
@@ -708,9 +703,8 @@ def main():
     for i in range(1, 20):
         bpy.context.scene.layers[i] = False
         
+    #clean objects in layer 0
     if args['cleanLayer0']:
-        print("Cleaning Screen, One Second Please")
-        #clean objects in layer 0
         bpy.ops.object.select_all(action='SELECT')
         bpy.ops.object.delete(use_global=False)
         #clean scripts
@@ -738,52 +732,37 @@ def main():
     bpy.ops.wm.save_as_mainfile(filepath=cwd+'empty.blend', compress=False, copy=False)
     os.remove(cwd+'empty.blend')
 
-    # Read point, vertex and regions from a file
+    # Read point, vertex and regions from a json file (the output of cityGen2D)
     inputFilename = args['inputFilename']
-    print("Read data from: %s" % inputFilename)
+    print("Read cityGen2D data from file", inputFilename)
     with open(cwd+inputFilename, 'r') as f:
         data = json.load(f)
         print("Data:", [x for x in data]);
         if 'name' in data:
-            print("City name: %s" % data['name'])
+            print("City name:", data['name'])
         seeds = data['barrierSeeds']
         vertices = data['vertices']
         regions = data['regions']
         internalRegions = data['internalRegions']
         externalPoints = data['externalPoints']
-        # Convert indexes to int
+        # This is a hack to convert dictionaries with string keys to integer.
+        # Necessary because json.dump() saves integer keys as strings
         regions = { int(k):v for k,v in regions.items() }
 
-    #Save a copy of input data as a buffer in blend file
+    #Save a copy of input data as a text buffer in blend file
     if inputFilename in bpy.data.texts:
         bpy.data.texts.remove(bpy.data.texts[inputFilename])
     bpy.data.texts.load(inputFilename, True)
     
-    #Save a copy of input data AI as a buffer in blend file
+    #Save a copy of input AI data as a buffer in blend file
     inputFilenameAI = args['inputFilenameAI']
     if inputFilenameAI in bpy.data.texts:
         bpy.data.texts.remove(bpy.data.texts[inputFilenameAI])
     bpy.data.texts.load(inputFilenameAI, True)
     
     # Convert vertex from 2D to 3D
-    vertices3D = []
-    for v in vertices:
-        vertices3D.append((v[0], v[1], 0.0))
-
-    #This piece of code has been moved to cg-playerBoy.blend//boy-move.py
-    #just under reading the .json file. !!!!
-    
-    #Build list of internal vertex
-    internalPoints = [i for i in range(len(vertices)) if i not in externalPoints]
-    
-    #save as a internal text
-    internalPointsFileName = args['internalPointsFileName']
-    if internalPointsFileName in bpy.data.texts:
-        bpy.data.texts.remove(bpy.data.texts[internalPointsFileName])
-    txt = bpy.data.texts.new(internalPointsFileName)
-    txt.from_string((json.dumps(internalPoints)))
-    
-    
+    vertices3D = [ (v[0], v[1], 0.0) for v in vertices ]
+        
     # Insert a camera and a light in the origin position
     # bpy.ops.object.camera_add(view_align=True, enter_editmode=False, location=(0,0,1.5), rotation=((math.radians(90)), 0, 0))
     # bpy.ops.object.lamp_add(type='SUN', view_align=False, location=(0, 0, 2))
@@ -846,12 +825,12 @@ def main():
         g1.location = (gate1[0], gate1[1], 0)
         g1.rotation_euler = (0, 0, angGate)
         
-        # Place a door on point v2, oriented to angR (next section of wall)
+        # Place a door on point gate1, oriented to angR (next section of wall)
         g1 = duplicateObject(bpy.data.objects["StoneTowerDoor"], "_Door%03d_B" % i)
         g1.location = (gate1[0], gate1[1], 0)
         g1.rotation_euler = (0, 0, angGate+math.pi/2)
                 
-        # Close the defense wall around the city
+        # Build the defense wall around the city
         for i in range(1, len(wallVertices)):
             v1 = wallVertices[i-1]
             v2 = wallVertices[i]
@@ -1040,6 +1019,8 @@ def main():
             print("AIData:", [x for x in AIData]);       
             
         print("Choosing starting points for monsters...")
+        #Build list of internal vertex
+        internalPoints = [i for i in range(len(vertices)) if i not in externalPoints]
         #print("internalPoints=", internalPoints)
         monsterVertex=[]
         for i in range(numMonsters):
@@ -1086,5 +1067,6 @@ def main():
     # print("Regions: %d Total Time: %s " % (len(regions), totalTime))
 
 #Call the main function
-main()
+if __name__ == '__main__':
+    main()
 
