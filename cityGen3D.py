@@ -42,8 +42,6 @@ args={
 'inputLibraries' : 'cg-library.blend',  # Set a filename for assets (houses, wall, etc...) library.
 'inputHouses' : ["House7", "House3","House4","House5","House6"],
 'inputPlayer' : 'cg-playerBoy.blend',   # Set a filename for player system.
-'inputSkyDome': 'cg-skyDomeNight.blend',   # set a filename for a skyDome
-'inputMonster' : 'cg-spider.blend',  # Set a filename for monster.
 'createDefenseWall' : True,  # Create exterior boundary of the city
 'createGround' : True,       # Create ground boundary of the city
 'createStreets' : True,      # Create streets of the city
@@ -683,7 +681,7 @@ def main():
         importLibrary(lib, link=False, destinationLayer=1+l, importScripts=True)
 
     #Insert global ilumination to scene
-    if 'createGlobalLight' in args and args['createGlobalLight']:
+    if args.get('createGlobalLight', False):
         print("Creating Global Light")
         bpy.ops.object.lamp_add(type='SUN', radius=1, view_align=False, location=(0,0,2), rotation=(0,0.175,0))
         bpy.data.lamps[-1].name='ASun1'
@@ -691,7 +689,7 @@ def main():
         bpy.data.lamps[-1].name='ASun2'
     
     #Insert and scale skyDome
-    if 'inputSkyDome' in args and args['inputSkyDome']:
+    if args.get('inputSkyDome', False):
         importLibrary(args['inputSkyDome'], link=False, destinationLayer=0, importScripts=True)
         #Compute the radius of the dome and apply scale
         skyDomeRadius = 50+(np.linalg.norm(vertices, axis=1)).max()
@@ -708,8 +706,8 @@ def main():
         bpy.context.scene.world.horizon_color = (0.685146, 0.800656, 0.728434)
         #"""
                 
-    # Exterior boundary of the city
-    if 'createDefenseWall' in args and args['createDefenseWall']:
+    # Create exterior boundary of the city
+    if args.get('createDefenseWall', False):
         print("Creating External Boundary of the City, Defense Wall")
         wallVertices = data['wallVertices']
 
@@ -787,12 +785,12 @@ def main():
             bpy.context.scene.objects.link(ob)
                     
     # Create a ground around the boundary
-    if 'createGround' in args and args['createGround']:
+    if args.get('createGround', False):
         createGround = args['createGround']
         groundRadius = 50+(np.linalg.norm(vertices, axis=1)).max()
         makeGround([], '_groundO', '_groundM', radius=groundRadius, material='Floor3')
 
-    if 'createStreets' in args and args['createStreets']:
+    if args.get('createStreets', False):
         # Create paths and polygon for internal regions
         print("Creating Districts")
         for nr, region in enumerate(internalRegions):
@@ -815,7 +813,7 @@ def main():
         bpy.ops.object.join()        
 
     #Save the current file, if outputCityFilename is set.
-    if 'outputCityFilename' in args and args['outputCityFilename']:
+    if args.get('outputCityFilename', False):
         outputCityFilename = args['outputCityFilename']
         print('Saving blender model as:', outputCityFilename)
         bpy.ops.wm.save_as_mainfile(filepath=cwd+outputCityFilename, compress=True, copy=False)
@@ -825,7 +823,7 @@ def main():
     ###########################################################################
 
     #Import the player system
-    if 'inputPlayer' in args and args['inputPlayer']:
+    if args.get('inputPlayer', False):
         importLibrary(args['inputPlayer'], destinationLayer=0, importScripts=True)
 
         #locate the object named Player
@@ -854,7 +852,7 @@ def main():
         player.game.properties['initPos'].value=str(locP)
 
     #Insert a background music
-    if 'backgroundMusic' in args and args['backgroundMusic']:
+    if args.get('backgroundMusic', False):
         backgroundMusic = args['backgroundMusic']
         print('Insert background music file:', backgroundMusic)
         #bpy.ops.sequencer.sound_strip_add(filepath=backgroundMusic, relative_path=True, frame_start=1, channel=1)
@@ -867,7 +865,7 @@ def main():
         player.game.controllers['playMusic'].link(sensor=player.game.sensors['playMusic'], actuator=player.game.actuators['playMusic'])
             
     #Save the current file, if outputGameFilename is set.
-    if 'outputTourFilename' in args and args['outputTourFilename']:
+    if args.get('outputTourFilename', False):
         outputTourFilename = args['outputTourFilename']
         print('Saving blender tourist as:', outputTourFilename)
         bpy.ops.wm.save_as_mainfile(filepath=cwd+outputTourFilename, compress=True, copy=False)
@@ -945,7 +943,7 @@ def main():
     updateExternalTexts()
 
     #Save the current file, if outputGameFilename is set.
-    if 'outputGameFilename' in args and args['outputGameFilename']:
+    if args.get('outputGameFilename', False):
         outputGameFilename = args['outputGameFilename']
         print('Saving blender game as:', outputGameFilename)
         bpy.ops.wm.save_as_mainfile(filepath=cwd+outputGameFilename, compress=True, copy=False)

@@ -1,5 +1,6 @@
 BUGS: 
 * Fix the house placing.
+* Monster must seek player (if near)
 
 TODO: 
 * Add temples, markets, dragons
