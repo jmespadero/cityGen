@@ -37,7 +37,7 @@ from datetime import datetime
 args={
 'cleanLayer0' : True,       # Clean all objects in layer 0
 'createGlobalLight' : True,         # Add new light to scene
-'inputFilename' : 'city.graph.json',  # Set a filename to read 2D city map data
+'inputFilename' : 'city.data.json',  # Set a filename to read 2D city map data
 'inputFilenameAI' : 'city.AI.json',   # Set a filename to read AI data
 'inputLibraries' : 'cg-library.blend',  # Set a filename for assets (houses, wall, etc...) library.
 'inputHouses' : ["House7", "House3","House4","House5","House6"],
@@ -546,102 +546,6 @@ def importLibrary(filename, link=False, destinationLayer=1, importScripts=True):
                 o.layers[0] = False
 
     updateExternalTexts()
-
-def importMonsters(vList3D, numMonsters, startPoints, filenameList):
-    print ("DISABLED: importMonster (... ) Now done in AI_Manager.py")
-    return 
-    
-    saveActiveObject=bpy.context.scene.objects.active
-    #TODO: use importLibrary instead...
-    for w in range(numMonsters):
-        #Choose a random monsters from the list 
-        filename = random.choice(filenameList)
-        # Choose a vertex as start point for this monster
-        monsterVertex = startPoints[w]
-        monsterLocation=(vList3D[monsterVertex][0], vList3D[monsterVertex][1], 1.0)
-        print('Creating Monster', w , 'from', filename, 'at vertex', monsterVertex)
-        #Read from blender file
-        """importLibrary(filename, link=False, destinationLayer=0, importScripts=True)
-        """
-        importedNames=[]
-        ignoredNames=[]
-        with bpy.data.libraries.load(filename, link=False) as (data_from, data_to):
-            #data_to.objects = [name for name in data_from.objects]
-            objNames = [o.name for o in bpy.data.objects]
-            for objName in data_from.objects:
-                if objName.startswith('_'):
-                    # print('  - Ignore', filename, '->', objName, '(name starts with _)')
-                    ignoredNames.append(objName)
-                else:
-                    # print('  + Import', filename, '->', objName)
-                    if objName in objNames:
-                        print('  * Warning: object', objName, 'is already in this file.')                    
-                    data_to.objects.append(objName)
-                    importedNames.append(objName)
-          
-            #Import all text/scripts
-            data_to.texts = [name for name in data_from.texts]
-        
-        print("Imported:", importedNames)    
-        print("Ignored:", ignoredNames)    
-        
-        for o in bpy.data.objects :
-            if o.users_scene == ():
-                bpy.context.scene.objects.link(o)
-                
-        #Configure the monster and token position...
-        monsterObj = bpy.data.objects['Monster']
-        #THIS WILL BREAK THE MONSTER ARMATURE ON BLENDERPLAYER
-        # monsterObj.location = monsterLocation                   
-        monsterToken = bpy.data.objects['MonsterToken']
-        monsterToken.location = monsterLocation
-
-        #TEMPORAL BUGFIX to cg-monsters.blend
-        monsterToken.layers[0] = True
-
-        # Use only if monsterToken is a text
-        monsterToken.data.body = str(w)
-        
-        #Inject a string property with a json code that can be parsed by a controller
-        if 'initPos' not in monsterObj.game.properties:
-            bpy.context.scene.objects.active = monsterObj
-            bpy.ops.object.game_property_new(name="initPos", type='STRING')
-        monsterObj.game.properties['initPos'].value=json.dumps(monsterLocation)
-
-                    
-        if 'debugVisibleTokens' in args:
-            monsterToken.hide_render = not args['debugVisibleTokens']
-
-        # Rename all parts of the monster to avoid collision names
-        # monsterObj.name= 'Monster ' + str(w)
-        # monsterToken.name= 'MonsterToken ' + str(w)
-        for n in importedNames:
-            o = bpy.data.objects[n]
-            oname = '%s %d' % (n, w)
-            o.name = oname
-            # print("hello", oname)
-
-        # Rename the initMonster.py script
-        if 'initMonster.py' in bpy.data.texts:
-            bpy.data.texts['initMonster.py'].name = 'initMonster %d.py' % w
-
-        #Set the name of the monster as a property of monster
-        if 'monsterName' not in monsterObj.game.properties:
-            bpy.context.scene.objects.active = monsterObj
-            bpy.ops.object.game_property_new(name='monsterName', type='STRING')
-        monsterObj.game.properties['monsterName'].value=monsterObj.name
-
-        #Set the name of the monster as a property of mosterToken
-        monsterToken = bpy.data.objects['MonsterToken %d' % w]
-        if 'monsterName' not in monsterToken.game.properties:
-            bpy.context.scene.objects.active = monsterToken
-            bpy.ops.object.game_property_new(name = 'monsterName', type='STRING')
-        monsterToken.game.properties['monsterName'].value = monsterObj.name
-                    
-    #Restore old active object
-    bpy.context.scene.objects.active=saveActiveObject
-
-        
        
 ###########################
 # The one and only... main
@@ -653,8 +557,9 @@ def main():
     if cwd == '/':
         cwd = ''
     
-    print("Current file: %s" % filepath)
-    print("Current dir: %s" % cwd)
+    if filepath:
+        print("Current blender file:", filepath)
+        print("Current dir:", cwd)
     
     # Set a default filename to read configuration
     argsFilename = 'cg-config.json'   
@@ -740,7 +645,7 @@ def main():
         print("Data:", [x for x in data]);
         if 'name' in data:
             print("City name:", data['name'])
-        seeds = data['barrierSeeds']
+        seeds = data['seeds']
         vertices = data['vertices']
         regions = data['regions']
         internalRegions = data['internalRegions']
@@ -748,6 +653,10 @@ def main():
         # This is a hack to convert dictionaries with string keys to integer.
         # Necessary because json.dump() saves integer keys as strings
         regions = { int(k):v for k,v in regions.items() }
+
+    ###########################################################################
+    #        Create a 3D model of the city
+    ###########################################################################
 
     #Save a copy of input data as a text buffer in blend file
     if inputFilename in bpy.data.texts:
@@ -911,6 +820,10 @@ def main():
         print('Saving blender model as:', outputCityFilename)
         bpy.ops.wm.save_as_mainfile(filepath=cwd+outputCityFilename, compress=True, copy=False)
 
+    ###########################################################################
+    #        Create lets-take-a-nice-walk game
+    ###########################################################################
+
     #Import the player system
     if 'inputPlayer' in args and args['inputPlayer']:
         importLibrary(args['inputPlayer'], destinationLayer=0, importScripts=True)
@@ -924,15 +837,6 @@ def main():
         
         print('Player starts at vertex:', playerVertex, 'position:', locP)
         
-        #THIS WILL BREAK THE PLAYER ARMATURE ON BLENDERPLAYER
-        #player.location = locP
-        """ IDEA: BUT THIS WORKS WHILE INIT!
-        # get a list objects with the initPos property
-        for o in [x for x in scene.objects if 'initPos' in x]:
-            print('Init position', o, o['initPos'])
-            o.position=Vector(json.loads(o['initPos']))
-        """
-
         # Show/hide the token that marks the nearest street point to the player
         if 'debugVisibleTokens' in args and 'Target' in bpy.data.objects:
             bpy.data.objects['Target'].hide_render = not args['debugVisibleTokens']
@@ -948,11 +852,6 @@ def main():
             bpy.context.scene.objects.active = player
             bpy.ops.object.game_property_new(name="initPos", type='STRING')
         player.game.properties['initPos'].value=str(locP)
-
-        #Inject a string property with a code that can be parsed by a controller
-        bpy.context.scene.objects.active = player
-        bpy.ops.object.game_property_new(name="numMonsters", type='INT')
-        player.game.properties['numMonsters'].value=0
 
     #Insert a background music
     if 'backgroundMusic' in args and args['backgroundMusic']:
@@ -973,9 +872,9 @@ def main():
         print('Saving blender tourist as:', outputTourFilename)
         bpy.ops.wm.save_as_mainfile(filepath=cwd+outputTourFilename, compress=True, copy=False)
 
-    """
-             Create a scape-from-here game
-    """
+    ###########################################################################
+    #        Create a get-me-outta-here game
+    ###########################################################################
     
     #Read the number of monsters in the city
     numMonsters = args.get('numMonsters', 0)
@@ -990,15 +889,12 @@ def main():
 
         if 'AI_Manager' not in bpy.data.objects:
             print("AI_Manager object not found in libraries")
-            return
-            
+            return            
         AI_Manager = bpy.data.objects['AI_Manager']
+        
         #Bring AI_Manager to layer 0
         AI_Manager.layers[0] = True        
         
-        #Set the number of monster as a game property of player
-        player.game.properties['numMonsters'].value=numMonsters
-
         #Inject a new python controller to the object, linked to an existing text
         #This is a trick so BGE can find a text object
         #http://blenderartists.org/forum/showthread.php?226148-reading-text-datablocks-via-python
@@ -1013,7 +909,7 @@ def main():
         AI_Manager.game.controllers['cg-ia.json'].text = bpy.data.texts[inputFilenameAI]
         
         AIData={}
-        print("Read AI data from: %s" % inputFilenameAI)
+        print("Read AI data from:", inputFilenameAI)
         with open(cwd+inputFilenameAI, 'r') as f:
             AIData.update(json.load(f))
             print("AIData:", [x for x in AIData]);       
@@ -1038,20 +934,12 @@ def main():
 
             #print("  + Selected vertex", maxDistVertex, "at distance", maxDistance)
             monsterVertex += [maxDistVertex]
-        print("Starting points for monsters", monsterVertex)
+        print("Starting vertex for monsters", monsterVertex)
 
         #Set the list of vertex where monsters spawn as a game property of AI
         bpy.context.scene.objects.active = AI_Manager
         bpy.ops.object.game_property_new(name="iniMonsters", type='STRING')
-        AI_Manager.game.properties['iniMonsters'].value=str(monsterVertex)
-
-        #If we have only a monster, build a list of just one element
-        if not isinstance(args['inputMonster'], list):
-            args['inputMonster'] = [args['inputMonster']]
-            
-        #Import monsters...
-        importMonsters(vertices3D, numMonsters, monsterVertex, args['inputMonster'])
-
+        AI_Manager.game.properties['iniMonsters'].value=str(monsterVertex)           
 
     # Check modified external scripts and update if necessary
     updateExternalTexts()
@@ -1064,7 +952,7 @@ def main():
         print ("Ready to run: blenderplayer", outputGameFilename);
             
     # totalTime = (datetime.now()-iniTime).total_seconds()
-    # print("Regions: %d Total Time: %s " % (len(regions), totalTime))
+    # print("Regions:", len(regions), " Total Time:" totalTime)
 
 #Call the main function
 if __name__ == '__main__':

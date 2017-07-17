@@ -1,0 +1,20 @@
+BUGS: 
+* Fix the house placing.
+
+TODO: 
+* Add temples, markets, dragons
+* Build exterior of the city
+* Study a monster watchdog that hchange token after a while to solve interlocks.
+
+SMALL TODO: 
+* Add dirt, leaves and grass to the city
+* A starry night skydome generator
+* Sound effects (monster attack, etc)
+* Clean playerBoy boyMove.py code.
+
+
+DONE:
+* Crear monstruos como edificios. Todos en capa 2 y hacer copias 
+  mediante BGE-python.
+* Hacer todos los scripts internos a ficheros blender
+* Pasar los seeds a la AI (que ahora usa la media de las regiones)

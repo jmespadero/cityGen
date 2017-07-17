@@ -241,7 +241,7 @@ class Delaunay2D:
             
         return vor_coors, regions
 
-def newVoronoiData(numSeeds=90, cityRadius=20, numBarriers=12, LloydSteps=2, gateLen=0., randomSeed=None):
+def newCityData(numSeeds=90, cityRadius=20, numBarriers=12, LloydSteps=2, gateLen=0., randomSeed=None):
     """Create a new set of regions from a voronoi diagram
     numSeeds   -- Number of seed to be used
     cityRadius -- Approximated radius of the city
@@ -696,7 +696,7 @@ def newVoronoiData(numSeeds=90, cityRadius=20, numBarriers=12, LloydSteps=2, gat
     # Assemble all information as a dict
     cityData = {
     'log': "-s %d -r %f --randomSeed %d %s" % (numSeeds, cityRadius, randomSeed, datetime.now()),
-    'barrierSeeds': barrierSeeds.tolist(),
+    'seeds': barrierSeeds.tolist(),
     'vertices': vertices.tolist(),
     'regions': vor_regions,    
     'internalRegions': internalRegions,
@@ -711,8 +711,7 @@ def newAIData(regions, vertices):
     """
 
     def distance2D(p1, p2):
-        """Distance between 2D points
-        """
+        """Euclidean distance between 2D points"""
         dx = p2[0] - p1[0]
         dy = p2[1] - p1[1]
         return sqrt(dx * dx + dy * dy)
@@ -862,34 +861,24 @@ def main():
     parser.add_argument('--randomSeed', type=int, required=False,
                         help='Initial random seed value')
     parser.add_argument('-p', '--plot', required=False,
-                        help='Replot a previous generated city (default="city.grap.json")')
+                        help='Replot a previous generated city (default="city.data.json")')
     parser.add_argument('--background', required=False, action='store_true')
     parser.add_argument('--python', required=False)
 
     args = parser.parse_args()
     # print(args)
 
-    """
-    # Create a minimal case test 
-    cityData = {}
-    cityData['cityName'] = "Minimal city"
-    cityData['barrierSeeds'] = [[-5.0, 0.0],[5.0, 5.0],[5.0, -5.0]]
-    cityData['vertices'] = [[-10.0, -10.0],[0.0, -10.0],[10.0, -10.0],[-10.0, 0.0],[0.0, 0.0],[10.0, 0.0],[-10.0, 10.0],[0.0, 10.0],[10.0, 10.0]]
-    cityData['internalRegions'] = [[0, 1, 4, 7, 6, 3], [1,2,5,4], [4,5,8,7]]
-    cityData['externalPoints'] = [0, 1, 2, 5, 8, 7, 6, 3]
-    """
-
     if not args.plot:
         # Generate a new city map
-        cityData = newVoronoiData(args.numSeeds, args.cityRadius, gateLen=args.gateLen, randomSeed=args.randomSeed)
+        cityData = newCityData(args.numSeeds, args.cityRadius, gateLen=args.gateLen, randomSeed=args.randomSeed)
         cityData['cityName'] = args.cityName
-        # Save graph data
-        graphFilename = args.cityName + '.graph.json'
-        print("Save graph data to: %s" % graphFilename)
-        with open(graphFilename, 'w') as f:
+        # Save cityData data as a json file
+        cityDataFilename = args.cityName + '.data.json'
+        print("Save graph data to:", cityDataFilename)
+        with open(cityDataFilename, 'w') as f:
             json.dump(cityData, f, indent=4, separators=(',', ':'), sort_keys=True)
     else:
-        print("Read data from file: %s" % args.plot)
+        print("Read data from file:", args.plot)
         with open(args.plot, 'r') as f:
             cityData = json.load(f)
             if 'cityName' in cityData:
@@ -900,7 +889,7 @@ def main():
     print("Computing matrixes used for AI path finding")
     AIData = newAIData(cityData['internalRegions'], cityData['vertices'])
     AIFilename = args.cityName + '.AI.json'
-    print("Save AI matrixes to: %s" % AIFilename)
+    print("Save AI matrixes to:", AIFilename)
     with open(AIFilename, 'w') as f:
         json.dump(AIData, f, separators=(',', ':'), sort_keys=True)
 

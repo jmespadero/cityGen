@@ -1,6 +1,6 @@
 {
 "cleanLayer0": true,
-"inputFilename": "city.graph.json",
+"inputFilename": "city.data.json",
 "inputFilenameAI": "city.AI.json",
 
 "inputLibraries": ["cg-library.blend"],
