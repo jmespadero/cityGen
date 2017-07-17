@@ -5,7 +5,7 @@ BUGS:
 TODO: 
 * Add temples, markets, dragons
 * Build exterior of the city
-* Study a monster watchdog that hchange token after a while to solve interlocks.
+* Study a monster watchdog that change token after a while to solve interlocks.
 
 SMALL TODO: 
 * Add dirt, leaves and grass to the city
