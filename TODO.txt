@@ -1,6 +1,5 @@
 BUGS: 
 * Fix the house placing.
-* Monster must seek player (if near)
 
 TODO: 
 * Add temples, markets, dragons
@@ -19,3 +18,4 @@ DONE:
   mediante BGE-python.
 * Hacer todos los scripts internos a ficheros blender
 * Pasar los seeds a la AI (que ahora usa la media de las regiones)
+* Monster must seek player (if near) -> Radar
