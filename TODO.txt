@@ -2,9 +2,10 @@ BUGS:
 * Fix the house placing.
 
 TODO: 
-* Add temples, markets, dragons
-* Build exterior of the city
 * Study a monster watchdog that change token after a while to solve interlocks.
+* Add temples, markets, dragons
+* Build exterior of the city -> Farms, roads, rivers, ...
+* Random houses starting from a basic model and adding door, windows, etc 
 
 SMALL TODO: 
 * Add dirt, leaves and grass to the city
@@ -18,4 +19,4 @@ DONE:
   mediante BGE-python.
 * Hacer todos los scripts internos a ficheros blender
 * Pasar los seeds a la AI (que ahora usa la media de las regiones)
-* Monster must seek player (if near) -> Radar
+* Monster must seek player (if near) -> Use a Radar sensor

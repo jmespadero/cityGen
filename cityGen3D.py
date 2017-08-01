@@ -595,6 +595,8 @@ def main():
     #print("bpy.data.use_autopack ", bpy.data.use_autopack )
     # Enable this if you need debug properties on screen
     bpy.context.scene.game_settings.show_debug_properties = True
+    #bpy.context.scene.game_settings.show_physics_visualization = True
+
 
     for a in bpy.data.screens['Default'].areas:
         if a.type == 'VIEW_3D':
