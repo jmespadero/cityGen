@@ -1,0 +1,575 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:xhtml="http://www.w3.org/1999/xhtml"
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="1018"
+   height="431"
+   version="1.1"
+   content="&lt;mxfile userAgent=&quot;Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:54.0) Gecko/20100101 Firefox/54.0&quot; version=&quot;6.8.15&quot; editor=&quot;www.draw.io&quot; type=&quot;device&quot;&gt;&lt;diagram name=&quot;Page-1&quot; id=&quot;6fb8d878-759e-a814-43a3-924822ee76bc&quot;&gt;7ZpNk6I6FIZ/jctrkQ++loradxaz6sWsI0TIbSAWpke9v34SDAqE7qarBHqqdWNyEhI4zznJS4oZCrLTU0H2yU8e0XQGreg0Q6sZhAC6WP4py/lisX37YogLFulON8Mz+59qo6Wtryyih0ZHwXkq2L5pDHme01A0bKQo+LHZbcfT5qx7ElPD8ByStLLO7Zv9F4tEou3A8W8N/1IWJ3pyDzqXhi0JX+KCv+Z6xhlEu/J3ac5INZZ+1ENCIn6smdB6hoKCc3EpZaeApsq7leOq68S5utsZWiYiS2UFyGLZvHnjYtDnYvlwBc1Ffbq3xnOsiHhbf4ehg3GEyD/wMsJvkr5WE7RnPCZM0Oc9CVX9KAOoeQul72ika1f3WKoiCv5y5aGadzwXOnyg6kFSFueyEsr7p4XqwNI04CkvyrnRZr2CwL0OVbXkPJdDLEOesVDPFafkcNBl0yvaj79pIeipZtJeeqI8o6I4yy66FQEdHzojsKXrx1t0QU+zTWqBhZE2Eh3T8XXsGxdZ0Gh6YkIGpoCJ8xPN4crgJZ9QNBF1Oq/uaW0yaCh/MZlmC92QsShS0yy7YuIWCFY7EOrYXV2vUbbKX9VPPwm4C0XYpAh7UnSGgIgNiPuzSHg+U0krg9bKX7P9+W/jab3DcwCEbl+E/hAInY+Xy5SVvm+ufa1l+xOp8u4KqTk34+HeAFArh7wOALgDABgCgPsA4HZtRaMB8AwAUtTtWDz/76BWshYLOZjUgG+tMP2ANEE6TUTA6aEilpslXvhdnDblb9gVDOKmlLCxa/ADGHfwA/YAAP2PM6i+1dRJROSQXBn131zkGHs1cnaK1evH/KL44VzNyA40Wqi6Gl45yJorouWrCVbT5FyEpXq0FSUq5biaTHbDZtS8KzffVJGtYJHSH4bhfdBjAJroqxetOnprLP0Beiyek4p9J1iW+dyJ6Q44HMtvbmWW3U9LDCPqgbmWalWPHqr+MxhhT4zDZJW5oLZk/fYh6j8g6PYlOIior45ovpOodGArh7wOAqOJyuv9f2MCbtdmNB4B8yAwlHvRigiilb2TqgVrW8hSrEqLH7XGLyn7g83C94KpZL/d4mtj87UN2F18B5H90DxCNLA9dP+ddL/jt9i7yGQ/mu6H5sGjgX5K3b9eBbjEPJTu9y3U3Oym1f2V2GnrfpLRv00njin7DYqTyn5oHgU/ZP8nCU4s+7/hWbIPWzk0rew3D0C+HYGJZb95eKFkf/mFyHyb0jwygHwNbb/a+GvX6oI1hrb3WhBtbEIcUdujHgcYD22vtL282YjRW1zcUWP6rZCYVPIjU52EWmJ+6bReb3xko6nSGgDLGy+vZfX22VjZVvs6D63/AA==&lt;/diagram&gt;&lt;/mxfile&gt;"
+   id="svg2"
+   inkscape:version="0.91 r"
+   sodipodi:docname="architecture2.svg"
+   inkscape:export-filename="/home/jespa/proyectos/2014.cityGen/cityGen/doc/architecture1.png"
+   inkscape:export-xdpi="90"
+   inkscape:export-ydpi="90">
+  <metadata
+     id="metadata102">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <sodipodi:namedview
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1"
+     objecttolerance="10"
+     gridtolerance="10"
+     guidetolerance="10"
+     inkscape:pageopacity="0"
+     inkscape:pageshadow="2"
+     inkscape:window-width="1698"
+     inkscape:window-height="949"
+     id="namedview100"
+     showgrid="false"
+     inkscape:zoom="0.90028971"
+     inkscape:cx="587.70707"
+     inkscape:cy="215.5"
+     inkscape:window-x="1"
+     inkscape:window-y="0"
+     inkscape:window-maximized="0"
+     inkscape:current-layer="svg2"
+     fit-margin-top="0"
+     fit-margin-left="0"
+     fit-margin-right="0"
+     fit-margin-bottom="0" />
+  <defs
+     id="defs4" />
+  <rect
+     style="fill:#fed217;stroke:none"
+     id="rect8"
+     pointer-events="none"
+     ry="42"
+     rx="42"
+     height="430"
+     width="280"
+     y="1"
+     x="73" />
+  <g
+     id="g10"
+     transform="translate(138.5,35.5)">
+    <switch
+       id="switch12">
+      <foreignObject
+         requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility"
+         height="30"
+         width="140"
+         pointer-events="all"
+         style="overflow:visible;">
+        <xhtml:div
+           style="display: inline-block; font-size: 27px; font-family: Helvetica; color: rgb(0, 0, 0); line-height: 1.2; vertical-align: top; width: 141px; white-space: nowrap; overflow-wrap: normal; font-weight: bold; text-align: center;">
+          <xhtml:div
+             style="display:inline-block;text-align:inherit;text-decoration:inherit;">CityGen2D</xhtml:div>
+        </xhtml:div>
+      </foreignObject>
+      <text
+         style="font-weight:bold;font-size:27px;font-family:Helvetica;text-anchor:middle;fill:#000000"
+         id="text14"
+         font-weight="bold"
+         font-size="27px"
+         y="29"
+         x="70">CityGen2D</text>
+    </switch>
+  </g>
+  <g
+     id="g16"
+     transform="translate(136.5,354.5)">
+    <switch
+       id="switch18">
+      <foreignObject
+         requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility"
+         height="22"
+         width="144"
+         pointer-events="all"
+         style="overflow:visible;">
+        <xhtml:div
+           style="display: inline-block; font-size: 20px; font-family: Helvetica; color: rgb(0, 0, 0); line-height: 1.2; vertical-align: top; width: 145px; white-space: nowrap; overflow-wrap: normal; text-align: center;">
+          <xhtml:div
+             style="display:inline-block;text-align:inherit;text-decoration:inherit;">python + numpy</xhtml:div>
+        </xhtml:div>
+      </foreignObject>
+      <text
+         style="font-size:20px;font-family:Helvetica;text-anchor:middle;fill:#000000"
+         id="text20"
+         font-size="20px"
+         y="21"
+         x="72">python + numpy</text>
+    </switch>
+  </g>
+  <path
+     style="fill:none;stroke:#000000;stroke-width:2;stroke-miterlimit:10"
+     inkscape:connector-curvature="0"
+     id="path22"
+     pointer-events="none"
+     stroke-miterlimit="10"
+     d="m 89,86 240,0" />
+  <path
+     style="fill:none;stroke:#000000;stroke-width:2;stroke-miterlimit:10"
+     inkscape:connector-curvature="0"
+     id="path24"
+     pointer-events="none"
+     stroke-miterlimit="10"
+     d="m 89,306 240,0" />
+  <ellipse
+     style="fill:#bfb4a9;stroke:#ffffff;stroke-width:6"
+     id="ellipse26"
+     pointer-events="none"
+     ry="57.5"
+     rx="72"
+     cy="200"
+     cx="75" />
+  <g
+     id="g28"
+     transform="translate(35.5,190.5)">
+    <switch
+       id="switch30">
+      <foreignObject
+         requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility"
+         height="17"
+         width="77"
+         pointer-events="all"
+         style="overflow:visible;">
+        <xhtml:div
+           style="display: inline-block; font-size: 16px; font-family: Helvetica; color: rgb(0, 0, 0); line-height: 1.2; vertical-align: top; width: 78px; white-space: nowrap; overflow-wrap: normal; text-align: center;">
+          <xhtml:div
+             style="display:inline-block;text-align:inherit;text-decoration:inherit;">config.json</xhtml:div>
+        </xhtml:div>
+      </foreignObject>
+      <text
+         style="font-size:16px;font-family:Helvetica;text-anchor:middle;fill:#000000"
+         id="text32"
+         font-size="16px"
+         y="17"
+         x="39">config.json</text>
+    </switch>
+  </g>
+  <path
+     style="fill:#fff2cc;stroke:none"
+     inkscape:connector-curvature="0"
+     id="path34"
+     pointer-events="none"
+     d="m 239.08823,129.90534 60,6 -10,-18 50,30 -50,30 10,-18 -60,6 15,-18 z" />
+  <rect
+     style="fill:#f6cb16;stroke:none"
+     id="rect36"
+     pointer-events="none"
+     ry="42"
+     rx="42"
+     height="430"
+     width="280"
+     y="0"
+     x="466" />
+  <g
+     id="g38"
+     transform="translate(607.5,34.5)">
+    <switch
+       id="switch40">
+      <foreignObject
+         requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility"
+         height="30"
+         width="140"
+         pointer-events="all"
+         style="overflow:visible;">
+        <xhtml:div
+           style="display: inline-block; font-size: 27px; font-family: Helvetica; color: rgb(0, 0, 0); line-height: 1.2; vertical-align: top; width: 141px; white-space: nowrap; overflow-wrap: normal; font-weight: bold; text-align: center;">
+          <xhtml:div
+             style="display:inline-block;text-align:inherit;text-decoration:inherit;">CityGen3D</xhtml:div>
+        </xhtml:div>
+      </foreignObject>
+      <text
+         style="font-weight:bold;font-size:27px;font-family:Helvetica;text-anchor:middle;fill:#000000"
+         id="text42"
+         font-weight="bold"
+         font-size="27px"
+         y="29"
+         x="70">CityGen3D</text>
+    </switch>
+  </g>
+  <g
+     id="g44"
+     transform="translate(619.5,353.5)">
+    <switch
+       id="switch46">
+      <foreignObject
+         requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility"
+         height="22"
+         width="116"
+         pointer-events="all"
+         style="overflow:visible;">
+        <xhtml:div
+           style="display: inline-block; font-size: 20px; font-family: Helvetica; color: rgb(0, 0, 0); line-height: 1.2; vertical-align: top; width: 117px; white-space: nowrap; overflow-wrap: normal; text-align: center;">
+          <xhtml:div
+             style="display:inline-block;text-align:inherit;text-decoration:inherit;">python + bpy</xhtml:div>
+        </xhtml:div>
+      </foreignObject>
+      <text
+         style="font-size:20px;font-family:Helvetica;text-anchor:middle;fill:#000000"
+         id="text48"
+         font-size="20px"
+         y="21"
+         x="58">python + bpy</text>
+    </switch>
+  </g>
+  <path
+     style="fill:none;stroke:#000000;stroke-width:2;stroke-miterlimit:10"
+     inkscape:connector-curvature="0"
+     id="path50"
+     pointer-events="none"
+     stroke-miterlimit="10"
+     d="m 486,85 240,0" />
+  <path
+     style="fill:none;stroke:#000000;stroke-width:2;stroke-miterlimit:10"
+     inkscape:connector-curvature="0"
+     id="path52"
+     pointer-events="none"
+     stroke-miterlimit="10"
+     d="m 486,305 240,0" />
+  <ellipse
+     style="fill:#cfa98c;stroke:#ffffff;stroke-width:5.26064014"
+     id="ellipse54"
+     pointer-events="none"
+     ry="43.98526"
+     rx="75.369682"
+     cy="147.77689"
+     cx="431" />
+  <g
+     id="g56"
+     transform="translate(384.5,117.5)">
+    <switch
+       id="switch58">
+      <foreignObject
+         requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility"
+         height="36"
+         width="92"
+         pointer-events="all"
+         style="overflow:visible;">
+        <xhtml:div
+           style="display: inline-block; font-size: 16px; font-family: Helvetica; color: rgb(0, 0, 0); line-height: 1.2; vertical-align: top; width: 93px; white-space: nowrap; overflow-wrap: normal; text-align: center;">
+          <xhtml:div
+             style="display:inline-block;text-align:inherit;text-decoration:inherit;">cityData.json<xhtml:br />
+
+
+
+
+
+
+
+AIData.json</xhtml:div>
+        </xhtml:div>
+      </foreignObject>
+      <text
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:16px;line-height:125%;font-family:Helvetica;-inkscape-font-specification:'Helvetica, Normal';text-align:center;writing-mode:lr-tb;text-anchor:middle;fill:#000000"
+         id="text60"
+         font-size="16px"
+         y="26"
+         x="46"
+         sodipodi:linespacing="125%">
+        <tspan
+           sodipodi:role="line"
+           id="tspan4196"
+           x="46"
+           y="26">cityData.json</tspan>
+        <tspan
+           sodipodi:role="line"
+           id="tspan4198"
+           x="46"
+           y="46">city.AI.json</tspan>
+      </text>
+      <text
+         style="font-size:16px;font-family:Helvetica;text-anchor:middle;fill:#000000"
+         font-size="16px"
+         y="26"
+         x="46"
+         id="text4276">+AIData.json</text>
+    </switch>
+  </g>
+  <path
+     style="fill:#fff2cc;stroke:none"
+     inkscape:connector-curvature="0"
+     id="path62"
+     pointer-events="none"
+     d="m 628,132 60,6 -10,-18 50,30 -50,30 10,-18 -60,6 15,-18 z" />
+  <rect
+     style="fill:#edc415;stroke:none"
+     id="rect64"
+     pointer-events="none"
+     ry="42"
+     rx="42"
+     height="430"
+     width="280"
+     y="0"
+     x="832" />
+  <g
+     id="g66"
+     transform="translate(908.5,34.5)">
+    <switch
+       id="switch68">
+      <foreignObject
+         requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility"
+         height="30"
+         width="127"
+         pointer-events="all"
+         style="overflow:visible;">
+        <xhtml:div
+           style="display: inline-block; font-size: 27px; font-family: Helvetica; color: rgb(0, 0, 0); line-height: 1.2; vertical-align: top; width: 128px; white-space: nowrap; overflow-wrap: normal; font-weight: bold; text-align: center;">
+          <xhtml:div
+             style="display:inline-block;text-align:inherit;text-decoration:inherit;">CityGame</xhtml:div>
+        </xhtml:div>
+      </foreignObject>
+      <text
+         style="font-weight:bold;font-size:27px;font-family:Helvetica;text-anchor:middle;fill:#000000"
+         id="text70"
+         font-weight="bold"
+         font-size="27px"
+         y="29"
+         x="64">CityGame</text>
+    </switch>
+  </g>
+  <g
+     id="g72"
+     transform="translate(913.5,353.5)">
+    <switch
+       id="switch74">
+      <foreignObject
+         requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility"
+         height="22"
+         width="116"
+         pointer-events="all"
+         style="overflow:visible;">
+        <xhtml:div
+           style="display: inline-block; font-size: 20px; font-family: Helvetica; color: rgb(0, 0, 0); line-height: 1.2; vertical-align: top; width: 117px; white-space: nowrap; overflow-wrap: normal; text-align: center;">
+          <xhtml:div
+             style="display:inline-block;text-align:inherit;text-decoration:inherit;">python + bpy</xhtml:div>
+        </xhtml:div>
+      </foreignObject>
+      <text
+         style="font-size:20px;font-family:Helvetica;text-anchor:middle;fill:#000000"
+         id="text76"
+         font-size="20px"
+         y="21"
+         x="58">python + bpy</text>
+    </switch>
+  </g>
+  <path
+     style="fill:none;stroke:#000000;stroke-width:2;stroke-miterlimit:10"
+     inkscape:connector-curvature="0"
+     id="path78"
+     pointer-events="none"
+     stroke-miterlimit="10"
+     d="m 852,85 240,0" />
+  <path
+     style="fill:none;stroke:#000000;stroke-width:2;stroke-miterlimit:10"
+     inkscape:connector-curvature="0"
+     id="path80"
+     pointer-events="none"
+     stroke-miterlimit="10"
+     d="m 852,305 240,0" />
+  <ellipse
+     style="fill:#df9e70;stroke:#ffffff;stroke-width:5.00038815"
+     id="ellipse82"
+     pointer-events="none"
+     ry="39.672375"
+     rx="75.499802"
+     cy="152.77689"
+     cx="827" />
+  <g
+     id="g84"
+     transform="translate(772.5,142.5)">
+    <switch
+       id="switch86">
+      <foreignObject
+         requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility"
+         height="17"
+         width="112"
+         pointer-events="all"
+         style="overflow:visible;">
+        <xhtml:div
+           style="display: inline-block; font-size: 16px; font-family: Helvetica; color: rgb(0, 0, 0); line-height: 1.2; vertical-align: top; width: 113px; white-space: nowrap; overflow-wrap: normal; text-align: center;">
+          <xhtml:div
+             style="display:inline-block;text-align:inherit;text-decoration:inherit;">cityModel.blend</xhtml:div>
+        </xhtml:div>
+      </foreignObject>
+      <text
+         style="font-size:16px;font-family:Helvetica;text-anchor:middle;fill:#000000"
+         id="text88"
+         font-size="16px"
+         y="17"
+         x="56">cityModel.blend</text>
+    </switch>
+  </g>
+  <path
+     style="fill:#fff2cc;stroke:none"
+     inkscape:connector-curvature="0"
+     id="path90"
+     pointer-events="none"
+     d="m 922,180 60,6 -10,-18 50,30 -50,30 10,-18 -60,6 15,-18 z" />
+  <ellipse
+     style="fill:#ef9353;stroke:#ffffff;stroke-width:6"
+     id="ellipse92"
+     pointer-events="none"
+     ry="57.5"
+     rx="75"
+     cy="198"
+     cx="1112" />
+  <g
+     id="g94"
+     transform="translate(1055.5,188.5)">
+    <switch
+       id="switch96">
+      <foreignObject
+         requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility"
+         height="17"
+         width="111"
+         pointer-events="all"
+         style="overflow:visible;">
+        <xhtml:div
+           style="display: inline-block; font-size: 16px; font-family: Helvetica; color: rgb(0, 0, 0); line-height: 1.2; vertical-align: top; width: 112px; white-space: nowrap; overflow-wrap: normal; text-align: center;">
+          <xhtml:div
+             style="display:inline-block;text-align:inherit;text-decoration:inherit;">cityGame.blend</xhtml:div>
+        </xhtml:div>
+      </foreignObject>
+      <text
+         style="font-size:16px;font-family:Helvetica;text-anchor:middle;fill:#000000"
+         id="text98"
+         font-size="16px"
+         y="17"
+         x="56">cityGame.blend</text>
+    </switch>
+  </g>
+  <flowRoot
+     xml:space="preserve"
+     id="flowRoot4278"
+     style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:7.5px;line-height:100%;font-family:Sans;-inkscape-font-specification:'Sans, Normal';text-align:center;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+     transform="translate(-0.5,-0.5)"><flowRegion
+       id="flowRegion4280"><rect
+         id="rect4282"
+         width="5.1282053"
+         height="30.76923"
+         x="402.56412"
+         y="211.48718" /></flowRegion><flowPara
+       id="flowPara4284" /></flowRoot>  <flowRoot
+     xml:space="preserve"
+     id="flowRoot4183"
+     style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:7.5px;line-height:100%;font-family:Sans;-inkscape-font-specification:'Sans, Normal';text-align:center;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+     transform="translate(-0.5,-0.5)"><flowRegion
+       id="flowRegion4185"><rect
+         id="rect4187"
+         width="184.61539"
+         height="283.33334"
+         x="-289.74359"
+         y="-78.256409" /></flowRegion><flowPara
+       id="flowPara4189" /></flowRoot>  <ellipse
+     style="fill:#cfa98c;stroke:#ffffff;stroke-width:5.26064014"
+     id="ellipse54-3"
+     pointer-events="none"
+     ry="43.98526"
+     rx="75.369682"
+     cy="250.19121"
+     cx="432.53259" />
+  <g
+     id="g56-6"
+     transform="translate(386.03259,221.91432)">
+    <switch
+       id="switch58-7">
+      <foreignObject
+         requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility"
+         height="36"
+         width="92"
+         pointer-events="all"
+         style="overflow:visible;">
+        <xhtml:div
+           style="display: inline-block; font-size: 16px; font-family: Helvetica; color: rgb(0, 0, 0); line-height: 1.2; vertical-align: top; width: 93px; white-space: nowrap; overflow-wrap: normal; text-align: center;">
+          <xhtml:div
+             style="display:inline-block;text-align:inherit;text-decoration:inherit;">cityData.json<xhtml:br />
+
+
+
+
+
+
+
+
+AIData.json</xhtml:div>
+        </xhtml:div>
+      </foreignObject>
+      <text
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:16px;line-height:125%;font-family:Helvetica;-inkscape-font-specification:'Helvetica, Normal';text-align:center;writing-mode:lr-tb;text-anchor:middle;fill:#000000"
+         id="text60-5"
+         font-size="16px"
+         y="26"
+         x="46"
+         sodipodi:linespacing="125%">
+        <tspan
+           sodipodi:role="line"
+           id="tspan4198-5"
+           x="46"
+           y="26">cg-library</tspan>
+        <tspan
+           sodipodi:role="line"
+           x="46"
+           y="46"
+           id="tspan4248">cg-skyDome</tspan>
+      </text>
+      <text
+         style="font-size:16px;font-family:Helvetica;text-anchor:middle;fill:#000000"
+         font-size="16px"
+         y="26"
+         x="46"
+         id="text4276-6">+AIData.json</text>
+    </switch>
+  </g>
+  <ellipse
+     style="fill:#df9e70;stroke:#ffffff;stroke-width:5.00038815"
+     id="ellipse82-2"
+     pointer-events="none"
+     ry="39.672375"
+     rx="75.499802"
+     cy="245.50415"
+     cx="826.62537" />
+  <g
+     id="g84-9"
+     transform="translate(772.12538,235.22727)">
+    <switch
+       id="switch86-1">
+      <foreignObject
+         requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility"
+         height="17"
+         width="112"
+         pointer-events="all"
+         style="overflow:visible;">
+        <xhtml:div
+           style="display: inline-block; font-size: 16px; font-family: Helvetica; color: rgb(0, 0, 0); line-height: 1.2; vertical-align: top; width: 113px; white-space: nowrap; overflow-wrap: normal; text-align: center;">
+          <xhtml:div
+             style="display:inline-block;text-align:inherit;text-decoration:inherit;">cityModel.blend</xhtml:div>
+        </xhtml:div>
+      </foreignObject>
+      <text
+         style="font-size:16px;font-family:Helvetica;text-anchor:middle;fill:#000000"
+         id="text88-2"
+         font-size="16px"
+         y="17"
+         x="56">cg-monsters.blend</text>
+    </switch>
+  </g>
+</svg>
