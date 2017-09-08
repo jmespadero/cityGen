@@ -1,5 +1,5 @@
 
-# cityGen 
+# cityGen
 ## An automatic generator for medieval scenes and games
 
 ![](demos/cityGameDemo.jpg)
