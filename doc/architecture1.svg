@@ -13,7 +13,7 @@
    version="1.1"
    content="&lt;mxfile userAgent=&quot;Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:54.0) Gecko/20100101 Firefox/54.0&quot; version=&quot;6.8.15&quot; editor=&quot;www.draw.io&quot; type=&quot;device&quot;&gt;&lt;diagram name=&quot;Page-1&quot; id=&quot;6fb8d878-759e-a814-43a3-924822ee76bc&quot;&gt;7ZpNk6I6FIZ/jctrkQ++loradxaz6sWsI0TIbSAWpke9v34SDAqE7qarBHqqdWNyEhI4zznJS4oZCrLTU0H2yU8e0XQGreg0Q6sZhAC6WP4py/lisX37YogLFulON8Mz+59qo6Wtryyih0ZHwXkq2L5pDHme01A0bKQo+LHZbcfT5qx7ElPD8ByStLLO7Zv9F4tEou3A8W8N/1IWJ3pyDzqXhi0JX+KCv+Z6xhlEu/J3ac5INZZ+1ENCIn6smdB6hoKCc3EpZaeApsq7leOq68S5utsZWiYiS2UFyGLZvHnjYtDnYvlwBc1Ffbq3xnOsiHhbf4ehg3GEyD/wMsJvkr5WE7RnPCZM0Oc9CVX9KAOoeQul72ika1f3WKoiCv5y5aGadzwXOnyg6kFSFueyEsr7p4XqwNI04CkvyrnRZr2CwL0OVbXkPJdDLEOesVDPFafkcNBl0yvaj79pIeipZtJeeqI8o6I4yy66FQEdHzojsKXrx1t0QU+zTWqBhZE2Eh3T8XXsGxdZ0Gh6YkIGpoCJ8xPN4crgJZ9QNBF1Oq/uaW0yaCh/MZlmC92QsShS0yy7YuIWCFY7EOrYXV2vUbbKX9VPPwm4C0XYpAh7UnSGgIgNiPuzSHg+U0krg9bKX7P9+W/jab3DcwCEbl+E/hAInY+Xy5SVvm+ufa1l+xOp8u4KqTk34+HeAFArh7wOALgDABgCgPsA4HZtRaMB8AwAUtTtWDz/76BWshYLOZjUgG+tMP2ANEE6TUTA6aEilpslXvhdnDblb9gVDOKmlLCxa/ADGHfwA/YAAP2PM6i+1dRJROSQXBn131zkGHs1cnaK1evH/KL44VzNyA40Wqi6Gl45yJorouWrCVbT5FyEpXq0FSUq5biaTHbDZtS8KzffVJGtYJHSH4bhfdBjAJroqxetOnprLP0Beiyek4p9J1iW+dyJ6Q44HMtvbmWW3U9LDCPqgbmWalWPHqr+MxhhT4zDZJW5oLZk/fYh6j8g6PYlOIior45ovpOodGArh7wOAqOJyuv9f2MCbtdmNB4B8yAwlHvRigiilb2TqgVrW8hSrEqLH7XGLyn7g83C94KpZL/d4mtj87UN2F18B5H90DxCNLA9dP+ddL/jt9i7yGQ/mu6H5sGjgX5K3b9eBbjEPJTu9y3U3Oym1f2V2GnrfpLRv00njin7DYqTyn5oHgU/ZP8nCU4s+7/hWbIPWzk0rew3D0C+HYGJZb95eKFkf/mFyHyb0jwygHwNbb/a+GvX6oI1hrb3WhBtbEIcUdujHgcYD22vtL282YjRW1zcUWP6rZCYVPIjU52EWmJ+6bReb3xko6nSGgDLGy+vZfX22VjZVvs6D63/AA==&lt;/diagram&gt;&lt;/mxfile&gt;"
    id="svg2"
-   inkscape:version="0.91 r"
+   inkscape:version="0.48.4 r9939"
    sodipodi:docname="architecture1.svg"
    inkscape:export-filename="/home/jespa/proyectos/2014.cityGen/cityGen/doc/architecture1.png"
    inkscape:export-xdpi="90"
@@ -39,15 +39,15 @@
      guidetolerance="10"
      inkscape:pageopacity="0"
      inkscape:pageshadow="2"
-     inkscape:window-width="1698"
+     inkscape:window-width="1280"
      inkscape:window-height="949"
      id="namedview100"
      showgrid="false"
      inkscape:zoom="0.90028971"
      inkscape:cx="464.25598"
      inkscape:cy="215.5"
-     inkscape:window-x="1"
-     inkscape:window-y="0"
+     inkscape:window-x="0"
+     inkscape:window-y="24"
      inkscape:window-maximized="0"
      inkscape:current-layer="svg2"
      fit-margin-top="0"
@@ -76,7 +76,8 @@
          height="30"
          width="140"
          pointer-events="all"
-         style="overflow:visible;">
+         style="overflow:visible;"
+         id="foreignObject9">
         <xhtml:div
            style="display: inline-block; font-size: 27px; font-family: Helvetica; color: rgb(0, 0, 0); line-height: 1.2; vertical-align: top; width: 141px; white-space: nowrap; overflow-wrap: normal; font-weight: bold; text-align: center;">
           <xhtml:div
@@ -102,7 +103,8 @@
          height="22"
          width="144"
          pointer-events="all"
-         style="overflow:visible;">
+         style="overflow:visible;"
+         id="foreignObject14">
         <xhtml:div
            style="display: inline-block; font-size: 20px; font-family: Helvetica; color: rgb(0, 0, 0); line-height: 1.2; vertical-align: top; width: 145px; white-space: nowrap; overflow-wrap: normal; text-align: center;">
           <xhtml:div
@@ -130,7 +132,7 @@
      id="path24"
      pointer-events="none"
      stroke-miterlimit="10"
-     d="m 89,306 240,0" />
+     d="m 89,332 240,0" />
   <ellipse
      style="fill:#bfb4a9;stroke:#ffffff;stroke-width:6"
      id="ellipse26"
@@ -138,10 +140,15 @@
      ry="57.5"
      rx="72"
      cy="200"
-     cx="75" />
+     cx="75"
+     sodipodi:cx="75"
+     sodipodi:cy="200"
+     sodipodi:rx="72"
+     sodipodi:ry="57.5"
+     transform="translate(0,52)" />
   <g
      id="g28"
-     transform="translate(35.5,190.5)">
+     transform="translate(35.5,242.5)">
     <switch
        id="switch30">
       <foreignObject
@@ -149,7 +156,7 @@
          height="17"
          width="77"
          pointer-events="all"
-         style="overflow:visible;">
+         id="foreignObject22">
         <xhtml:div
            style="display: inline-block; font-size: 16px; font-family: Helvetica; color: rgb(0, 0, 0); line-height: 1.2; vertical-align: top; width: 78px; white-space: nowrap; overflow-wrap: normal; text-align: center;">
           <xhtml:div
@@ -157,7 +164,7 @@
         </xhtml:div>
       </foreignObject>
       <text
-         style="font-size:16px;font-family:Helvetica;text-anchor:middle;fill:#000000"
+         style="font-size:16px;text-anchor:middle;fill:#000000;font-family:Helvetica"
          id="text32"
          font-size="16px"
          y="17"
@@ -169,7 +176,7 @@
      inkscape:connector-curvature="0"
      id="path34"
      pointer-events="none"
-     d="m 168,181 60,6 -10,-18 50,30 -50,30 10,-18 -60,6 15,-18 z" />
+     d="m 168,233 60,6 -10,-18 50,30 -50,30 10,-18 -60,6 15,-18 z" />
   <rect
      style="fill:#f6cb16;stroke:none"
      id="rect36"
@@ -190,7 +197,8 @@
          height="30"
          width="140"
          pointer-events="all"
-         style="overflow:visible;">
+         style="overflow:visible;"
+         id="foreignObject29">
         <xhtml:div
            style="display: inline-block; font-size: 27px; font-family: Helvetica; color: rgb(0, 0, 0); line-height: 1.2; vertical-align: top; width: 141px; white-space: nowrap; overflow-wrap: normal; font-weight: bold; text-align: center;">
           <xhtml:div
@@ -216,7 +224,8 @@
          height="22"
          width="116"
          pointer-events="all"
-         style="overflow:visible;">
+         style="overflow:visible;"
+         id="foreignObject34">
         <xhtml:div
            style="display: inline-block; font-size: 20px; font-family: Helvetica; color: rgb(0, 0, 0); line-height: 1.2; vertical-align: top; width: 117px; white-space: nowrap; overflow-wrap: normal; text-align: center;">
           <xhtml:div
@@ -244,7 +253,7 @@
      id="path52"
      pointer-events="none"
      stroke-miterlimit="10"
-     d="m 386,305 240,0" />
+     d="m 386,331 240,0" />
   <ellipse
      style="fill:#cfa98c;stroke:#ffffff;stroke-width:6"
      id="ellipse54"
@@ -252,10 +261,15 @@
      ry="57.5"
      rx="75"
      cy="199"
-     cx="361" />
+     cx="361"
+     sodipodi:cx="361"
+     sodipodi:cy="199"
+     sodipodi:rx="75"
+     sodipodi:ry="57.5"
+     transform="translate(0,52)" />
   <g
      id="g56"
-     transform="translate(314.5,171.5)">
+     transform="translate(314.5,223.5)">
     <switch
        id="switch58">
       <foreignObject
@@ -263,7 +277,7 @@
          height="36"
          width="92"
          pointer-events="all"
-         style="overflow:visible;">
+         id="foreignObject42">
         <xhtml:div
            style="display: inline-block; font-size: 16px; font-family: Helvetica; color: rgb(0, 0, 0); line-height: 1.2; vertical-align: top; width: 93px; white-space: nowrap; overflow-wrap: normal; text-align: center;">
           <xhtml:div
@@ -274,11 +288,12 @@
 
 
 
+
 AIData.json</xhtml:div>
         </xhtml:div>
       </foreignObject>
       <text
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:16px;line-height:125%;font-family:Helvetica;-inkscape-font-specification:'Helvetica, Normal';text-align:center;writing-mode:lr-tb;text-anchor:middle;fill:#000000"
+         style="font-size:16px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:center;line-height:125%;writing-mode:lr-tb;text-anchor:middle;fill:#000000;font-family:Helvetica;-inkscape-font-specification:'Helvetica, Normal'"
          id="text60"
          font-size="16px"
          y="26"
@@ -296,7 +311,7 @@ AIData.json</xhtml:div>
            y="46">city.AI.json</tspan>
       </text>
       <text
-         style="font-size:16px;font-family:Helvetica;text-anchor:middle;fill:#000000"
+         style="font-size:16px;text-anchor:middle;fill:#000000;font-family:Helvetica"
          font-size="16px"
          y="26"
          x="46"
@@ -308,7 +323,7 @@ AIData.json</xhtml:div>
      inkscape:connector-curvature="0"
      id="path62"
      pointer-events="none"
-     d="m 456,180 60,6 -10,-18 50,30 -50,30 10,-18 -60,6 15,-18 z" />
+     d="m 456,232 60,6 -10,-18 50,30 -50,30 10,-18 -60,6 15,-18 z" />
   <rect
      style="fill:#edc415;stroke:none"
      id="rect64"
@@ -329,7 +344,8 @@ AIData.json</xhtml:div>
          height="30"
          width="127"
          pointer-events="all"
-         style="overflow:visible;">
+         style="overflow:visible;"
+         id="foreignObject52">
         <xhtml:div
            style="display: inline-block; font-size: 27px; font-family: Helvetica; color: rgb(0, 0, 0); line-height: 1.2; vertical-align: top; width: 128px; white-space: nowrap; overflow-wrap: normal; font-weight: bold; text-align: center;">
           <xhtml:div
@@ -355,7 +371,8 @@ AIData.json</xhtml:div>
          height="22"
          width="116"
          pointer-events="all"
-         style="overflow:visible;">
+         style="overflow:visible;"
+         id="foreignObject57">
         <xhtml:div
            style="display: inline-block; font-size: 20px; font-family: Helvetica; color: rgb(0, 0, 0); line-height: 1.2; vertical-align: top; width: 117px; white-space: nowrap; overflow-wrap: normal; text-align: center;">
           <xhtml:div
@@ -383,7 +400,7 @@ AIData.json</xhtml:div>
      id="path80"
      pointer-events="none"
      stroke-miterlimit="10"
-     d="m 680,305 240,0" />
+     d="m 680,331 240,0" />
   <ellipse
      style="fill:#df9e70;stroke:#ffffff;stroke-width:6"
      id="ellipse82"
@@ -391,10 +408,15 @@ AIData.json</xhtml:div>
      ry="57.5"
      rx="75"
      cy="198"
-     cx="655" />
+     cx="655"
+     sodipodi:cx="655"
+     sodipodi:cy="198"
+     sodipodi:rx="75"
+     sodipodi:ry="57.5"
+     transform="translate(0,52)" />
   <g
      id="g84"
-     transform="translate(598.5,188.5)">
+     transform="translate(598.5,240.5)">
     <switch
        id="switch86">
       <foreignObject
@@ -402,7 +424,7 @@ AIData.json</xhtml:div>
          height="17"
          width="112"
          pointer-events="all"
-         style="overflow:visible;">
+         id="foreignObject65">
         <xhtml:div
            style="display: inline-block; font-size: 16px; font-family: Helvetica; color: rgb(0, 0, 0); line-height: 1.2; vertical-align: top; width: 113px; white-space: nowrap; overflow-wrap: normal; text-align: center;">
           <xhtml:div
@@ -410,7 +432,7 @@ AIData.json</xhtml:div>
         </xhtml:div>
       </foreignObject>
       <text
-         style="font-size:16px;font-family:Helvetica;text-anchor:middle;fill:#000000"
+         style="font-size:16px;text-anchor:middle;fill:#000000;font-family:Helvetica"
          id="text88"
          font-size="16px"
          y="17"
@@ -422,7 +444,7 @@ AIData.json</xhtml:div>
      inkscape:connector-curvature="0"
      id="path90"
      pointer-events="none"
-     d="m 750,180 60,6 -10,-18 50,30 -50,30 10,-18 -60,6 15,-18 z" />
+     d="m 750,232 60,6 -10,-18 50,30 -50,30 10,-18 -60,6 15,-18 z" />
   <ellipse
      style="fill:#ef9353;stroke:#ffffff;stroke-width:6"
      id="ellipse92"
@@ -430,10 +452,15 @@ AIData.json</xhtml:div>
      ry="57.5"
      rx="75"
      cy="198"
-     cx="940" />
+     cx="940"
+     sodipodi:cx="940"
+     sodipodi:cy="198"
+     sodipodi:rx="75"
+     sodipodi:ry="57.5"
+     transform="translate(0,52)" />
   <g
      id="g94"
-     transform="translate(883.5,188.5)">
+     transform="translate(883.5,240.5)">
     <switch
        id="switch96">
       <foreignObject
@@ -441,7 +468,7 @@ AIData.json</xhtml:div>
          height="17"
          width="111"
          pointer-events="all"
-         style="overflow:visible;">
+         id="foreignObject72">
         <xhtml:div
            style="display: inline-block; font-size: 16px; font-family: Helvetica; color: rgb(0, 0, 0); line-height: 1.2; vertical-align: top; width: 112px; white-space: nowrap; overflow-wrap: normal; text-align: center;">
           <xhtml:div
@@ -449,7 +476,7 @@ AIData.json</xhtml:div>
         </xhtml:div>
       </foreignObject>
       <text
-         style="font-size:16px;font-family:Helvetica;text-anchor:middle;fill:#000000"
+         style="font-size:16px;text-anchor:middle;fill:#000000;font-family:Helvetica"
          id="text98"
          font-size="16px"
          y="17"
@@ -478,4 +505,54 @@ AIData.json</xhtml:div>
          height="283.33334"
          x="-289.74359"
          y="-78.256409" /></flowRegion><flowPara
-       id="flowPara4189" /></flowRoot></svg>
+       id="flowPara4189" /></flowRoot>  <flowRoot
+     xml:space="preserve"
+     id="flowRoot3066"
+     style="font-size:24px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-indent:0;text-align:center;text-decoration:none;line-height:125%;letter-spacing:0px;word-spacing:0px;text-transform:none;direction:ltr;block-progression:tb;writing-mode:lr-tb;text-anchor:middle;baseline-shift:baseline;color:#000000;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1px;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate;font-family:Ubuntu;-inkscape-font-specification:Ubuntu"><flowRegion
+       id="flowRegion3068"><rect
+         id="rect3070"
+         width="237.70126"
+         height="84.417267"
+         x="91.081795"
+         y="101.10619"
+         style="text-align:center;text-anchor:middle" /></flowRegion><flowPara
+       id="flowPara3072"
+       style="font-size:16px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:center;line-height:125%;writing-mode:lr-tb;text-anchor:middle;font-family:Ubuntu;-inkscape-font-specification:Ubuntu">Generate a random 2D </flowPara><flowPara
+       style="font-size:16px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:center;line-height:125%;writing-mode:lr-tb;text-anchor:middle;font-family:Ubuntu;-inkscape-font-specification:Ubuntu"
+       id="flowPara3074">map of the city.</flowPara><flowPara
+       style="font-size:16px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:center;line-height:125%;writing-mode:lr-tb;text-anchor:middle;font-family:Ubuntu;-inkscape-font-specification:Ubuntu"
+       id="flowPara3080">Precompute AI data.</flowPara></flowRoot>  <flowRoot
+     style="font-size:24px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-indent:0;text-align:center;text-decoration:none;line-height:125%;letter-spacing:0px;word-spacing:0px;text-transform:none;direction:ltr;block-progression:tb;writing-mode:lr-tb;text-anchor:middle;baseline-shift:baseline;color:#000000;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1px;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate;font-family:Ubuntu;-inkscape-font-specification:Ubuntu"
+     id="flowRoot3082"
+     xml:space="preserve"
+     transform="translate(294,0)"><flowRegion
+       id="flowRegion3084"><rect
+         style="text-align:center;text-anchor:middle"
+         y="101.10619"
+         x="91.081795"
+         height="84.417267"
+         width="237.70126"
+         id="rect3086" /></flowRegion><flowPara
+       style="font-size:16px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:center;line-height:125%;writing-mode:lr-tb;text-anchor:middle;font-family:Ubuntu;-inkscape-font-specification:Ubuntu"
+       id="flowPara3088">Generate a static </flowPara><flowPara
+       id="flowPara3090"
+       style="font-size:16px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:center;line-height:125%;writing-mode:lr-tb;text-anchor:middle;font-family:Ubuntu;-inkscape-font-specification:Ubuntu">3D model of the city.</flowPara><flowPara
+       id="flowPara3092"
+       style="font-size:16px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:center;line-height:125%;writing-mode:lr-tb;text-anchor:middle;font-family:Ubuntu;-inkscape-font-specification:Ubuntu" /></flowRoot>  <flowRoot
+     style="font-size:24px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-indent:0;text-align:center;text-decoration:none;line-height:125%;letter-spacing:0px;word-spacing:0px;text-transform:none;direction:ltr;block-progression:tb;writing-mode:lr-tb;text-anchor:middle;baseline-shift:baseline;color:#000000;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1px;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate;font-family:Ubuntu;-inkscape-font-specification:Ubuntu"
+     id="flowRoot3082-2"
+     xml:space="preserve"
+     transform="translate(584,-2.4369016e-6)"><flowRegion
+       id="flowRegion3084-4"><rect
+         style="text-align:center;text-anchor:middle"
+         y="101.10619"
+         x="91.081795"
+         height="84.417267"
+         width="237.70126"
+         id="rect3086-4" /></flowRegion><flowPara
+       style="font-size:16px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:center;line-height:125%;writing-mode:lr-tb;text-anchor:middle;font-family:Ubuntu;-inkscape-font-specification:Ubuntu"
+       id="flowPara3133">Add dynamic objects</flowPara><flowPara
+       style="font-size:16px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:center;line-height:125%;writing-mode:lr-tb;text-anchor:middle;font-family:Ubuntu;-inkscape-font-specification:Ubuntu"
+       id="flowPara3135">(player, monsters, etc).</flowPara><flowPara
+       id="flowPara3092-1"
+       style="font-size:16px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:center;line-height:125%;writing-mode:lr-tb;text-anchor:middle;font-family:Ubuntu;-inkscape-font-specification:Ubuntu" /></flowRoot></svg>
