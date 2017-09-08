@@ -551,13 +551,13 @@ def main():
     # Current time
     iniTime = datetime.now()
     filepath = bpy.data.filepath
-    cwd = os.path.dirname(filepath)+'/'
-    if cwd == '/':
-        cwd = ''
-    
     if filepath:
         print("Current blender file:", filepath)
-        print("Current dir:", cwd)
+        cwd = os.path.dirname(filepath)+'/'
+    else:
+        cwd = ''
+    
+    print("Current cwd directory:", cwd)
     
     # Set a default filename to read configuration
     argsFilename = 'cg-config.json'   
@@ -633,7 +633,7 @@ def main():
 
     # This is a hack to give blender a current working directory. If not, it will
     # write several warnings of the type "xxxxx can not make relative"
-    print('Saving empty blender model:')
+    print('Saving empty blender model:', cwd+'empty.blend')
     bpy.ops.wm.save_as_mainfile(filepath=cwd+'empty.blend', compress=False, copy=False)
     os.remove(cwd+'empty.blend')
 

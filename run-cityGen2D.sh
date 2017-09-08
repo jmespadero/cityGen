@@ -1,1 +1,6 @@
+#!/bin/sh
+#Use external python3 interpreter
 python3 cityGen2D.py && geeqie
+
+#Use blender internal python3 interpreter (wont generate .svg files)
+#blender --background --python cityGen2D.py -s 13

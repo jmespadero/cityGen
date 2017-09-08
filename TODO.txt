@@ -1,5 +1,7 @@
 BUGS: 
 * Fix the house placing.
+* In windows: Fail line 664 -> "bpy.data.texts.load(inputFilename, True)
+  Can't find file. Do we need to use cwd+inputFilename instead?
 
 TODO: 
 * Study a monster watchdog that change token after a while to solve interlocks.
