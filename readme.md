@@ -20,8 +20,8 @@ bundled inside of each .blend file to get detailed info about their authors
 and licenses applyed to their work. If you feel that you are owner of any 
 artwork used here, send me a message.
 
-Special acknowledge to (Daniel Andersson)[http://www.blendswap.com/user/Daniel74]
-and (Dennis Haupt)[http://traevaine.com/] artworks.
+Special acknowledge to [Daniel Andersson](http://www.blendswap.com/user/Daniel74)
+and [Dennis Haupt](http://traevaine.com/) artworks.
 
 ## Developers
 CityGen development started in 2014 as the CS final project of Juan Ramos. 
