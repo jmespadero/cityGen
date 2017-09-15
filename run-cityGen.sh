@@ -1,1 +1,1 @@
-python3 cityGen2D.py && blender --background --python cityGen3D.py
+blender --background --python cityGen2D.py --python cityGen3D.py
