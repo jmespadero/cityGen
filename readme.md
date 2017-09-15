@@ -1,12 +1,12 @@
 
-# cityGen
+# Medieval CityGen
 ## An automatic generator for medieval scenes and games
 
 ![](demos/cityGameDemo.jpg)
 <https://github.com/jmespadero/cityGen>
 
 ## Description
-CityGen is a set of tools to automatically generate random 2D 
+Medieval CityGen is a set of tools to automatically generate random 2D 
 maps of medieval cities, which are then converted into 3D scenes
 and videogames.
 
@@ -20,11 +20,11 @@ bundled inside of each .blend file to get detailed info about their authors
 and licenses applyed to their work. If you feel that you are owner of any 
 artwork used here, send me a message.
 
-Special acknowledge to [Daniel Andersson](http://www.blendswap.com/user/Daniel74)
-and [Dennis Haupt](http://traevaine.com/) artworks.
+The project give a special acknowledge to [Daniel Andersson](http://www.blendswap.com/user/Daniel74)
+and [Dennis Haupt](http://traevaine.com/) 3D artworks.
 
 ## Developers
-CityGen development started in 2014 as the CS final project of Juan Ramos. 
+Medieval CityGen development started in 2014 as the CS final project of Juan Ramos. 
 Its work is currently continued by Sergio Fernandez under the supervision
 of Jose M. Espadero.
 
