@@ -1,6 +1,6 @@
 
 # Medieval CityGen
-## An automatic generator for medieval scenes and games
+An automatic generator for medieval scenes and games
 
 ![](demos/cityGameDemo.jpg)
 <https://github.com/jmespadero/cityGen>
