@@ -28,13 +28,23 @@ Medieval CityGen development started in 2014 as the CS final project of Juan Ram
 Its work is currently continued by Sergio Fernandez under the supervision
 of Jose M. Espadero.
 
-## How do I create a model?
-First step is (obviously) to install blender3D, and then clone this repository:
+## Getting Started (How do I play a game?)
+
+### Prerequisites
+You just need to have [blender3D](https://www.blender.org) installed in your computer.
+If you plain to tweak the procedure to build the 2D map, then it is recommended to have
+matplotlib package installed to generate svg images with the step-by-step construction 
+of the 2D map. Matplotlib is *not* included into the python interpreter bundled with 
+blender, so it is recommendable install your own python interpreter.
+
+### Installing
+Just clone or download a copy of this repository:
 ``` sh
     git clone https://github.com/jmespadero/cityGen.git
     cd cityGen
 ```
 
+### Creating a new random 3D model and game
 To create a new 2D map and 3D model from scratch, execute the command:
 ``` sh
     blender --background --python cityGen2D.py --python cityGen3D.py
@@ -52,5 +62,6 @@ You can use some parameter to control values as city size and initial random see
 * python3 cityGen2D.py  --randomSeed 10
 * python3 cityGen2D.py -s 30 --randomSeed 47932
 
-
+### Executing a game
+Just open the cityGame.blend file with blender or blenderplayer programs.
 
