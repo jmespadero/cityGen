@@ -29,13 +29,28 @@ Its work is currently continued by Sergio Fernandez under the supervision
 of Jose M. Espadero.
 
 ## How do I create a model?
+First step is (obviously) to install blender3D, and then clone this repository:
 ``` sh
     git clone https://github.com/jmespadero/cityGen.git
     cd cityGen
-    python3 cityGen2D.py && blender --background --python cityGen3D.py
 ```
 
-Some nice values for randomSeed:
-* ./cityGen2D.py  --randomSeed 10
-* ./cityGen2D.py -s 30 --randomSeed 47932
+To create a new 2D map and 3D model from scratch, execute the command:
+``` sh
+    blender --background --python cityGen2D.py --python cityGen3D.py
+```
+
+As alternative, you can run the 2D script and 3D script separated, so you can 
+change the configuration file and create several 3D models from the same 2 map.
+``` sh
+    python3 cityGen2D.py 
+    blender --background --python cityGen3D.py
+```
+
+You can use some parameter to control values as city size and initial random seed
+(so you create the same 2D map several times)
+* python3 cityGen2D.py  --randomSeed 10
+* python3 cityGen2D.py -s 30 --randomSeed 47932
+
+
 
