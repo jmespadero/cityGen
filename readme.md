@@ -20,13 +20,20 @@ bundled inside of each .blend file to get detailed info about their authors
 and licenses applyed to their work. If you feel that you are owner of any 
 artwork used here, send me a message.
 
-The project give a special acknowledge to [Daniel Andersson](http://www.blendswap.com/user/Daniel74)
-and [Dennis Haupt](http://traevaine.com/) 3D artworks.
-
-## Developers
-Medieval CityGen development started in 2014 as the CS final project of Juan Ramos. 
-Its work is currently continued by [Sergio Fernandez](https://github.com/sergiofv93)
+## Contributors
+Medieval CityGen development started in 2014 as the CS grade final project of Juan Ramos
 under the supervision of [Jose M. Espadero](https://github.com/jmespadero).
+Its work is currently being continued by [Sergio Fernandez](https://github.com/sergiofv93).
+
+Most of the artwork has been done by external artists that have released
+their work under open licenses. Please refer to the Readme.txt file
+bundled inside of each .blend file to get detailed info about their authors 
+and licenses applyed to their work. If you feel that you are owner of any 
+artwork used here, send me a message to be acknowledged or ask to remove your work.
+
+Special thanks to [Daniel Andersson](http://www.blendswap.com/user/Daniel74)
+and [Dennis Haupt](http://traevaine.com/) for their 3D artworks.
+
 
 ## Getting Started (How do I play?)
 
@@ -70,4 +77,14 @@ You can use some parameter to control values as city size and initial random see
 
 ### Executing a game
 Just open the cityGame.blend file with blender or blenderplayer programs.
+
+## License
+
+This project is build as a mash-up of many works (3D artwork, music and even code) previously 
+published under a range of open licenses. We will honor each of these licenses for each 
+contribution. Please see the Readme.txt file inside of each .blend file to get details about the 
+real author, source URL and license applied to its work.
+
+The python code written for this project is published under 
+(Creative Commons BY-NC-SA 3.0 license)[https://creativecommons.org/licenses/by-nc-sa/3.0/].
 
