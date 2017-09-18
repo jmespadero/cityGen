@@ -78,5 +78,5 @@ contribution. Please see the Readme.txt file inside of each .blend file to get d
 real author, source URL and license applied to its work.
 
 The python code written for this project is published under 
-(Creative Commons BY-NC-SA 3.0 license)[https://creativecommons.org/licenses/by-nc-sa/3.0/].
+[Creative Commons BY-NC-SA 3.0 license](https://creativecommons.org/licenses/by-nc-sa/3.0/).
 
