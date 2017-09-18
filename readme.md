@@ -14,12 +14,6 @@ The scripts are mainly written in [python3](https://www.python.org),
 models are generated with [blender3D](https://www.blender.org) and
 games are playable using blenderplayer.
 
-Most of the artwork has been done by external artists that have released
-their work in several domain licenses. Please refer to the Readme.txt file
-bundled inside of each .blend file to get detailed info about their authors 
-and licenses applyed to their work. If you feel that you are owner of any 
-artwork used here, send me a message.
-
 ## Contributors
 Medieval CityGen development started in 2014 as the CS grade final project of Juan Ramos
 under the supervision of [Jose M. Espadero](https://github.com/jmespadero).
@@ -33,7 +27,6 @@ artwork used here, send me a message to be acknowledged or ask to remove your wo
 
 Special thanks to [Daniel Andersson](http://www.blendswap.com/user/Daniel74)
 and [Dennis Haupt](http://traevaine.com/) for their 3D artworks.
-
 
 ## Getting Started (How do I play?)
 
@@ -79,7 +72,6 @@ You can use some parameter to control values as city size and initial random see
 Just open the cityGame.blend file with blender or blenderplayer programs.
 
 ## License
-
 This project is build as a mash-up of many works (3D artwork, music and even code) previously 
 published under a range of open licenses. We will honor each of these licenses for each 
 contribution. Please see the Readme.txt file inside of each .blend file to get details about the 
