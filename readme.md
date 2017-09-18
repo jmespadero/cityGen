@@ -25,15 +25,15 @@ and [Dennis Haupt](http://traevaine.com/) 3D artworks.
 
 ## Developers
 Medieval CityGen development started in 2014 as the CS final project of Juan Ramos. 
-Its work is currently continued by Sergio Fernandez under the supervision
-of Jose M. Espadero.
+Its work is currently continued by [Sergio Fernandez](https://github.com/sergiofv93)
+under the supervision of [Jose M. Espadero](https://github.com/jmespadero).
 
-## Getting Started (How do I play a game?)
+## Getting Started (How do I play?)
 
 ### Prerequisites
 You just need to have [blender3D](https://www.blender.org) installed in your computer.
-If you plain to tweak the procedure to build the 2D map, then it is recommended to have
-matplotlib package installed to generate svg images with the step-by-step construction 
+If you plain to tweak the procedure to build the 2D map, then it is recommended to have the
+[matplotlib](https://matplotlib.org/) package installed to generate svg images with the step-by-step construction 
 of the 2D map. Matplotlib is *not* included into the python interpreter bundled with 
 blender, so it is recommendable install your own python interpreter.
 
@@ -42,6 +42,12 @@ Just clone or download a copy of this repository:
 ``` sh
     git clone https://github.com/jmespadero/cityGen.git
     cd cityGen
+```
+If you are really anxious to test it, just try the files in the [demos](demos) directory, but 
+keep in mind that they do not represent current status of the project .
+``` sh
+    cd demos
+    blenderplayer demo1game.blend
 ```
 
 ### Creating a new random 3D model and game
