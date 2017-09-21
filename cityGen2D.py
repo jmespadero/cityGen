@@ -810,16 +810,15 @@ def plotVoronoiData(vertices, regions, extraV, filename, radius, labels=False, e
             for i, v in enumerate(vertices):
                 svgLabels += '<text x="%g" y="%g">%d</text>\n' % (radius+v[0], radius-v[1], i)
 
-        # Plot barrierSeeds/extra data
-        for v in extraV:
-            svgLabels += '<circle cx="%g" cy="%g" r="3" stroke="black" stroke-width="1" fill="red" />' % (radius+v[0], radius-v[1])
-
         #Plot Extra vertex as a polygon
         if extraR:
             svgRegions += '  <polyline style="fill:none;stroke:black;stroke-width:2"'
             svgRegions += ' points="' + ' '.join("%g,%g"%(radius+v[0],radius-v[1]) for v in extraV) 
             svgRegions += '" />\n'
             
+        # Plot barrierSeeds/extra data
+        for v in extraV:
+            svgRegions += '<circle cx="%g" cy="%g" r="3" stroke="black" stroke-width="1" fill="red" />' % (radius+v[0], radius-v[1])
 
         if not filename.endswith('.svg'):
             filename += ".svg"
