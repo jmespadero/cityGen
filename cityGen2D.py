@@ -22,6 +22,17 @@ from pprint import pprint
 from datetime import datetime
 import numpy as np
 
+use_matplotlib = False
+"""
+# Check matplotlib.pyplot is installed
+try:
+    importlib.import_module('matplotlib.pyplot')
+    use_matplotlib = True
+except ImportError:
+    print("module matplotlib.pyplot is not available. Using internal SVG plot")
+    use_matplotlib = False
+"""
+
 class Delaunay2D:
     """
     Class to compute a Delaunay triangulation in 2D
@@ -337,7 +348,7 @@ def newCityData(numSeeds=90, cityRadius=20, numBarriers=12, LloydSteps=2, gateLe
     internalRegions = [vor_regions[r] for r in range(len(seeds))]
 
     # Plot initial voronoi diagram
-    plotVoronoiData(vor_vertices, internalRegions, barrierSeeds, 'tmp0.initialVoronoi', radius=2 * cityRadius)
+    plotVoronoiData(vor_vertices, internalRegions, barrierSeeds, 'tmp0.initialVoronoi', cityRadius)
 
     ###########################################################        
     # Apply several steps of Lloyd's Relaxation
@@ -366,7 +377,7 @@ def newCityData(numSeeds=90, cityRadius=20, numBarriers=12, LloydSteps=2, gateLe
         internalRegions = [vor_regions[r] for r in range(len(seeds))]
 
         # Plot initial voronoi diagram
-        plotVoronoiData(vor_vertices, internalRegions, barrierSeeds, 'tmp1.Lloyd-Step%d' % (w + 1), radius=2 * cityRadius)
+        plotVoronoiData(vor_vertices, internalRegions, barrierSeeds, 'tmp1.Lloyd-Step%d' % (w + 1), cityRadius)
     
     # Compute some usefull lists
     nv = len(vor_vertices)
@@ -437,7 +448,7 @@ def newCityData(numSeeds=90, cityRadius=20, numBarriers=12, LloydSteps=2, gateLe
         externalVertex = set([v for v in sum(externalRegions, []) if v != -1])
 
     # Plot data after joining near vertex
-    plotVoronoiData(vor_vertices, internalRegions, barrierSeeds, 'tmp2.mergeNears', radius=2 * cityRadius)
+    plotVoronoiData(vor_vertices, internalRegions, barrierSeeds, 'tmp2.mergeNears', cityRadius)
 
     ###########################################################
     # Extract the list of internal and external regions
@@ -478,7 +489,7 @@ def newCityData(numSeeds=90, cityRadius=20, numBarriers=12, LloydSteps=2, gateLe
         vor_vertices[i] *= 0.75 + 0.25 * externalRadius / r
 
     # Plot data after recentering
-    plotVoronoiData(vor_vertices, internalRegions, barrierSeeds, 'tmp3.1.smooth', radius=2 * cityRadius)
+    plotVoronoiData(vor_vertices, internalRegions, barrierSeeds, 'tmp3.1.smooth', cityRadius)
 
     ###########################################################
     # compute the centroid of the voronoi set (average of seeds)
@@ -494,7 +505,7 @@ def newCityData(numSeeds=90, cityRadius=20, numBarriers=12, LloydSteps=2, gateLe
     barrierSeeds = barrierSeeds - meanVertex
 
     # Plot data after recentering
-    plotVoronoiData(vertices, internalRegions, barrierSeeds, 'tmp3.2.recenter', radius=2 * cityRadius)
+    plotVoronoiData(vertices, internalRegions, barrierSeeds, 'tmp3.2.recenter', cityRadius)
 
     # Compute the signed area to ensure positive orientation of the wall
     cityArea = 0
@@ -551,7 +562,7 @@ def newCityData(numSeeds=90, cityRadius=20, numBarriers=12, LloydSteps=2, gateLe
     
     # Plot data with external wall vertices. Tricked to plot a closed line.
     wv = wallVertices.tolist()+[wallVertices[0]]
-    plotVoronoiData(vertices, internalRegions, wv, 'tmp4.envelope', radius=2 * cityRadius, extraR=True)
+    plotVoronoiData(vertices, internalRegions, wv, 'tmp4.envelope', cityRadius, extraR=True)
 
     ###########################################################
     # Search places to place gates to the city
@@ -587,7 +598,7 @@ def newCityData(numSeeds=90, cityRadius=20, numBarriers=12, LloydSteps=2, gateLe
         gate1 = wallVertices[bestCorner] - tangent * gateLen/2
         gate2 = wallVertices[bestCorner] + tangent * gateLen/2
         wv = [gate2]+wallVertices.tolist()[bestCorner+1:] + wallVertices.tolist()[:bestCorner]+[gate1]
-        plotVoronoiData(vertices, internalRegions, wv, 'tmp5.gatesCorner2', radius=2 * cityRadius, extraR=True)
+        plotVoronoiData(vertices, internalRegions, wv, 'tmp5.gatesCorner2', cityRadius, extraR=True)
     # """
 
     """ OK, but will prefer gates on corners
@@ -606,7 +617,7 @@ def newCityData(numSeeds=90, cityRadius=20, numBarriers=12, LloydSteps=2, gateLe
         gateMid = wallVertices[longestEdge-1] + edgeVec * edgeLen/2
         gate2 = wallVertices[longestEdge-1] + edgeVec * (edgeLen+gateLen)/2
         wv = [gate2]+wallVertices.tolist()[longestEdge:] + wallVertices.tolist()[:longestEdge]+[gate1]
-        plotVoronoiData(vertices, internalRegions, wv, 'tmp5.gateLongestWall', radius=2 * cityRadius, extraR=True)
+        plotVoronoiData(vertices, internalRegions, wv, 'tmp5.gateLongestWall', cityRadius, extraR=True)
 
     if gateLen > 0:
         # Place a gate on the midpoint of a ramdom external wall
@@ -624,7 +635,7 @@ def newCityData(numSeeds=90, cityRadius=20, numBarriers=12, LloydSteps=2, gateLe
         gateMid = wallVertices[edge-1] + edgeVec * edgeLen/2
         gate2 = wallVertices[edge-1] + edgeVec * (edgeLen+gateLen)/2
         wv = [gate2]+wallVertices.tolist()[edge:] + wallVertices.tolist()[:edge]+[gate1]
-        plotVoronoiData(vertices, internalRegions, wv, 'tmp5.gateRandomWall', radius=2 * cityRadius, extraR=True)
+        plotVoronoiData(vertices, internalRegions, wv, 'tmp5.gateRandomWall', cityRadius, extraR=True)
     # """
         
     if gateLen > 0:
@@ -648,7 +659,7 @@ def newCityData(numSeeds=90, cityRadius=20, numBarriers=12, LloydSteps=2, gateLe
         gate1 = wallVertices[bestCorner] - tangent * gateLen/2
         gate2 = wallVertices[bestCorner] + tangent * gateLen/2
         wv = [gate2]+wallVertices.tolist()[bestCorner+1:] + wallVertices.tolist()[:bestCorner]+[gate1]
-        plotVoronoiData(vertices, internalRegions, wv, 'tmp5.gateFlatCorner', radius=2 * cityRadius, extraR=True)
+        plotVoronoiData(vertices, internalRegions, wv, 'tmp5.gateFlatCorner', cityRadius, extraR=True)
 
         # Change wallVertices, so choose this gate
         wallVertices = np.array(wv)
@@ -668,7 +679,7 @@ def newCityData(numSeeds=90, cityRadius=20, numBarriers=12, LloydSteps=2, gateLe
         gate1 = wallVertices[bestCorner] - tangent * gateLen/2
         gate2 = wallVertices[bestCorner] + tangent * gateLen/2
         wv = [gate2]+wallVertices.tolist()[bestCorner+1:] + wallVertices.tolist()[:bestCorner]+[gate1]
-        plotVoronoiData(vertices, internalRegions, wv, 'tmp5.gatesCorner2', radius=2 * cityRadius, extraR=True)
+        plotVoronoiData(vertices, internalRegions, wv, 'tmp5.gatesCorner2', cityRadius, extraR=True)
     # """
 
 
@@ -766,63 +777,98 @@ def newAIData(regions, vertices):
     return AIData
 
 
-def plotVoronoiData(vertices, regions, extraV=[], filename='', show=False, labels=False, radius=None, extraR=False):
+def plotVoronoiData(vertices, regions, extraV, filename, radius, labels=False, extraR=False):
     """Plot a 2D representation of voronoi data as vertices, regions, seeds
-    """
+    """   
+    radius = 2*radius
+        
     # Check matplotlib.pyplot is installed
-    try:
-        importlib.import_module('matplotlib.pyplot')
-    except ImportError:
-        print("plotVoronoiData needs module matplotlib.pyplot, but is not available.")
-        return
+    if not use_matplotlib:
+        svgHeader = '<svg width="%d" height="%d" >\n'%(2*radius,2*radius)
+        svgHeader += '<rect id="background" width="100%" height="100%" style="fill:white"/>\n'
+        svgFooter = '<line x1="50%" y1="5%" x2="50%" y2="95%" stroke-dasharray="1, 5" style="stroke:black;" />\n'
+        svgFooter += '<line x1="5%" y1="50%" x2="95%" y2="50%" stroke-dasharray="1, 5" style="stroke:black" />\n'
+        svgFooter += '</svg>\n'
+        
+        svgRegions = '<g id="regions" style="fill:#ffeeaa;stroke:black;stroke-width:1">\n'
+        svgLabels = '<g id="labels" style="fill:black;text-anchor:middle">\n'
+        palette=["#9c9fff", "#ff89b5", "#ffdc89", "#90d4f7", "#71e096", "#f5a26f", "#ed6d79", "#cff381"]
 
-    import matplotlib.pyplot as plt
-    plt.gcf().clear()
-    my_dpi = 96
-    plt.figure(figsize=(800 / my_dpi, 800 / my_dpi), dpi=my_dpi)
-
-    # Plot voronoi vertex
-    plt.scatter([v[0] for v in vertices], [v[1] for v in vertices], marker='.')
-    if labels:
-        for i, v in enumerate(vertices):
-            plt.annotate(i, xy=(v[0], v[1]))
-
-    # Plot voronoi regions
-    for r, region in enumerate(regions):
-        polygon = [(vertices[i][0], vertices[i][1]) for i in region]
-        plt.fill(*zip(*polygon), alpha=0.2)
-        # plot a label for the region
+        # Plot voronoi regions
+        for r, region in enumerate(regions):
+            polygon = [(radius+vertices[i][0], radius-vertices[i][1]) for i in region]
+            svgRegions += '  <polygon style="fill:'+palette[r%len(palette)]
+            svgRegions += '" points="' + ' '.join("%g,%g" % v for v in polygon) 
+            svgRegions += '" />\n'
+            if labels:
+                # plot a label for the region in the centroid of the region
+                xy=np.average(polygon, axis=0)
+                svgLabels += '<text x="%g" y="%g">r%d</text>\n' % (xy[0], xy[1], r)
+        
+        # Labels for voronoi vertex 
         if labels:
-            plt.annotate("r%d" % r, xy=np.average(polygon, axis=0))
+            for i, v in enumerate(vertices):
+                svgLabels += '<text x="%g" y="%g">%d</text>\n' % (radius+v[0], radius-v[1], i)
 
-    # Plot barrierSeeds/extra data
-    plt.scatter([s[0] for s in extraV], [s[1] for s in extraV], marker='*')  
+        # Plot barrierSeeds/extra data
+        for v in extraV:
+            svgLabels += '<text x="%g" y="%g" style="fill:#CC5500">*</text>\n' % (radius+v[0], radius-v[1])
 
-    #Plot Extra vertex as a polygon
-    if extraR:
-        #plt.fill(*zip(*extraV), fill=False)
-        plt.plot(*zip(*extraV), color='black')
+        #Plot Extra vertex as a polygon
+        if extraR:
+            svgRegions += '  <polyline style="fill:none;stroke:black;stroke-width:2"'
+            svgRegions += ' points="' + ' '.join("%g,%g"%(radius+v[0],radius-v[1]) for v in extraV) 
+            svgRegions += '" />\n'
+            
 
-    # Choose axis
-    if radius:
-        plt.axis([-radius, radius, -radius, radius])
+        if not filename.endswith('.svg'):
+            filename += ".svg"
 
-    plt.grid()
+        with open(filename, "w") as svg_file:
+            svg_file.write(svgHeader+svgRegions+'\n</g>\n'+svgLabels+'\n</g>\n'+svgFooter)
+            
+    else:
+        import matplotlib.pyplot as plt
+        plt.gcf().clear()
+        my_dpi = 96
+        plt.figure(figsize=(800 / my_dpi, 800 / my_dpi), dpi=my_dpi)
 
-    # Save to file
-    if filename:
+        # Plot voronoi vertex
+        plt.scatter([v[0] for v in vertices], [v[1] for v in vertices], marker='.')
+        if labels:
+            for i, v in enumerate(vertices):
+                plt.annotate(i, xy=(v[0], v[1]))
+
+        # Plot voronoi regions
+        for r, region in enumerate(regions):
+            polygon = [(vertices[i][0], vertices[i][1]) for i in region]
+            plt.fill(*zip(*polygon), alpha=0.2)
+            # plot a label for the region
+            if labels:
+                plt.annotate("r%d" % r, xy=np.average(polygon, axis=0))
+
+        # Plot barrierSeeds/extra data
+        plt.scatter([s[0] for s in extraV], [s[1] for s in extraV], marker='*')  
+
+        #Plot Extra vertex as a polygon
+        if extraR:
+            plt.plot(*zip(*extraV), color='black')
+
+        # Choose axis
+        if radius:
+            plt.axis([-radius, radius, -radius, radius])
+
+        plt.grid()
+
+        # Save to file
         if filename.endswith('.png') or filename.endswith('.svg') or filename.endswith('.jpg'):
             plt.savefig(filename, dpi=my_dpi, bbox_inches='tight')
         else:
             # plt.savefig(filename + '.png', dpi=my_dpi, bbox_inches='tight')
             plt.savefig(filename + '.svg', dpi=my_dpi, bbox_inches='tight')
 
-    # Interactive plot
-    if show:
-        plt.show()
 
-
-def plotCityData(cityData, filename='', show=True, labels=False, radius=None):
+def plotCityData(cityData, filename='', labels=False, radius=None):
     """Plot a 2D representation of voronoiData dict
     """
     vertices = cityData.get('vertices', [])
@@ -838,7 +884,7 @@ def plotCityData(cityData, filename='', show=True, labels=False, radius=None):
         extraV = cityData['barrierSeeds']
         extraR = False
 
-    plotVoronoiData(vertices, regions, extraV, filename, show, labels, radius, extraR=extraR)
+    plotVoronoiData(vertices, regions, extraV, filename, radius, labels, extraR=extraR)
 
 
 ###########################
@@ -856,18 +902,21 @@ def main():
                         help='Size of gates in external wall. Use 0. to avoid gates. (default=13.08)')
     parser.add_argument('-n', '--cityName', default='city', required=False,
                         help='Name of the city (default="city")')
-    parser.add_argument('-v', '--show', action='store_true',
-                        help='Display the map of the city')
     parser.add_argument('--randomSeed', type=int, required=False,
                         help='Initial random seed value')
     parser.add_argument('-p', '--plot', required=False,
                         help='Replot a previous generated city (default="city.data.json")')
+    parser.add_argument('--matplotlib', required=False, action='store_true', 
+                        help='Use matplotlib.pyplot to draw svg files')
     parser.add_argument('--background', required=False, action='store_true')
     parser.add_argument('--python', required=False)
 
     args = parser.parse_args()
     # print(args)
 
+    global use_matplotlib
+    use_matplotlib = args.matplotlib
+        
     if not args.plot:
         # Generate a new city map
         cityData = newCityData(args.numSeeds, args.cityRadius, gateLen=args.gateLen, randomSeed=args.randomSeed)
@@ -894,8 +943,8 @@ def main():
         json.dump(AIData, f, separators=(',', ':'), sort_keys=True)
 
     # Plot debug info
-    plotCityData(cityData, args.cityName + '.map', show=False, labels=False, radius=2 * args.cityRadius)
-    plotCityData(cityData, args.cityName + '.map.verbose', show=False, labels=True, radius=2 * args.cityRadius)
+    plotCityData(cityData, args.cityName + '.map.svg', labels=False, radius= args.cityRadius)
+    plotCityData(cityData, args.cityName + '.map.verbose.svg', labels=True, radius= args.cityRadius)
 
 
 # Call the main function
