@@ -252,13 +252,15 @@ class Delaunay2D:
             
         return vor_coors, regions
 
-def newCityData(numSeeds=90, cityRadius=20, numBarriers=12, LloydSteps=2, gateLen=0., randomSeed=None):
+def newCityData(numSeeds=90, cityRadius=20, numBarriers=12, LloydSteps=2, gateLen=0., randomSeed=None, debugSVG=False):
     """Create a new set of regions from a voronoi diagram
     numSeeds   -- Number of seed to be used
     cityRadius -- Approximated radius of the city
     numBarriers -- Number of barrier nodes. Usually 12.
     LloydSteps -- Number of Lloyd's relaxation steps to apply 
-    gateLen    -- Size of the gates in the external wall. Use 0.0 to avoid place gates 
+    gateLen    -- Size of the gates in the external wall. Use 0.0 to avoid place gates
+    randomSeed -- Random seed (to make deterministic)
+    debugSVG   -- Create debug SVG files on each step.
     """
 
     def pnt2line(pnt, s1, s2):
@@ -348,7 +350,8 @@ def newCityData(numSeeds=90, cityRadius=20, numBarriers=12, LloydSteps=2, gateLe
     internalRegions = [vor_regions[r] for r in range(len(seeds))]
 
     # Plot initial voronoi diagram
-    plotVoronoiData(vor_vertices, internalRegions, barrierSeeds, 'tmp0.initialVoronoi', cityRadius)
+    if debugSVG:
+        plotVoronoiData(vor_vertices, internalRegions, barrierSeeds, 'tmp0.initialVoronoi', cityRadius)
 
     ###########################################################        
     # Apply several steps of Lloyd's Relaxation
@@ -377,7 +380,8 @@ def newCityData(numSeeds=90, cityRadius=20, numBarriers=12, LloydSteps=2, gateLe
         internalRegions = [vor_regions[r] for r in range(len(seeds))]
 
         # Plot initial voronoi diagram
-        plotVoronoiData(vor_vertices, internalRegions, barrierSeeds, 'tmp1.Lloyd-Step%d' % (w + 1), cityRadius)
+        if debugSVG:
+            plotVoronoiData(vor_vertices, internalRegions, barrierSeeds, 'tmp1.Lloyd-Step%d' % (w + 1), cityRadius)
     
     # Compute some usefull lists
     nv = len(vor_vertices)
@@ -448,7 +452,8 @@ def newCityData(numSeeds=90, cityRadius=20, numBarriers=12, LloydSteps=2, gateLe
         externalVertex = set([v for v in sum(externalRegions, []) if v != -1])
 
     # Plot data after joining near vertex
-    plotVoronoiData(vor_vertices, internalRegions, barrierSeeds, 'tmp2.mergeNears', cityRadius)
+    if debugSVG:
+        plotVoronoiData(vor_vertices, internalRegions, barrierSeeds, 'tmp2.mergeNears', cityRadius)
 
     ###########################################################
     # Extract the list of internal and external regions
@@ -489,7 +494,8 @@ def newCityData(numSeeds=90, cityRadius=20, numBarriers=12, LloydSteps=2, gateLe
         vor_vertices[i] *= 0.75 + 0.25 * externalRadius / r
 
     # Plot data after recentering
-    plotVoronoiData(vor_vertices, internalRegions, barrierSeeds, 'tmp3.1.smooth', cityRadius)
+    if debugSVG:
+        plotVoronoiData(vor_vertices, internalRegions, barrierSeeds, 'tmp3.1.smooth', cityRadius)
 
     ###########################################################
     # compute the centroid of the voronoi set (average of seeds)
@@ -505,7 +511,8 @@ def newCityData(numSeeds=90, cityRadius=20, numBarriers=12, LloydSteps=2, gateLe
     barrierSeeds = barrierSeeds - meanVertex
 
     # Plot data after recentering
-    plotVoronoiData(vertices, internalRegions, barrierSeeds, 'tmp3.2.recenter', cityRadius)
+    if debugSVG:
+        plotVoronoiData(vertices, internalRegions, barrierSeeds, 'tmp3.2.recenter', cityRadius)
 
     # Compute the signed area to ensure positive orientation of the wall
     cityArea = 0
@@ -562,7 +569,8 @@ def newCityData(numSeeds=90, cityRadius=20, numBarriers=12, LloydSteps=2, gateLe
     
     # Plot data with external wall vertices. Tricked to plot a closed line.
     wv = wallVertices.tolist()+[wallVertices[0]]
-    plotVoronoiData(vertices, internalRegions, wv, 'tmp4.envelope', cityRadius, extraR=True)
+    if debugSVG:
+        plotVoronoiData(vertices, internalRegions, wv, 'tmp4.envelope', cityRadius, extraR=True)
 
     ###########################################################
     # Search places to place gates to the city
@@ -598,7 +606,8 @@ def newCityData(numSeeds=90, cityRadius=20, numBarriers=12, LloydSteps=2, gateLe
         gate1 = wallVertices[bestCorner] - tangent * gateLen/2
         gate2 = wallVertices[bestCorner] + tangent * gateLen/2
         wv = [gate2]+wallVertices.tolist()[bestCorner+1:] + wallVertices.tolist()[:bestCorner]+[gate1]
-        plotVoronoiData(vertices, internalRegions, wv, 'tmp5.gatesCorner2', cityRadius, extraR=True)
+        if debugSVG:
+            plotVoronoiData(vertices, internalRegions, wv, 'tmp5.gatesCorner2', cityRadius, extraR=True)
     # """
 
     """ OK, but will prefer gates on corners
@@ -617,7 +626,8 @@ def newCityData(numSeeds=90, cityRadius=20, numBarriers=12, LloydSteps=2, gateLe
         gateMid = wallVertices[longestEdge-1] + edgeVec * edgeLen/2
         gate2 = wallVertices[longestEdge-1] + edgeVec * (edgeLen+gateLen)/2
         wv = [gate2]+wallVertices.tolist()[longestEdge:] + wallVertices.tolist()[:longestEdge]+[gate1]
-        plotVoronoiData(vertices, internalRegions, wv, 'tmp5.gateLongestWall', cityRadius, extraR=True)
+        if debugSVG:
+            plotVoronoiData(vertices, internalRegions, wv, 'tmp5.gateLongestWall', cityRadius, extraR=True)
 
     if gateLen > 0:
         # Place a gate on the midpoint of a ramdom external wall
@@ -635,7 +645,8 @@ def newCityData(numSeeds=90, cityRadius=20, numBarriers=12, LloydSteps=2, gateLe
         gateMid = wallVertices[edge-1] + edgeVec * edgeLen/2
         gate2 = wallVertices[edge-1] + edgeVec * (edgeLen+gateLen)/2
         wv = [gate2]+wallVertices.tolist()[edge:] + wallVertices.tolist()[:edge]+[gate1]
-        plotVoronoiData(vertices, internalRegions, wv, 'tmp5.gateRandomWall', cityRadius, extraR=True)
+        if debugSVG:
+            plotVoronoiData(vertices, internalRegions, wv, 'tmp5.gateRandomWall', cityRadius, extraR=True)
     # """
         
     if gateLen > 0:
@@ -659,7 +670,8 @@ def newCityData(numSeeds=90, cityRadius=20, numBarriers=12, LloydSteps=2, gateLe
         gate1 = wallVertices[bestCorner] - tangent * gateLen/2
         gate2 = wallVertices[bestCorner] + tangent * gateLen/2
         wv = [gate2]+wallVertices.tolist()[bestCorner+1:] + wallVertices.tolist()[:bestCorner]+[gate1]
-        plotVoronoiData(vertices, internalRegions, wv, 'tmp5.gateFlatCorner', cityRadius, extraR=True)
+        if debugSVG:
+            plotVoronoiData(vertices, internalRegions, wv, 'tmp5.gateFlatCorner', cityRadius, extraR=True)
 
         # Change wallVertices, so choose this gate
         wallVertices = np.array(wv)
@@ -679,7 +691,8 @@ def newCityData(numSeeds=90, cityRadius=20, numBarriers=12, LloydSteps=2, gateLe
         gate1 = wallVertices[bestCorner] - tangent * gateLen/2
         gate2 = wallVertices[bestCorner] + tangent * gateLen/2
         wv = [gate2]+wallVertices.tolist()[bestCorner+1:] + wallVertices.tolist()[:bestCorner]+[gate1]
-        plotVoronoiData(vertices, internalRegions, wv, 'tmp5.gatesCorner2', cityRadius, extraR=True)
+        if debugSVG:
+            plotVoronoiData(vertices, internalRegions, wv, 'tmp5.gatesCorner2', cityRadius, extraR=True)
     # """
 
 
@@ -905,6 +918,8 @@ def main():
                         help='Initial random seed value')
     parser.add_argument('-p', '--plot', required=False,
                         help='Replot a previous generated city (default="city.data.json")')
+    parser.add_argument('--debug', required=False, action='store_true',
+                        help='Create debug SVG files')
     parser.add_argument('--matplotlib', required=False, action='store_true', 
                         help='Use matplotlib.pyplot to draw svg files')
     parser.add_argument('--background', required=False, action='store_true')
@@ -918,7 +933,7 @@ def main():
         
     if not args.plot:
         # Generate a new city map
-        cityData = newCityData(args.numSeeds, args.cityRadius, gateLen=args.gateLen, randomSeed=args.randomSeed)
+        cityData = newCityData(args.numSeeds, args.cityRadius, gateLen=args.gateLen, randomSeed=args.randomSeed, debugSVG=args.debug)
         cityData['cityName'] = args.cityName
         # Save cityData data as a json file
         cityDataFilename = args.cityName + '.data.json'
