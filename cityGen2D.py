@@ -784,7 +784,7 @@ def plotVoronoiData(vertices, regions, extraV, filename, radius, labels=False, e
         
     # Check matplotlib.pyplot is installed
     if not use_matplotlib:
-        svgHeader = '<svg width="%d" height="%d" >\n'%(2*radius,2*radius)
+        svgHeader = '<svg xmlns="http://www.w3.org/2000/svg" width="%d" height="%d" >\n'%(2*radius,2*radius)
         svgHeader += '<rect id="background" width="100%" height="100%" style="fill:white"/>\n'
         svgFooter = '<line x1="50%" y1="5%" x2="50%" y2="95%" stroke-dasharray="1, 5" style="stroke:black;" />\n'
         svgFooter += '<line x1="5%" y1="50%" x2="95%" y2="50%" stroke-dasharray="1, 5" style="stroke:black" />\n'
@@ -812,7 +812,7 @@ def plotVoronoiData(vertices, regions, extraV, filename, radius, labels=False, e
 
         # Plot barrierSeeds/extra data
         for v in extraV:
-            svgLabels += '<text x="%g" y="%g" style="fill:#CC5500">*</text>\n' % (radius+v[0], radius-v[1])
+            svgLabels += '<circle cx="%g" cy="%g" r="3" stroke="black" stroke-width="1" fill="red" />' % (radius+v[0], radius-v[1])
 
         #Plot Extra vertex as a polygon
         if extraR:
