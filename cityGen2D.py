@@ -923,7 +923,7 @@ def main():
     parser.add_argument('--matplotlib', required=False, action='store_true', 
                         help='Use matplotlib.pyplot to draw svg files')
     parser.add_argument('--background', required=False, action='store_true')
-    parser.add_argument('--python', required=False)
+    parser.add_argument('-P', '--python', required=False)
 
     args = parser.parse_args()
     # print(args)
