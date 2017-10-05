@@ -29,7 +29,6 @@ import bpy
 import math, json, random, os, sys
 from math import sqrt, acos, sin, cos
 from pprint import pprint
-import numpy as np
 from mathutils import Vector
 from datetime import datetime
 
@@ -671,6 +670,8 @@ def main():
     
     # Convert vertex from 2D to 3D
     vertices3D = [ (v[0], v[1], 0.0) for v in vertices ]
+    
+    # Compute the radius of the city, as the max distance from any vertex to origimathn
         
     # Insert a camera and a light in the origin position
     # bpy.ops.object.camera_add(view_align=True, enter_editmode=False, location=(0,0,1.5), rotation=((math.radians(90)), 0, 0))
@@ -694,7 +695,7 @@ def main():
     if args.get('inputSkyDome', False):
         importLibrary(args['inputSkyDome'], link=False, destinationLayer=0, importScripts=True)
         #Compute the radius of the dome and apply scale
-        skyDomeRadius = 50+(np.linalg.norm(vertices, axis=1)).max()
+        skyDomeRadius = 50 + max([Vector(v).length for v in vertices])
         print("Scaling SkyDome object to radius",skyDomeRadius)
         bpy.data.objects["SkyDome"].scale=(skyDomeRadius, skyDomeRadius, skyDomeRadius/2)
 
@@ -789,7 +790,7 @@ def main():
     # Create a ground around the boundary
     if args.get('createGround', False):
         createGround = args['createGround']
-        groundRadius = 50+(np.linalg.norm(vertices, axis=1)).max()
+        groundRadius = 50 + max([Vector(v).length for v in vertices])
         makeGround([], '_groundO', '_groundM', radius=groundRadius, material='Floor3')
 
     if args.get('createStreets', False):
