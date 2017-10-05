@@ -448,34 +448,6 @@ def makePolygon(cList, objName="meshObj", meshName="mesh", height=0.0, reduct=0.
     ob.hide = hide
     """
 
-def nearestPoint(vList, centerPoint=(0,0) ):
-    """Return the position of the point of vlist nearest to centerPoint 
-    vlist       -- list of vertex to search
-    centerPoint -- Target point of the search
-    """    
-    #compute the center of the voronoi vertex (average)
-    #We search the neares to [0,0]
-    #for v in vList:
-        #centerPoint[0] += v[0]
-        #centerPoint[1] += v[1]
-    #centerPoint[0] /= len(vList)
-    #centerPoint[1] /= len(vList)
-    #print("Center point", centerPoint)
-    
-    #Search the vertex closest to the center
-    meanVertex = None
-    minDist = float('Inf')
-    for k,v in enumerate(vList):
-        dx = v[0]-centerPoint[0]
-        dy = v[1]-centerPoint[1]
-        dist = dx*dx+dy*dy
-        if (dist < minDist):
-            meanVertex = k
-            minDist = dist
-    #print("Nearest vertex to center is at position", meanVertex, ", distance to center", minDist)
-    return meanVertex
-
-
 def updateExternalTexts():
     """ Check modified external scripts in the scene and update if possible
     """
@@ -645,7 +617,7 @@ def main():
         if 'name' in data:
             print("City name:", data['name'])
         seeds = data['seeds']
-        vertices = data['vertices']
+        vertices = [Vector(v) for v in data['vertices'] ]
         regions = data['regions']
         internalRegions = data['internalRegions']
         externalPoints = data['externalPoints']
@@ -669,7 +641,7 @@ def main():
     bpy.data.texts.load(inputFilenameAI, True)
     
     # Convert vertex from 2D to 3D
-    vertices3D = [ (v[0], v[1], 0.0) for v in vertices ]
+    vertices3D = [ v.to_3d() for v in vertices ]
     
     # Compute the radius of the city, as the max distance from any vertex to origimathn
         
@@ -695,7 +667,7 @@ def main():
     if args.get('inputSkyDome', False):
         importLibrary(args['inputSkyDome'], link=False, destinationLayer=0, importScripts=True)
         #Compute the radius of the dome and apply scale
-        skyDomeRadius = 50 + max([Vector(v).length for v in vertices])
+        skyDomeRadius = 50 + max([v.length for v in vertices])
         print("Scaling SkyDome object to radius",skyDomeRadius)
         bpy.data.objects["SkyDome"].scale=(skyDomeRadius, skyDomeRadius, skyDomeRadius/2)
 
@@ -790,7 +762,7 @@ def main():
     # Create a ground around the boundary
     if args.get('createGround', False):
         createGround = args['createGround']
-        groundRadius = 50 + max([Vector(v).length for v in vertices])
+        groundRadius = 50 + max([v.length for v in vertices])
         makeGround([], '_groundO', '_groundM', radius=groundRadius, material='Floor3')
 
     if args.get('createStreets', False):
@@ -832,11 +804,13 @@ def main():
         #locate the object named Player
         player = bpy.data.objects['Player']
 
-        #Calculate the vertex nearest to the center of the city
-        playerVertex = nearestPoint(vertices, (0,0) )        
-        locP = vertices[playerVertex]+[3.0]
+        #Search the vertex nearest to the center of the city
+        vlength = [v.length for v in vertices]
+        # https://stackoverflow.com/questions/2474015/
+        playerVertex = min(range(len(vertices)), key=vlength.__getitem__)
+        locP = vertices3D[playerVertex] + Vector((0,0,3))
         
-        print('Player starts at vertex:', playerVertex, 'position:', locP)
+        print('Player starts at vertex:', playerVertex, 'position:', locP.to_tuple())
         
         # Show/hide the token that marks the nearest street point to the player
         if 'debugVisibleTokens' in args and 'Target' in bpy.data.objects:
