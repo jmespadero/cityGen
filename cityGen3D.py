@@ -526,10 +526,10 @@ def pointDistance(x1, y1, x2, y2):
 
 
 
-def nearestSeed(point, seeds):
+def nearestSeed(x, y, seeds, limit):
     distance = None
     for i in seeds:
-        d = pointDistance(point.location.x, point.location.y, i[0], i[1])
+        d = pointDistance(x, y, i[0], i[1])
         if (distance == None):
             distance = d
             seed = seeds.index(i)
@@ -537,15 +537,19 @@ def nearestSeed(point, seeds):
             if (d < distance):
                 distance = d
                 seed = seeds.index(i)
+
+        limit = limit - 1
+        if (limit == 0):
+            break
     return seed
 
 
 
-def nearestSegment(point, vertices, vert_coords):
+def nearestSegment(x, y , vertices, vert_coords):
     distance = None
     for i in vertices:
         coordinates = vert_coords[i]
-        d = pointDistance(point.location.x, point.location.y, coordinates[0], coordinates[1])
+        d = pointDistance(x, y, coordinates[0], coordinates[1])
 
         if (distance == None):
             distance = d
@@ -559,12 +563,12 @@ def nearestSegment(point, vertices, vert_coords):
     segment1 = [vert_coords[vertices[vertex - 1]], vert_coords[vertices[vertex]]]
     segment2 = [vert_coords[vertices[vertex]], vert_coords[vertices[-len(vertices) + vertex + 1]]]
 
-    dist1 = ((segment1[1][0] - segment1[0][0]) * (point.location.y - segment1[0][1]) - (
-    segment1[1][1] - segment1[0][1]) * (point.location.x - segment1[0][0])) / (
+    dist1 = ((segment1[1][0] - segment1[0][0]) * (y - segment1[0][1]) - (
+    segment1[1][1] - segment1[0][1]) * (x - segment1[0][0])) / (
             sqrt(pow(segment1[1][0] - segment1[0][0], 2) + pow(segment1[1][1] - segment1[0][1], 2)))
 
-    dist2 = ((segment2[1][0] - segment2[0][0]) * (point.location.y - segment2[0][1]) - (
-        segment2[1][1] - segment2[0][1]) * (point.location.x - segment2[0][0])) / (
+    dist2 = ((segment2[1][0] - segment2[0][0]) * (y - segment2[0][1]) - (
+        segment2[1][1] - segment2[0][1]) * (x - segment2[0][0])) / (
             sqrt(pow(segment2[1][0] - segment2[0][0], 2) + pow(segment2[1][1] - segment2[0][1], 2)))
 
     if (dist1 < dist2):
@@ -575,27 +579,20 @@ def nearestSegment(point, vertices, vert_coords):
 
 
 def createLeaves(seeds, internalRegions, vertices):
-    print("Creating leaves...\n")
+    print("Creating leaves...")
     hojas = 0
 
-    while (hojas < 1000):
-        g1 = duplicateObject(bpy.data.objects["Hoja"], "_leave_" + str(hojas))
-        g1.location = (uniform(-500, 500), uniform(-500, 500), 0.02)
-        g1.rotation_euler = (0, 0, uniform(0, 360))
-        n = nearestSeed(g1, seeds)
-        print("Más cerca de r", n, "\n")
-        (s, d) = nearestSegment(g1, internalRegions[n], vertices)
-        print("Segmento mas cercano a la hoja:\n", s, "\n")
-        print("Distancia de la hoja al segmento:", d)
-        print("Punto de localizacion de la hoja:", g1.location)
+    while (hojas < 2500):
+        (x, y) = (uniform(-300, 300), uniform(-300, 300))
 
-        if (d < 5 and d > 1):
-            print("La hoja esta en buena posicion(", hojas, ")\n\n")
+        n = nearestSeed(x, y, seeds, len(internalRegions))
+        (s, d) = nearestSegment(x, y , internalRegions[n], vertices)
+
+        if (d < 4.5 and d > 1.5):
+            g1 = duplicateObject(bpy.data.objects["Hoja"], "_leave_" + str(hojas))
+            g1.location = (x, y, 0.02)
+            g1.rotation_euler = (0, 0, uniform(0, 360))
             hojas = hojas + 1
-        else:
-            print("La hoja esta mal colocada(", hojas, ")\n\n")
-            bpy.data.objects["_leave_" + str(hojas)].select = True
-            bpy.ops.object.delete()
 
     print("\nLeaves created (", hojas, ")")
 
@@ -872,8 +869,8 @@ def main():
         bpy.context.scene.objects.active = bpy.data.objects["_Region"]
         bpy.ops.object.join()
 
-
-    createLeaves(seeds, internalRegions, vertices)
+    if args.get('createLeaves', False):
+        createLeaves(seeds, internalRegions, vertices)
 
 
     #Save the current file, if outputCityFilename is set.
