@@ -526,10 +526,10 @@ def pointDistance(x1, y1, x2, y2):
 
 
 
-def nearestSeed(x, y, seeds, limit):
+def nearestSeed(vector, seeds):
     distance = None
     for i in seeds:
-        d = pointDistance(x, y, i[0], i[1])
+        d = pointDistance(vector[0], vector[1], i[0], i[1])
         if (distance == None):
             distance = d
             seed = seeds.index(i)
@@ -537,10 +537,6 @@ def nearestSeed(x, y, seeds, limit):
             if (d < distance):
                 distance = d
                 seed = seeds.index(i)
-
-        limit = limit - 1
-        if (limit == 0):
-            break
     return seed
 
 
@@ -564,7 +560,7 @@ def nearestSegment(x, y , vertices, vert_coords):
     segment2 = [vert_coords[vertices[vertex]], vert_coords[vertices[-len(vertices) + vertex + 1]]]
 
     dist1 = ((segment1[1][0] - segment1[0][0]) * (y - segment1[0][1]) - (
-    segment1[1][1] - segment1[0][1]) * (x - segment1[0][0])) / (
+        segment1[1][1] - segment1[0][1]) * (x - segment1[0][0])) / (
             sqrt(pow(segment1[1][0] - segment1[0][0], 2) + pow(segment1[1][1] - segment1[0][1], 2)))
 
     dist2 = ((segment2[1][0] - segment2[0][0]) * (y - segment2[0][1]) - (
@@ -581,20 +577,23 @@ def nearestSegment(x, y , vertices, vert_coords):
 def createLeaves(seeds, internalRegions, vertices):
     print("Creating leaves...")
     hojas = 0
+    loops = 0
 
-    while (hojas < 2500):
+    while (hojas < 3000):
+        loops = loops + 1
         (x, y) = (uniform(-300, 300), uniform(-300, 300))
+        vector = Vector((x, y, 0.1))
 
-        n = nearestSeed(x, y, seeds, len(internalRegions))
+        n = nearestSeed(vector, seeds)
         (s, d) = nearestSegment(x, y , internalRegions[n], vertices)
 
         if (d < 4.5 and d > 1.5):
-            g1 = duplicateObject(bpy.data.objects["Hoja"], "_leave_" + str(hojas))
-            g1.location = (x, y, 0.02)
+            g1 = duplicateObject(bpy.data.objects["DryLeaf"], "_leave_" + str(hojas))
+            g1.location = vector
             g1.rotation_euler = (0, 0, uniform(0, 360))
             hojas = hojas + 1
 
-    print("\nLeaves created (", hojas, ")")
+    print("\nLeaves created (", loops, "loops)")
 
 
        
@@ -706,6 +705,7 @@ def main():
         # This is a hack to convert dictionaries with string keys to integer.
         # Necessary because json.dump() saves integer keys as strings
         regions = { int(k):v for k,v in regions.items() }
+        internalSeeds = [Vector(s) for s in seeds[:len(internalRegions)]]
 
     ###########################################################################
     #        Create a 3D model of the city
@@ -870,7 +870,7 @@ def main():
         bpy.ops.object.join()
 
     if args.get('createLeaves', False):
-        createLeaves(seeds, internalRegions, vertices)
+        createLeaves(internalSeeds, internalRegions, vertices)
 
 
     #Save the current file, if outputCityFilename is set.
