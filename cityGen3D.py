@@ -31,6 +31,7 @@ from math import sqrt, acos, sin, cos
 from pprint import pprint
 from mathutils import Vector
 from datetime import datetime
+from random import uniform
 
 #Set default values for args
 args={
@@ -44,6 +45,7 @@ args={
 'createDefenseWall' : True,  # Create exterior boundary of the city
 'createGround' : True,       # Create ground boundary of the city
 'createStreets' : True,      # Create streets of the city
+'createLeaves' : True,       # Create leaves on the streets
 'numMonsters' : 4,
 'outputCityFilename' : 'outputcity.blend', #Output file with just the city
 'outputTourFilename' : 'outputtour.blend', #Output file with complete game
@@ -515,6 +517,85 @@ def importLibrary(filename, link=False, destinationLayer=1, importScripts=True):
                 o.layers[0] = False
 
     updateExternalTexts()
+
+
+
+def pointDistance(x1, y1, x2, y2):
+    distance = sqrt(pow(x2 - x1, 2) + pow(y2 - y1, 2))
+    return distance
+
+
+
+def nearestSeed(vector, seeds):
+    distance = None
+    for i in seeds:
+        d = pointDistance(vector[0], vector[1], i[0], i[1])
+        if (distance == None):
+            distance = d
+            seed = seeds.index(i)
+        else:
+            if (d < distance):
+                distance = d
+                seed = seeds.index(i)
+    return seed
+
+
+
+def nearestSegment(x, y , vertices, vert_coords):
+    distance = None
+    for i in vertices:
+        coordinates = vert_coords[i]
+        d = pointDistance(x, y, coordinates[0], coordinates[1])
+
+        if (distance == None):
+            distance = d
+            vertex = i
+        else:
+            if (d < distance):
+                distance = d
+                vertex = i
+
+    vertex = vertices.index(vertex)
+    segment1 = [vert_coords[vertices[vertex - 1]], vert_coords[vertices[vertex]]]
+    segment2 = [vert_coords[vertices[vertex]], vert_coords[vertices[-len(vertices) + vertex + 1]]]
+
+    dist1 = ((segment1[1][0] - segment1[0][0]) * (y - segment1[0][1]) - (
+        segment1[1][1] - segment1[0][1]) * (x - segment1[0][0])) / (
+            sqrt(pow(segment1[1][0] - segment1[0][0], 2) + pow(segment1[1][1] - segment1[0][1], 2)))
+
+    dist2 = ((segment2[1][0] - segment2[0][0]) * (y - segment2[0][1]) - (
+        segment2[1][1] - segment2[0][1]) * (x - segment2[0][0])) / (
+            sqrt(pow(segment2[1][0] - segment2[0][0], 2) + pow(segment2[1][1] - segment2[0][1], 2)))
+
+    if (dist1 < dist2):
+        return (segment1, dist1)
+    else:
+        return (segment2, dist2)
+
+
+
+def createLeaves(seeds, internalRegions, vertices):
+    print("Creating leaves...")
+    hojas = 0
+    loops = 0
+
+    while (hojas < 3000):
+        loops = loops + 1
+        (x, y) = (uniform(-300, 300), uniform(-300, 300))
+        vector = Vector((x, y, 0.1))
+
+        n = nearestSeed(vector, seeds)
+        (s, d) = nearestSegment(x, y , internalRegions[n], vertices)
+
+        if (d < 4.5 and d > 1.5):
+            g1 = duplicateObject(bpy.data.objects["DryLeaf"], "_leave_" + str(hojas))
+            g1.location = vector
+            g1.rotation_euler = (0, 0, uniform(0, 360))
+            hojas = hojas + 1
+
+    print("\nLeaves created (", loops, "loops)")
+
+
        
 ###########################
 # The one and only... main
@@ -624,6 +705,7 @@ def main():
         # This is a hack to convert dictionaries with string keys to integer.
         # Necessary because json.dump() saves integer keys as strings
         regions = { int(k):v for k,v in regions.items() }
+        internalSeeds = [Vector(s) for s in seeds[:len(internalRegions)]]
 
     ###########################################################################
     #        Create a 3D model of the city
@@ -785,7 +867,11 @@ def main():
         for o in bpy.data.objects:
             o.select = o.name.startswith("_Region")
         bpy.context.scene.objects.active = bpy.data.objects["_Region"]
-        bpy.ops.object.join()        
+        bpy.ops.object.join()
+
+    if args.get('createLeaves', False):
+        createLeaves(internalSeeds, internalRegions, vertices)
+
 
     #Save the current file, if outputCityFilename is set.
     if args.get('outputCityFilename', False):
