@@ -310,12 +310,19 @@ def newCityData(numSeeds=90, cityRadius=20, numBarriers=12, LloydSteps=2, gateLe
     # Generate random seed in a square
     seeds = 2 * cityRadius * np.random.random((numSeeds, 2)) - cityRadius
 
+    seeds[0] = np.array([0,0])
+    seeds[1] = np.array([-25,0])
+    seeds[2] = np.array([25,0])
+    seeds[3] = np.array([0, -32])
+    seeds[4] = np.array([0, 32])
+
     # Min distante allowed between seeds. See documentation
     minSeedDistance = 1.9 * cityRadius / sqrt(numSeeds)
     print("minSeedDistance = ", minSeedDistance)
 
     # Generate the array of seeds
     for i in range(numSeeds):
+
         # Check the distance with previous seeds
         for j in range(i):
             dist = np.linalg.norm(seeds[i] - seeds[j])
@@ -325,6 +332,12 @@ def newCityData(numSeeds=90, cityRadius=20, numBarriers=12, LloydSteps=2, gateLe
                 seeds[i] = 2 * cityRadius * np.random.random(2) - cityRadius
                 i -= 1
                 break
+
+    seeds[0] = np.array([0,0])
+    seeds[1] = np.array([-25,0])
+    seeds[2] = np.array([25,0])
+    seeds[3] = np.array([0, -32])
+    seeds[4] = np.array([0, 32])
 
     # Create a dense barrier of points around the seeds, to avoid far voronoi vertex
     if numBarriers > 0:
@@ -370,6 +383,12 @@ def newCityData(numSeeds=90, cityRadius=20, numBarriers=12, LloydSteps=2, gateLe
                 seeds[r] = newSeed
             else:
                 print("dist=", dist, ">= DistanciaMaxima=", DistanciaMaxima)
+
+        seeds[0] = np.array([0,0])
+        seeds[1] = np.array([-25,0])
+        seeds[2] = np.array([25,0])
+        seeds[3] = np.array([0, -32])
+        seeds[4] = np.array([0, 32])
 
         # Recompute Voronoi Diagram
         barrierSeeds = np.concatenate((seeds, barrier), axis=0)
