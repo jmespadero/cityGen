@@ -520,51 +520,40 @@ def importLibrary(filename, link=False, destinationLayer=1, importScripts=True):
 
 
 
-def pointDistance(x1, y1, x2, y2):
-    distance = sqrt(pow(x2 - x1, 2) + pow(y2 - y1, 2))
-    return distance
-
-
-
 def nearestSeed(vector, seeds):
-    distance = None
-    for i in seeds:
-        d = pointDistance(vector[0], vector[1], i[0], i[1])
-        if (distance == None):
+    distance = float('inf')
+    for s in seeds:
+        d = (vector.xy - s).length
+        if (d < distance):
             distance = d
-            seed = seeds.index(i)
-        else:
-            if (d < distance):
-                distance = d
-                seed = seeds.index(i)
+            seed = seeds.index(s)
     return seed
 
 
 
-def nearestSegment(x, y , vertices, vert_coords):
-    distance = None
-    for i in vertices:
-        coordinates = vert_coords[i]
-        d = pointDistance(x, y, coordinates[0], coordinates[1])
+def nearestSegment(vector , vertices, vert_coords):
+    distance = float('inf')
+    for v in vertices:
+        d = (vector.xy - vert_coords[v]).length
 
         if (distance == None):
             distance = d
-            vertex = i
+            vertex = v
         else:
             if (d < distance):
                 distance = d
-                vertex = i
+                vertex = v
 
     vertex = vertices.index(vertex)
     segment1 = [vert_coords[vertices[vertex - 1]], vert_coords[vertices[vertex]]]
     segment2 = [vert_coords[vertices[vertex]], vert_coords[vertices[-len(vertices) + vertex + 1]]]
 
-    dist1 = ((segment1[1][0] - segment1[0][0]) * (y - segment1[0][1]) - (
-        segment1[1][1] - segment1[0][1]) * (x - segment1[0][0])) / (
+    dist1 = ((segment1[1][0] - segment1[0][0]) * (vector.y - segment1[0][1]) - (
+        segment1[1][1] - segment1[0][1]) * (vector.x - segment1[0][0])) / (
             sqrt(pow(segment1[1][0] - segment1[0][0], 2) + pow(segment1[1][1] - segment1[0][1], 2)))
 
-    dist2 = ((segment2[1][0] - segment2[0][0]) * (y - segment2[0][1]) - (
-        segment2[1][1] - segment2[0][1]) * (x - segment2[0][0])) / (
+    dist2 = ((segment2[1][0] - segment2[0][0]) * (vector.y - segment2[0][1]) - (
+        segment2[1][1] - segment2[0][1]) * (vector.x - segment2[0][0])) / (
             sqrt(pow(segment2[1][0] - segment2[0][0], 2) + pow(segment2[1][1] - segment2[0][1], 2)))
 
     if (dist1 < dist2):
@@ -581,11 +570,10 @@ def createLeaves(seeds, internalRegions, vertices):
 
     while (hojas < 3000):
         loops = loops + 1
-        (x, y) = (uniform(-300, 300), uniform(-300, 300))
-        vector = Vector((x, y, 0.1))
+        vector = Vector((uniform(-300, 300), uniform(-300, 300), 0.1))
 
         n = nearestSeed(vector, seeds)
-        (s, d) = nearestSegment(x, y , internalRegions[n], vertices)
+        (s, d) = nearestSegment(vector , internalRegions[n], vertices)
 
         if (d < 4.5 and d > 1.5):
             g1 = duplicateObject(bpy.data.objects["DryLeaf"], "_leave_" + str(hojas))
