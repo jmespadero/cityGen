@@ -42,10 +42,12 @@ args={
 'inputLibraries' : 'cg-library.blend',  # Set a filename for assets (houses, wall, etc...) library.
 'inputHouses' : ["House7", "House3","House4","House5","House6"],
 'inputPlayer' : 'cg-playerBoy.blend',   # Set a filename for player system.
+'inputTemple' : 'cg-temple.blend',
 'createDefenseWall' : True,  # Create exterior boundary of the city
 'createGround' : True,       # Create ground boundary of the city
 'createStreets' : True,      # Create streets of the city
 'createLeaves' : True,       # Create leaves on the streets
+'createTemple' : True,
 'numMonsters' : 4,
 'outputCityFilename' : 'outputcity.blend', #Output file with just the city
 'outputTourFilename' : 'outputtour.blend', #Output file with complete game
@@ -317,7 +319,7 @@ def makeGround(cList=[], objName="meshObj", meshName="mesh", radius=10.0, materi
 
 
 
-def makePolygon(cList, objName="meshObj", meshName="mesh", height=0.0, reduct=0.0, hide=True, nr=None, seed=None):
+def makePolygon(cList, num_region, objName="meshObj", meshName="mesh", height=0.0, reduct=0.0, hide=True, nr=None, seed=None):
     """Create a polygon/prism to represent a city block
     cList    -- A list of 3D points with the vertex of the polygon (corners of the city block)
     objName  -- the name of the new object
@@ -330,6 +332,8 @@ def makePolygon(cList, objName="meshObj", meshName="mesh", height=0.0, reduct=0.
     print(".", end="")
     
     nv = len(cList)
+
+
 
     if not seed:
         #Compute center of voronoi region
@@ -364,7 +368,8 @@ def makePolygon(cList, objName="meshObj", meshName="mesh", height=0.0, reduct=0.
     # pprint(streetData)
     me.from_pydata(cList+cList2, [], streetData)
     me.update(calc_edges=True)
-    me.materials.append(bpy.data.materials['Floor1'])
+    if (num_region > 0):
+        me.materials.append(bpy.data.materials['Floor1'])
     bpy.context.scene.objects.link(ob)
 
     # 2. Create a mesh interior of this region
@@ -394,7 +399,8 @@ def makePolygon(cList, objName="meshObj", meshName="mesh", height=0.0, reduct=0.
 
     # 4. Fill boundary of region with Curbs
     for i in range(nv):
-        duplicateAlongSegment(cList2[i-1], cList2[i], "Curb", 0.1)
+        if (num_region > 0):
+            duplicateAlongSegment(cList2[i-1], cList2[i], "Curb", 0.1)
     
     # 5. Create Houses
     
@@ -415,10 +421,12 @@ def makePolygon(cList, objName="meshObj", meshName="mesh", height=0.0, reduct=0.
             vecyM = reduct * 1.5 * dy / dist
             cList3.append((cList[i][0]-vecx,cList[i][1]-vecy,cList[i][2]))
             cList4.append((cList[i][0]-vecxM,cList[i][1]-vecyM,cList[i][2]))
-    
+
+
     for i in range(nv):
-        duplicateAlongSegmentMix (cList3[i-1], cList3[i], 1 ,args["inputHouses"])
-        duplicateAlongSegment(cList4[i-1], cList4[i], "WallHouse", 0, True )
+        if (num_region > 0):
+            duplicateAlongSegmentMix (cList3[i-1], cList3[i], 1 ,args["inputHouses"])
+            duplicateAlongSegment(cList4[i-1], cList4[i], "WallHouse", 0, True )
 
     """
     #Create a mesh for colision
@@ -582,6 +590,18 @@ def createLeaves(seeds, internalRegions, vertices):
             hojas = hojas + 1
 
     print("\nLeaves created (", loops, "loops)")
+
+
+
+def createTemple(seeds):
+    importLibrary(args['inputTemple'])
+    vector = Vector((0.0, 0.0, 0.1))
+
+    temple = duplicateObject(bpy.data.objects["Temple"], "_temple")
+    temple.location = vector
+    temple.rotation_euler = (0, 0, 90)
+
+
 
 
        
@@ -841,7 +861,7 @@ def main():
         for nr, region in enumerate(internalRegions):
             print(".", end="")
             corners = [vertices3D[i] for i in region]
-            makePolygon(corners, "houseO", "houseM", height=0.5, reduct=1.0, nr=nr, seed=seeds[nr])
+            makePolygon(corners, nr, "houseO", "houseM", height=0.5, reduct=1.0, nr=nr, seed=seeds[nr])
         print(".")
 
         # Merge streets meshes in one object
@@ -857,8 +877,13 @@ def main():
         bpy.context.scene.objects.active = bpy.data.objects["_Region"]
         bpy.ops.object.join()
 
+
     if args.get('createLeaves', False):
         createLeaves(internalSeeds, internalRegions, vertices)
+
+
+    if args.get('createTemple', False):
+        createTemple(internalSeeds)
 
 
     #Save the current file, if outputCityFilename is set.
