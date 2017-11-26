@@ -594,15 +594,11 @@ def createLeaves(seeds, internalRegions, vertices):
 
 
 def createTemple(seeds):
-    importLibrary(args['inputTemple'])
-    vector = Vector((0.0, 0.0, 0.1))
+    importLibrary(args['inputTemple'], destinationLayer=0, importScripts=True)
+    vector = Vector((0.0, 11.0))
 
-    temple = duplicateObject(bpy.data.objects["Temple"], "_temple")
-    temple.location = vector
-    temple.rotation_euler = (0, 0, 90)
-
-
-
+    temple = bpy.data.objects['Temple']
+    temple.location.xy = seeds[0] + vector
 
        
 ###########################
