@@ -310,11 +310,39 @@ def newCityData(numSeeds=90, cityRadius=20, numBarriers=12, LloydSteps=2, gateLe
     # Generate random seed in a square
     seeds = 2 * cityRadius * np.random.random((numSeeds, 2)) - cityRadius
 
-    seeds[0] = np.array([0,0])
-    seeds[1] = np.array([-25,0])
-    seeds[2] = np.array([25,0])
-    seeds[3] = np.array([0, -32])
-    seeds[4] = np.array([0, 32])
+    # Lists of static and temporal seeds for temple and market regions
+    static_seeds = {}
+    temporal_seeds = {}
+
+    # Load temple seeds from "cg-Temple.json" file
+    with open("cg-Temple.json", 'r') as f:
+        static_seeds["cg-Temple.json"] = json.load(f)
+
+    # Load relative market seeds from "cg-Market.json" file
+    aux_list = []
+    with open("cg-Market.json",'r') as f:
+        aux_list = temporal_seeds["cg-Market.json"] = json.load(f)
+    
+    # Calculate static market seeds from relative marked seeds
+    i = 0
+    for x, y in aux_list:
+        if (i > 0):
+            aux_list[i][0] = aux_list[i][0] + aux_list[0][0]
+            aux_list[i][1] = aux_list[i][1] + aux_list[0][1]
+        i = i + 1
+
+    # Add static market seeds values to the static seeds list
+    static_seeds["cg-Market.json"] = aux_list
+
+
+    #Force fixed seeds
+    i=0
+    for name in static_seeds:
+        reg = static_seeds[name]
+        for s in reg:
+            seeds[i] = s
+            i = i + 1
+
 
     # Min distante allowed between seeds. See documentation
     minSeedDistance = 1.9 * cityRadius / sqrt(numSeeds)
@@ -333,11 +361,14 @@ def newCityData(numSeeds=90, cityRadius=20, numBarriers=12, LloydSteps=2, gateLe
                 i -= 1
                 break
 
-    seeds[0] = np.array([0,0])
-    seeds[1] = np.array([-25,0])
-    seeds[2] = np.array([25,0])
-    seeds[3] = np.array([0, -32])
-    seeds[4] = np.array([0, 32])
+
+    # Force fixed seeds
+    i = 0
+    for name in static_seeds:
+        reg = static_seeds[name]
+        for s in reg:
+            seeds[i] = s
+            i = i + 1
 
     # Create a dense barrier of points around the seeds, to avoid far voronoi vertex
     if numBarriers > 0:
@@ -384,11 +415,13 @@ def newCityData(numSeeds=90, cityRadius=20, numBarriers=12, LloydSteps=2, gateLe
             else:
                 print("dist=", dist, ">= DistanciaMaxima=", DistanciaMaxima)
 
-        seeds[0] = np.array([0,0])
-        seeds[1] = np.array([-25,0])
-        seeds[2] = np.array([25,0])
-        seeds[3] = np.array([0, -32])
-        seeds[4] = np.array([0, 32])
+        # Force fixed seeds
+        i = 0
+        for name in static_seeds:
+            reg = static_seeds[name]
+            for s in reg:
+                seeds[i] = s
+                i = i + 1
 
         # Recompute Voronoi Diagram
         barrierSeeds = np.concatenate((seeds, barrier), axis=0)
@@ -925,7 +958,7 @@ def main():
     import argparse
     parser = argparse.ArgumentParser(description='Citymap generator from project citygen.')
 
-    parser.add_argument('-s', '--numSeeds', type=int, default=10, required=False,
+    parser.add_argument('-s', '--numSeeds', type=int, default=13, required=False,
                         help='Number of seeds used as Voronoi input (default=10)')
     parser.add_argument('-r', '--cityRadius', type=float, default=150, required=False,
                         help='Radius of the city (default=150)')
