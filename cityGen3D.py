@@ -368,7 +368,7 @@ def makePolygon(cList, num_region, objName="meshObj", meshName="mesh", height=0.
     # pprint(streetData)
     me.from_pydata(cList+cList2, [], streetData)
     me.update(calc_edges=True)
-    if (num_region > 0):
+    if ((num_region != 0) and (num_region != 6)):
         me.materials.append(bpy.data.materials['Floor1'])
     bpy.context.scene.objects.link(ob)
 
@@ -399,7 +399,7 @@ def makePolygon(cList, num_region, objName="meshObj", meshName="mesh", height=0.
 
     # 4. Fill boundary of region with Curbs
     for i in range(nv):
-        if (num_region > 0):
+        if ((num_region != 0) and (num_region != 6)):
             duplicateAlongSegment(cList2[i-1], cList2[i], "Curb", 0.1)
     
     # 5. Create Houses
@@ -424,7 +424,7 @@ def makePolygon(cList, num_region, objName="meshObj", meshName="mesh", height=0.
 
 
     for i in range(nv):
-        if (num_region > 0):
+        if ((num_region != 0) and (num_region != 6)):
             duplicateAlongSegmentMix (cList3[i-1], cList3[i], 1 ,args["inputHouses"])
             duplicateAlongSegment(cList4[i-1], cList4[i], "WallHouse", 0, True )
 
@@ -598,7 +598,7 @@ def createTemple(seeds):
     vector = Vector((0.0, 11.0))
 
     temple = bpy.data.objects['Temple']
-    temple.location.xy = seeds[0] + vector
+    temple.location.xy = seeds[6] + vector
 
        
 ###########################
