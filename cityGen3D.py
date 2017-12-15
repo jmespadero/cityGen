@@ -43,11 +43,13 @@ args={
 'inputHouses' : ["House7", "House3","House4","House5","House6"],
 'inputPlayer' : 'cg-playerBoy.blend',   # Set a filename for player system.
 'inputTemple' : 'cg-temple.blend',
+'inputMarket' : 'cg-market.blend',
 'createDefenseWall' : True,  # Create exterior boundary of the city
 'createGround' : True,       # Create ground boundary of the city
 'createStreets' : True,      # Create streets of the city
 'createLeaves' : True,       # Create leaves on the streets
 'createTemple' : True,
+'createMarket' : True,
 'numMonsters' : 4,
 'outputCityFilename' : 'outputcity.blend', #Output file with just the city
 'outputTourFilename' : 'outputtour.blend', #Output file with complete game
@@ -368,7 +370,7 @@ def makePolygon(cList, num_region, objName="meshObj", meshName="mesh", height=0.
     # pprint(streetData)
     me.from_pydata(cList+cList2, [], streetData)
     me.update(calc_edges=True)
-    if ((num_region != 0) and (num_region != 6)):
+    if ((num_region != 0) and (num_region != 5)):
         me.materials.append(bpy.data.materials['Floor1'])
     bpy.context.scene.objects.link(ob)
 
@@ -399,7 +401,7 @@ def makePolygon(cList, num_region, objName="meshObj", meshName="mesh", height=0.
 
     # 4. Fill boundary of region with Curbs
     for i in range(nv):
-        if ((num_region != 0) and (num_region != 6)):
+        if ((num_region != 0) and (num_region != 5)):
             duplicateAlongSegment(cList2[i-1], cList2[i], "Curb", 0.1)
     
     # 5. Create Houses
@@ -424,7 +426,7 @@ def makePolygon(cList, num_region, objName="meshObj", meshName="mesh", height=0.
 
 
     for i in range(nv):
-        if ((num_region != 0) and (num_region != 6)):
+        if ((num_region != 0) and (num_region != 5)):
             duplicateAlongSegmentMix (cList3[i-1], cList3[i], 1 ,args["inputHouses"])
             duplicateAlongSegment(cList4[i-1], cList4[i], "WallHouse", 0, True )
 
@@ -593,14 +595,28 @@ def createLeaves(seeds, internalRegions, vertices):
 
 
 
+# Methodto place the only temple in the map
 def createTemple(seeds):
+    # Importing the temple object in layer 0
     importLibrary(args['inputTemple'], destinationLayer=0, importScripts=True)
     vector = Vector((0.0, 11.0))
 
+    # Locating the temple parent seed
     temple = bpy.data.objects['Temple']
-    temple.location.xy = seeds[6] + vector
+    temple.location.xy = seeds[0] + vector
 
-       
+
+
+def createMarket(seeds):
+    # Importing the market object in layer 0
+    importLibrary(args['inputMarket'], destinationLayer=0, importScripts=True)
+
+    # Locating the market parent seed
+    market = bpy.data.objects['Market']
+    market.location.xy = seeds[5]
+
+
+
 ###########################
 # The one and only... main
 def main():
@@ -881,6 +897,8 @@ def main():
     if args.get('createTemple', False):
         createTemple(internalSeeds)
 
+    if args.get('createMarket', False):
+        createMarket(internalSeeds)
 
     #Save the current file, if outputCityFilename is set.
     if args.get('outputCityFilename', False):

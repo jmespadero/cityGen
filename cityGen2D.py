@@ -266,6 +266,7 @@ def forceStaticSeeds(static_seeds, seeds):
 
 
 def buildStaticSeeds(names, city_radius):
+    print("Creating next specific regions:", names, "...")
     i = 0
     random_seed = [0.0, 0.0]
     dictionary = {}
@@ -286,6 +287,8 @@ def buildStaticSeeds(names, city_radius):
         # Add pair <name, list> to the static seeds dictionary
             dictionary[region_name + "_" + str(i)] = aux_list
         i = i + 1
+
+    print(" ... created!")
     return dictionary
 
 
