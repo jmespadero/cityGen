@@ -48,8 +48,7 @@ args={
 'createGround' : True,       # Create ground boundary of the city
 'createStreets' : True,      # Create streets of the city
 'createLeaves' : True,       # Create leaves on the streets
-'createTemple' : True,
-'createMarket' : True,
+'createBuildings' : True,    # Create buildings on specific regions
 'numMonsters' : 4,
 'outputCityFilename' : 'outputcity.blend', #Output file with just the city
 'outputTourFilename' : 'outputtour.blend', #Output file with complete game
@@ -595,25 +594,17 @@ def createLeaves(seeds, internalRegions, vertices):
 
 
 
-# Methodto place the only temple in the map
-def createTemple(seeds):
-    # Importing the temple object in layer 0
-    importLibrary(args['inputTemple'], destinationLayer=0, importScripts=True)
-    vector = Vector((0.0, 11.0))
+def createBuildings(seeds, staticRegions):
+    for i, (region, building) in staticRegions.items():
+        if (building == 'Temple'):
+            vector = Vector((0.0, 11.0))
+        else:
+            vector = Vector((-2.0, 0.0))
 
-    # Locating the temple parent seed
-    temple = bpy.data.objects['Temple']
-    temple.location.xy = seeds[0] + vector
-
-
-
-def createMarket(seeds):
-    # Importing the market object in layer 0
-    importLibrary(args['inputMarket'], destinationLayer=0, importScripts=True)
-
-    # Locating the market parent seed
-    market = bpy.data.objects['Market']
-    market.location.xy = seeds[5]
+        importLibrary(args['input' + building], destinationLayer=0, importScripts=True)
+        object = bpy.data.objects[building]
+        object.location.xy = seeds[region] + vector
+        print("Locating " + building + " in region " + str(region))
 
 
 
@@ -722,6 +713,7 @@ def main():
         regions = data['regions']
         internalRegions = data['internalRegions']
         externalPoints = data['externalPoints']
+        staticRegions = data['staticRegions']
         # This is a hack to convert dictionaries with string keys to integer.
         # Necessary because json.dump() saves integer keys as strings
         regions = { int(k):v for k,v in regions.items() }
@@ -894,11 +886,9 @@ def main():
         createLeaves(internalSeeds, internalRegions, vertices)
 
 
-    if args.get('createTemple', False):
-        createTemple(internalSeeds)
+    if args.get('createBuildings', False):
+        createBuildings(internalSeeds, staticRegions)
 
-    if args.get('createMarket', False):
-        createMarket(internalSeeds)
 
     #Save the current file, if outputCityFilename is set.
     if args.get('outputCityFilename', False):

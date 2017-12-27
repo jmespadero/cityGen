@@ -257,53 +257,61 @@ class Delaunay2D:
 def forceStaticSeeds(static_seeds, seeds):
     # Force static seeds
     i = 0
-    for name in static_seeds:
-        reg = static_seeds[name]
-        for s in reg:
+    for name in sorted(static_seeds):
+        for s in static_seeds[name]:
             seeds[i] = s
             i = i + 1
 
 
 
 def buildStaticSeeds(names, city_radius):
-    print("Creating next specific regions:", names, "...")
-    i = 0
-    random_seed = [0.0, 0.0]
+    print("Creating requested fix regions:", names)
     dictionary = {}
+    fixedSeeds=0
+    static_regions = {}
+    j = 0
 
-    for region_name in names:
+    for i, name in enumerate(names):
+        reg_id = "f%d_%s"%(i, name)
+
+        random_seed = [0.0, 0.0]
         if (i > 0):
             random_seed = 2 * city_radius * np.random.random(2) - city_radius / 2
-
+        
         # Load relative seeds from "cg-XXXXXXX.json" file
-        with open("cg-" + region_name + ".json", 'r') as f:
+        with open("cg-" + name + ".json", 'r') as f:
             aux_list = [[0, 0]] + json.load(f)
 
-        # Calculating static seeds of region from relative seeds using the random_seed
-        for x in aux_list:
-            x[0] = x[0] + random_seed[0]
-            x[1] = x[1] + random_seed[1]
+            # Displace seeds of this region 
+            for x in aux_list:
+                x[0] = x[0] + random_seed[0]
+                x[1] = x[1] + random_seed[1]
+            
+            # Add pair <name, list> to the static seeds dictionary
+            dictionary[reg_id] = aux_list
+            
+            #Debug info
+            print(" * Build", name, "as", reg_id, "in region", fixedSeeds)
+            static_regions[j] = (fixedSeeds, name)
+            j = j + 1
+            fixedSeeds += len(aux_list)
 
-        # Add pair <name, list> to the static seeds dictionary
-            dictionary[region_name + "_" + str(i)] = aux_list
-        i = i + 1
-
-    print(" ... created!")
-    return dictionary
+    return dictionary, static_regions
 
 
 
 
 
-def newCityData(numSeeds=90, cityRadius=20, numBarriers=12, LloydSteps=2, gateLen=0., randomSeed=None, debugSVG=False):
+#def newCityData(numSeeds=90, cityRadius=20, numBarriers=12, LloydSteps=2, gateLen=0., randomSeed=None, debugSVG=False):
+def newCityData(args, numBarriers=12, LloydSteps=2):
     """Create a new set of regions from a voronoi diagram
-    numSeeds   -- Number of seed to be used
-    cityRadius -- Approximated radius of the city
-    numBarriers -- Number of barrier nodes. Usually 12.
-    LloydSteps -- Number of Lloyd's relaxation steps to apply 
-    gateLen    -- Size of the gates in the external wall. Use 0.0 to avoid place gates
-    randomSeed -- Random seed (to make deterministic)
-    debugSVG   -- Create debug SVG files on each step.
+    args.numSeeds   -- Number of seed to be used
+    args.cityRadius -- Approximated radius of the city
+    args.numBarriers -- Number of barrier seeds. Usually 12.
+    args.LloydSteps -- Number of Lloyd's relaxation steps to apply 
+    args.gateLen    -- Size of the gates in the external wall. Use 0.0 to avoid place gates
+    args.randomSeed -- Random seed (to make deterministic)
+    args.debugSVG   -- Create debug SVG files on each step.
     """
 
     def pnt2line(pnt, s1, s2):
@@ -338,6 +346,13 @@ def newCityData(numSeeds=90, cityRadius=20, numBarriers=12, LloydSteps=2, gateLe
         nearest = s1 + line_vec * t
         return nearest
 
+    # Extract variables from args
+    numSeeds = args.numSeeds
+    cityRadius = args.cityRadius
+    randomSeed = args.randomSeed
+    debugSVG = args.debug
+    debugSVG = args.debug
+    
     print("createNewScene (numSeeds=%d, cityRadius=%g, numBarriers=%d, LloydSteps=%d" % (
     numSeeds, cityRadius, numBarriers, LloydSteps))
 
@@ -346,15 +361,15 @@ def newCityData(numSeeds=90, cityRadius=20, numBarriers=12, LloydSteps=2, gateLe
         randomSeed = np.random.randint(99999)
 
     # A nice example value... np.random.seed(10)
-    print("Using randomSeed", randomSeed)
-    np.random.seed(randomSeed)
+    print("Using randomSeed", args.randomSeed)
+    np.random.seed(args.randomSeed)
 
     ###########################################################        
     # Generate random seed in a square
     seeds = 2 * cityRadius * np.random.random((numSeeds, 2)) - cityRadius
 
     # Dictionary with the specific regions coordinates inside
-    static_seeds = buildStaticSeeds(["Temple", "Market"], cityRadius)
+    static_seeds, static_regions = buildStaticSeeds(args.models, cityRadius)
     forceStaticSeeds(static_seeds, seeds)
 
 
@@ -705,7 +720,7 @@ def newCityData(numSeeds=90, cityRadius=20, numBarriers=12, LloydSteps=2, gateLe
             plotVoronoiData(vertices, internalRegions, wv, 'tmp5.gateRandomWall', cityRadius, extraR=True)
     # """
         
-    if gateLen > 0:
+    if args.gateLen > 0:
         # Place a gate in the external corner with angle nearest to 180
         nv = len(wallVertices)        
         #Compute edge vectors (vertex to its previous)
@@ -723,8 +738,8 @@ def newCityData(numSeeds=90, cityRadius=20, numBarriers=12, LloydSteps=2, gateLe
         tangent /= np.linalg.norm(tangent)
         #Displace the vertex at the corner in the direction of tangent
         gateMid = wallVertices[bestCorner]
-        gate1 = wallVertices[bestCorner] - tangent * gateLen/2
-        gate2 = wallVertices[bestCorner] + tangent * gateLen/2
+        gate1 = wallVertices[bestCorner] - tangent * args.gateLen/2
+        gate2 = wallVertices[bestCorner] + tangent * args.gateLen/2
         wv = [gate2]+wallVertices.tolist()[bestCorner+1:] + wallVertices.tolist()[:bestCorner]+[gate1]
         if debugSVG:
             plotVoronoiData(vertices, internalRegions, wv, 'tmp5.gateFlatCorner', cityRadius, extraR=True)
@@ -782,6 +797,7 @@ def newCityData(numSeeds=90, cityRadius=20, numBarriers=12, LloydSteps=2, gateLe
     'internalRegions': internalRegions,
     'externalPoints': externalPoints,
     'wallVertices': wallVertices.tolist(),
+    'staticRegions': static_regions,
     }
     return cityData
 
@@ -974,6 +990,8 @@ def main():
                         help='Initial random seed value')
     parser.add_argument('-p', '--plot', required=False,
                         help='Replot a previous generated city (default="city.data.json")')
+    parser.add_argument('-m', '--models', type=str, required=False, nargs='+', default=['Temple'], 
+                        help='Add a list of static models defined in a .json+.blend files')
     parser.add_argument('--debug', required=False, action='store_true',
                         help='Create debug SVG files')
     parser.add_argument('--matplotlib', required=False, action='store_true', 
@@ -989,7 +1007,7 @@ def main():
         
     if not args.plot:
         # Generate a new city map
-        cityData = newCityData(args.numSeeds, args.cityRadius, gateLen=args.gateLen, randomSeed=args.randomSeed, debugSVG=args.debug)
+        cityData = newCityData(args)
         cityData['cityName'] = args.cityName
         # Save cityData data as a json file
         cityDataFilename = args.cityName + '.data.json'
