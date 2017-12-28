@@ -320,7 +320,7 @@ def makeGround(cList=[], objName="meshObj", meshName="mesh", radius=10.0, materi
 
 
 
-def makePolygon(cList, num_region, objName="meshObj", meshName="mesh", height=0.0, reduct=0.0, hide=True, nr=None, seed=None):
+def makePolygon(emptyRegions, cList, num_region, objName="meshObj", meshName="mesh", height=0.0, reduct=0.0, hide=True, nr=None, seed=None):
     """Create a polygon/prism to represent a city block
     cList    -- A list of 3D points with the vertex of the polygon (corners of the city block)
     objName  -- the name of the new object
@@ -369,7 +369,7 @@ def makePolygon(cList, num_region, objName="meshObj", meshName="mesh", height=0.
     # pprint(streetData)
     me.from_pydata(cList+cList2, [], streetData)
     me.update(calc_edges=True)
-    if ((num_region != 0) and (num_region != 5)):
+    if (num_region not in emptyRegions):
         me.materials.append(bpy.data.materials['Floor1'])
     bpy.context.scene.objects.link(ob)
 
@@ -400,7 +400,7 @@ def makePolygon(cList, num_region, objName="meshObj", meshName="mesh", height=0.
 
     # 4. Fill boundary of region with Curbs
     for i in range(nv):
-        if ((num_region != 0) and (num_region != 5)):
+        if (num_region not in emptyRegions):
             duplicateAlongSegment(cList2[i-1], cList2[i], "Curb", 0.1)
     
     # 5. Create Houses
@@ -859,13 +859,18 @@ def main():
         groundRadius = 50 + max([v.length for v in vertices])
         makeGround([], '_groundO', '_groundM', radius=groundRadius, material='Floor3')
 
+    emptyRegions = []
+    for i, (region, building) in staticRegions.items():
+        emptyRegions.append(int(region))
+
+
     if args.get('createStreets', False):
         # Create paths and polygon for internal regions
         print("Creating Districts")
         for nr, region in enumerate(internalRegions):
             print(".", end="")
             corners = [vertices3D[i] for i in region]
-            makePolygon(corners, nr, "houseO", "houseM", height=0.5, reduct=1.0, nr=nr, seed=seeds[nr])
+            makePolygon(emptyRegions, corners, nr, "houseO", "houseM", height=0.5, reduct=1.0, nr=nr, seed=seeds[nr])
         print(".")
 
         # Merge streets meshes in one object
