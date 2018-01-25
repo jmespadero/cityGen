@@ -253,11 +253,11 @@ class Delaunay2D:
         return vor_coors, regions
 
 
-
 def forceStaticSeeds(static_seeds, seeds):
     # Force static seeds
     i = 0
-    for name in sorted(static_seeds):
+    for name in sorted(static_seeds): ####################################################################
+        print("fixing region", name, "len", len(static_seeds[name]))
         for s in static_seeds[name]:
             seeds[i] = s
             i = i + 1
@@ -266,40 +266,49 @@ def forceStaticSeeds(static_seeds, seeds):
 
 def buildStaticSeeds(names, city_radius):
     print("Creating requested fix regions:", names)
-    dictionary = {}
+    regionDict = {}
     fixedSeeds=0
     static_regions = {}
-    j = 0
 
     for i, name in enumerate(names):
         reg_id = "f%d_%s"%(i, name)
 
-        random_seed = [0.0, 0.0]
-        if (i > 0):
-            random_seed = 2 * city_radius * np.random.random(2) - city_radius / 2
-        
         # Load relative seeds from "cg-XXXXXXX.json" file
         with open("cg-" + name + ".json", 'r') as f:
             aux_list = [[0, 0]] + json.load(f)
+            radius = 5 + max([np.linalg.norm(x) for x in aux_list])
+            print("cg-" + name + ".json", " radius",radius)
+
+            if (i == 0):
+                displacement = np.asarray([0.0, 0.0])
+            else:
+                displacement = np.asarray(1.5 * city_radius * np.random.random(2) - city_radius / 2)
+                # Compute signed distances from point displacement to each region
+                # r[0] is position of fixedRegion. r[2] is radius of fixedRegion
+                while (min([np.linalg.norm(r[0] - displacement) - r[2] for r in static_regions.values()]) < radius):
+                    displacement = 1.5 * city_radius * np.random.random(2) - city_radius / 2
+                    print ("Repitiendo displacement")
+
+                print("displacement", displacement, "origin", np.linalg.norm(displacement))
+                print(
+                "signedDistance", min([np.linalg.norm(r[0] - displacement) - r[2] for r in static_regions.values()]))
+                print(
+                "signedDistance", [np.linalg.norm(r[0] - displacement) - r[2] for r in static_regions.values()])
 
             # Displace seeds of this region 
             for x in aux_list:
-                x[0] = x[0] + random_seed[0]
-                x[1] = x[1] + random_seed[1]
+                x[0] = x[0] + displacement[0]
+                x[1] = x[1] + displacement[1]
             
             # Add pair <name, list> to the static seeds dictionary
-            dictionary[reg_id] = aux_list
-            
+            regionDict[reg_id] = aux_list
+
             #Debug info
             print(" * Build", name, "as", reg_id, "in region", fixedSeeds)
-            static_regions[j] = (fixedSeeds, name)
-            j = j + 1
+            static_regions[i] = (fixedSeeds, name, radius)
             fixedSeeds += len(aux_list)
 
-    return dictionary, static_regions
-
-
-
+    return regionDict, static_regions, fixedSeeds
 
 
 #def newCityData(numSeeds=90, cityRadius=20, numBarriers=12, LloydSteps=2, gateLen=0., randomSeed=None, debugSVG=False):
@@ -361,25 +370,25 @@ def newCityData(args, numBarriers=12, LloydSteps=2):
         randomSeed = np.random.randint(99999)
 
     # A nice example value... np.random.seed(10)
-    print("Using randomSeed", args.randomSeed)
-    np.random.seed(args.randomSeed)
+    print("Using randomSeed", randomSeed)
+    np.random.seed(randomSeed)
 
     ###########################################################        
     # Generate random seed in a square
     seeds = 2 * cityRadius * np.random.random((numSeeds, 2)) - cityRadius
 
     # Dictionary with the specific regions coordinates inside
-    static_seeds, static_regions = buildStaticSeeds(args.models, cityRadius)
+    static_seeds, static_regions, fixedSeeds = buildStaticSeeds(args.models, cityRadius)
     forceStaticSeeds(static_seeds, seeds)
 
 
-
     # Min distante allowed between seeds. See documentation
-    minSeedDistance = 1.9 * cityRadius / sqrt(numSeeds)
+    minSeedDistance = 1.9 * cityRadius / sqrt(numSeeds)  #Minima distancia de una semilla con otra, si es menor la distancia
+                                                         # la semilla se descartará.
     print("minSeedDistance = ", minSeedDistance)
 
     # Generate the array of seeds
-    for i in range(numSeeds):
+    for i in range(fixedSeeds, numSeeds):
 
         # Check the distance with previous seeds
         for j in range(i):

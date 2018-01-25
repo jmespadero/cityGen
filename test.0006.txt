@@ -1,0 +1,55 @@
+createNewScene (numSeeds=24, cityRadius=150, numBarriers=12, LloydSteps=2
+Using randomSeed 73291
+Creating requested fix regions: ['Temple', 'Market', 'Temple']
+cg-Temple.json  radius 37.0
+ * Build Temple as f0_Temple in region 0
+cg-Market.json  radius 48.0464865001
+Repitiendo displacement
+displacement [ -18.1155656   125.04577398] origin 126.351174534
+signedDistance 89.3511745345
+ * Build Market as f1_Market in region 5
+cg-Temple.json  radius 37.0
+displacement [  66.00845334  107.38302798] origin 126.048524824
+signedDistance 71.1353736848
+ * Build Temple as f2_Temple in region 11
+fixing region f0_Temple len 5
+fixing region f1_Market len 6
+fixing region f2_Temple len 5
+minSeedDistance =  58.17538139110049
+fixing region f0_Temple len 5
+fixing region f1_Market len 6
+fixing region f2_Temple len 5
+Lloyd Iteration 1 of 2
+fixing region f0_Temple len 5
+fixing region f1_Market len 6
+fixing region f2_Temple len 5
+Lloyd Iteration 2 of 2
+fixing region f0_Temple len 5
+fixing region f1_Market len 6
+fixing region f2_Temple len 5
+Check and merge pairs of vertex too near...
+Distance from vertex 1 to vertex 55 = 2.6350386291 
+Distance from vertex 3 to vertex 51 = 1.62738464525 
+Distance from vertex 12 to vertex 20 = 4.60214928499 
+Distance from vertex 14 to vertex 39 = 18.8350615823 (external edge)
+Distance from vertex 54 to vertex 64 = 15.256225741 (external edge)
+Repacking unusedVertex {64, 51, 20, 39, 55}
+vertexToReuse= [64, 51, 20, 39, 55]
+vertexToRemove= [69, 70, 71, 72, 73]
+Using Vertex 64 instead vertex 69
+Using Vertex 51 instead vertex 70
+Using Vertex 20 instead vertex 71
+Using Vertex 39 instead vertex 72
+Using Vertex 55 instead vertex 73
+numVertex after repacking 69
+internalRegions= 24  externalRegions= 12
+externalPoints: [2, 18, 48, 49, 37, 34, 17, 53, 13, 60, 39, 14, 11, 66, 47, 7, 26, 54, 40, 45, 38, 9]
+Average external radius 209.017219553
+Current centroid [0 0] Nearest Vertex [ 12.5 -16. ]
+City Area (inside external boundary): 136557.468216
+Creating Wall Vertices
+Best corner for a gate 16 near external vertex -> 26
+Save graph data to: city.data.json
+Computing matrixes used for AI path finding
+Save AI matrixes to: city.AI.json
+Ready to run: blender --background --python cityGen3D.py

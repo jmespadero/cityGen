@@ -1,0 +1,53 @@
+createNewScene (numSeeds=24, cityRadius=150, numBarriers=12, LloydSteps=2
+Using randomSeed 42005
+Creating requested fix regions: ['Temple', 'Market', 'Temple']
+cg-Temple.json  radius 37.0
+ * Build Temple as f0_Temple in region 0
+cg-Market.json  radius 48.0464865001
+Repitiendo displacement
+displacement [ 99.5240446  -37.95643267] origin 106.516319098
+signedDistance 69.5163190978
+ * Build Market as f1_Market in region 5
+cg-Temple.json  radius 37.0
+displacement [  32.34041112  103.77670755] origin 108.699159248
+signedDistance 54.4441766576
+ * Build Temple as f2_Temple in region 11
+fixing region f0_Temple len 5
+fixing region f1_Market len 6
+fixing region f2_Temple len 5
+minSeedDistance =  58.17538139110049
+fixing region f0_Temple len 5
+fixing region f1_Market len 6
+fixing region f2_Temple len 5
+Lloyd Iteration 1 of 2
+fixing region f0_Temple len 5
+fixing region f1_Market len 6
+fixing region f2_Temple len 5
+Lloyd Iteration 2 of 2
+fixing region f0_Temple len 5
+fixing region f1_Market len 6
+fixing region f2_Temple len 5
+Check and merge pairs of vertex too near...
+Distance from vertex 12 to vertex 31 = 5.42068379329 
+Distance from vertex 19 to vertex 30 = 5.82717425129 (external edge)
+Distance from vertex 37 to vertex 52 = 2.82922521739 
+Distance from vertex 48 to vertex 57 = 9.04262264344 
+Repacking unusedVertex {57, 52, 30, 31}
+vertexToReuse= [57, 52, 30, 31]
+vertexToRemove= [70, 71, 72, 73]
+Using Vertex 57 instead vertex 70
+Using Vertex 52 instead vertex 71
+Using Vertex 30 instead vertex 72
+Using Vertex 31 instead vertex 73
+numVertex after repacking 70
+internalRegions= 24  externalRegions= 12
+externalPoints: [64, 49, 44, 51, 20, 4, 21, 67, 8, 40, 16, 43, 47, 24, 30, 66, 42, 14, 15, 2, 19]
+Average external radius 201.989483453
+Current centroid [0 0] Nearest Vertex [-12.5 -16. ]
+City Area (inside external boundary): 127717.167981
+Creating Wall Vertices
+Best corner for a gate 19 near external vertex -> 2
+Save graph data to: city.data.json
+Computing matrixes used for AI path finding
+Save AI matrixes to: city.AI.json
+Ready to run: blender --background --python cityGen3D.py

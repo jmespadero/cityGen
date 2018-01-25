@@ -1,0 +1,129 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="600" >
+<rect id="background" width="100%" height="100%" style="fill:white"/>
+<g id="regions" style="fill:#ffeeaa;stroke:black;stroke-width:1">
+  <polygon style="fill:#9c9fff" points="300,300 300,332 325,332 325,300" />
+  <polygon style="fill:#ff89b5" points="300,300 260.634,269.246 212.488,295.207 233.521,338.677 275.22,351.36 300,332" />
+  <polygon style="fill:#ffdc89" points="361.695,360.668 396.392,340.026 390.391,270.697 371.279,263.844 325,300 325,332" />
+  <polygon style="fill:#90d4f7" points="361.695,360.668 325,332 300,332 275.22,351.36 297.78,378.024 354.641,370.487" />
+  <polygon style="fill:#71e096" points="300,300 325,300 371.279,263.844 331.097,231.541 284.943,239.805 260.634,269.246" />
+  <polygon style="fill:#f5a26f" points="437.635,154.494 431.254,184.802 449.182,196.368 467.667,187.444 469.696,155.985" />
+  <polygon style="fill:#ed6d79" points="437.635,154.494 469.696,155.985 505.652,136.098 515.443,113.218 414.073,115.337 416.227,130.028" />
+  <polygon style="fill:#cff381" points="505.652,136.098 469.696,155.985 467.667,187.444 512.053,217.271" />
+  <polygon style="fill:#9c9fff" points="449.182,196.368 452.632,255.021 523.154,262.354 512.053,217.271 467.667,187.444" />
+  <polygon style="fill:#ff89b5" points="409.108,195.936 399.399,264.473 452.632,255.021 449.182,196.368 431.254,184.802" />
+  <polygon style="fill:#ffdc89" points="437.635,154.494 416.227,130.028 405.849,142.378 409.108,195.936 431.254,184.802" />
+  <polygon style="fill:#90d4f7" points="365.835,186.107 390.835,186.107 390.835,154.107 365.835,154.107" />
+  <polygon style="fill:#71e096" points="365.835,186.107 365.835,154.107 309.425,111.563 334.457,210.622" />
+  <polygon style="fill:#f5a26f" points="405.849,142.378 390.835,154.107 390.835,186.107 409.108,195.936" />
+  <polygon style="fill:#ed6d79" points="409.108,195.936 390.835,186.107 365.835,186.107 334.457,210.622 331.097,231.541 371.279,263.844 390.391,270.697 399.399,264.473" />
+  <polygon style="fill:#cff381" points="405.849,142.378 416.227,130.028 414.073,115.337 376.521,77.7031 309.425,111.563 365.835,154.107 390.835,154.107" />
+  <polygon style="fill:#9c9fff" points="309.425,111.563 257.626,110.444 228.58,135.872 284.943,239.805 331.097,231.541 334.457,210.622" />
+  <polygon style="fill:#ff89b5" points="207.251,444.952 233.521,338.677 212.488,295.207 130.446,266.322 101.41,372.171 167.162,460.761 190.136,464.939" />
+  <polygon style="fill:#ffdc89" points="361.695,360.668 354.641,370.487 354.553,460.011 370.356,507.704 459.248,463.568 486.558,395.261 396.392,340.026" />
+  <polygon style="fill:#90d4f7" points="370.356,507.704 354.553,460.011 285.473,420.666 207.251,444.952 190.136,464.939 254.711,529.741" />
+  <polygon style="fill:#71e096" points="207.251,444.952 285.473,420.666 297.78,378.024 275.22,351.36 233.521,338.677" />
+  <polygon style="fill:#f5a26f" points="523.154,262.354 452.632,255.021 399.399,264.473 390.391,270.697 396.392,340.026 486.558,395.261 514.56,370.458" />
+  <polygon style="fill:#ed6d79" points="130.446,266.322 212.488,295.207 260.634,269.246 284.943,239.805 228.58,135.872 164.148,167.293" />
+  <polygon style="fill:#cff381" points="354.553,460.011 354.641,370.487 297.78,378.024 285.473,420.666" />
+  <polyline style="fill:none;stroke:black;stroke-width:2" points="124.701,271.399 97.0377,372.991 164.891,464.413 188.188,468.65 253.375,534.068 371.643,511.531 462.395,466.471 489.92,397.627 518.42,372.383 527.192,262.026 516.015,216.631 509.717,136.766 521.561,109.09 415.697,111.303 377.306,72.8265 308.514,107.543 256.16,106.411 226.347,132.511 160.898,164.428 128.54,258.895" />
+<circle cx="124.701" cy="271.399" r="3" stroke="black" stroke-width="1" fill="red" /><circle cx="97.0377" cy="372.991" r="3" stroke="black" stroke-width="1" fill="red" /><circle cx="164.891" cy="464.413" r="3" stroke="black" stroke-width="1" fill="red" /><circle cx="188.188" cy="468.65" r="3" stroke="black" stroke-width="1" fill="red" /><circle cx="253.375" cy="534.068" r="3" stroke="black" stroke-width="1" fill="red" /><circle cx="371.643" cy="511.531" r="3" stroke="black" stroke-width="1" fill="red" /><circle cx="462.395" cy="466.471" r="3" stroke="black" stroke-width="1" fill="red" /><circle cx="489.92" cy="397.627" r="3" stroke="black" stroke-width="1" fill="red" /><circle cx="518.42" cy="372.383" r="3" stroke="black" stroke-width="1" fill="red" /><circle cx="527.192" cy="262.026" r="3" stroke="black" stroke-width="1" fill="red" /><circle cx="516.015" cy="216.631" r="3" stroke="black" stroke-width="1" fill="red" /><circle cx="509.717" cy="136.766" r="3" stroke="black" stroke-width="1" fill="red" /><circle cx="521.561" cy="109.09" r="3" stroke="black" stroke-width="1" fill="red" /><circle cx="415.697" cy="111.303" r="3" stroke="black" stroke-width="1" fill="red" /><circle cx="377.306" cy="72.8265" r="3" stroke="black" stroke-width="1" fill="red" /><circle cx="308.514" cy="107.543" r="3" stroke="black" stroke-width="1" fill="red" /><circle cx="256.16" cy="106.411" r="3" stroke="black" stroke-width="1" fill="red" /><circle cx="226.347" cy="132.511" r="3" stroke="black" stroke-width="1" fill="red" /><circle cx="160.898" cy="164.428" r="3" stroke="black" stroke-width="1" fill="red" /><circle cx="128.54" cy="258.895" r="3" stroke="black" stroke-width="1" fill="red" />
+</g>
+<g id="labels" style="fill:black;text-anchor:middle">
+<text x="312.5" y="316">r0</text>
+<text x="263.644" y="314.415">r1</text>
+<text x="361.626" y="311.206">r2</text>
+<text x="319.056" y="354.09">r3</text>
+<text x="312.159" y="267.406">r4</text>
+<text x="451.087" y="175.818">r5</text>
+<text x="459.788" y="134.193">r6</text>
+<text x="488.767" y="174.199">r7</text>
+<text x="480.938" y="223.692">r8</text>
+<text x="428.315" y="219.32">r9</text>
+<text x="420.015" y="161.528">r10</text>
+<text x="378.335" y="170.107">r11</text>
+<text x="343.888" y="165.6">r12</text>
+<text x="399.157" y="169.632">r13</text>
+<text x="374.05" y="226.166">r14</text>
+<text x="382.681" y="126.461">r15</text>
+<text x="291.021" y="173.308">r16</text>
+<text x="177.488" y="377.576">r17</text>
+<text x="397.635" y="413.961">r18</text>
+<text x="277.08" y="471.336">r19</text>
+<text x="259.849" y="386.736">r20</text>
+<text x="451.869" y="308.327">r21</text>
+<text x="213.54" y="228.957">r22</text>
+<text x="323.112" y="407.297">r23</text>
+<text x="-53.4548" y="1669.54">0</text>
+<text x="370.356" y="507.704">1</text>
+<text x="437.635" y="154.494">2</text>
+<text x="-530.458" y="1155.61">3</text>
+<text x="405.849" y="142.378">4</text>
+<text x="409.108" y="195.936">5</text>
+<text x="365.835" y="186.107">6</text>
+<text x="312.5" y="-1483.63">7</text>
+<text x="361.695" y="360.668">8</text>
+<text x="207.251" y="444.952">9</text>
+<text x="-1042.05" y="-49.0715">10</text>
+<text x="449.182" y="196.368">11</text>
+<text x="376.521" y="77.7031">12</text>
+<text x="505.652" y="136.098">13</text>
+<text x="523.154" y="262.354">14</text>
+<text x="354.553" y="460.011">15</text>
+<text x="354.641" y="370.487">16</text>
+<text x="309.425" y="111.563">17</text>
+<text x="130.446" y="266.322">18</text>
+<text x="676.687" y="-1039.57">19</text>
+<text x="399.399" y="264.473">20</text>
+<text x="-1487.13" y="316">21</text>
+<text x="396.392" y="340.026">22</text>
+<text x="512.053" y="217.271">23</text>
+<text x="414.073" y="115.337">24</text>
+<text x="300" y="300">25</text>
+<text x="285.473" y="420.666">26</text>
+<text x="1669.08" y="-47.3023">27</text>
+<text x="486.558" y="395.261">28</text>
+<text x="275.22" y="351.36">29</text>
+<text x="2112.13" y="316">30</text>
+<text x="228.58" y="135.872">31</text>
+<text x="297.78" y="378.024">32</text>
+<text x="233.521" y="338.677">33</text>
+<text x="365.835" y="154.107">34</text>
+<text x="416.227" y="130.028">35</text>
+<text x="1666.96" y="681.046">36</text>
+<text x="-1046.12" y="677.529">37</text>
+<text x="190.136" y="464.939">38</text>
+<text x="1154.12" y="-524.948">39</text>
+<text x="390.835" y="154.107">40</text>
+<text x="260.634" y="269.246">41</text>
+<text x="514.56" y="370.458">42</text>
+<text x="325" y="332">43</text>
+<text x="459.248" y="463.568">44</text>
+<text x="673.141" y="1675.64">45</text>
+<text x="257.626" y="110.444">46</text>
+<text x="469.696" y="155.985">47</text>
+<text x="334.457" y="210.622">48</text>
+<text x="371.279" y="263.844">49</text>
+<text x="515.443" y="113.218">50</text>
+<text x="101.41" y="372.171">51</text>
+<text x="164.148" y="167.293">52</text>
+<text x="431.254" y="184.802">53</text>
+<text x="1151.44" y="1159.63">54</text>
+<text x="467.667" y="187.444">55</text>
+<text x="254.711" y="529.741">56</text>
+<text x="-527.778" y="-526.288">57</text>
+<text x="312.5" y="2115.63">58</text>
+<text x="-49.9162" y="-1041.6">59</text>
+<text x="390.835" y="186.107">60</text>
+<text x="300" y="332">61</text>
+<text x="284.943" y="239.805">62</text>
+<text x="325" y="300">63</text>
+<text x="167.162" y="460.761">64</text>
+<text x="390.391" y="270.697">65</text>
+<text x="452.632" y="255.021">66</text>
+<text x="212.488" y="295.207">67</text>
+<text x="331.097" y="231.541">68</text>
+
+</g>
+<line x1="50%" y1="5%" x2="50%" y2="95%" stroke-dasharray="1, 5" style="stroke:black;" />
+<line x1="5%" y1="50%" x2="95%" y2="50%" stroke-dasharray="1, 5" style="stroke:black" />
+</svg>

@@ -1,0 +1,62 @@
+createNewScene (numSeeds=24, cityRadius=150, numBarriers=12, LloydSteps=2
+Using randomSeed 89119
+Creating requested fix regions: ['Temple', 'Market', 'Temple']
+cg-Temple.json  radius 37.0
+ * Build Temple as f0_Temple in region 0
+cg-Market.json  radius 48.0464865001
+displacement [ -46.80007705  139.96293481] origin 147.580047205
+signedDistance 110.580047205
+ * Build Market as f1_Market in region 5
+cg-Temple.json  radius 37.0
+Repitiendo displacement
+displacement [ 121.61445513  122.12543443] origin 172.350507491
+signedDistance 117.232969383
+ * Build Temple as f2_Temple in region 11
+fixing region f0_Temple len 5
+fixing region f1_Market len 6
+fixing region f2_Temple len 5
+minSeedDistance =  58.17538139110049
+fixing region f0_Temple len 5
+fixing region f1_Market len 6
+fixing region f2_Temple len 5
+Lloyd Iteration 1 of 2
+dist= 193.847519765 >= DistanciaMaxima= 189.0
+dist= 195.375172488 >= DistanciaMaxima= 189.0
+dist= 200.965546796 >= DistanciaMaxima= 189.0
+fixing region f0_Temple len 5
+fixing region f1_Market len 6
+fixing region f2_Temple len 5
+Lloyd Iteration 2 of 2
+dist= 193.847519765 >= DistanciaMaxima= 189.0
+dist= 195.540371547 >= DistanciaMaxima= 189.0
+dist= 200.965546796 >= DistanciaMaxima= 189.0
+fixing region f0_Temple len 5
+fixing region f1_Market len 6
+fixing region f2_Temple len 5
+Check and merge pairs of vertex too near...
+Distance from vertex 8 to vertex 17 = 16.8982252309 (external edge)
+Distance from vertex 8 to vertex 50 = 18.7148079963 (external edge)
+Distance from vertex 17 to vertex 50 = 9.35740399815 (external edge)
+Distance from vertex 23 to vertex 28 = 15.972142848 (external edge)
+Distance from vertex 27 to vertex 56 = 8.05086519802 (external edge)
+Distance from vertex 31 to vertex 64 = 5.47944988587 
+Repacking unusedVertex {56, 17, 50, 64, 28}
+vertexToReuse= [56, 17, 50, 64, 28]
+vertexToRemove= [69, 70, 71, 72, 73]
+Using Vertex 56 instead vertex 69
+Using Vertex 17 instead vertex 70
+Using Vertex 50 instead vertex 71
+Using Vertex 64 instead vertex 72
+Using Vertex 28 instead vertex 73
+numVertex after repacking 69
+internalRegions= 24  externalRegions= 12
+externalPoints: [19, 60, 59, 2, 16, 65, 41, 39, 24, 35, 66, 48, 27, 8, 7, 12, 23, 45, 28, 46]
+Average external radius 216.576370028
+Current centroid [0 0] Nearest Vertex [-12.5 -16. ]
+City Area (inside external boundary): 147247.433866
+Creating Wall Vertices
+Best corner for a gate 13 near external vertex -> 8
+Save graph data to: city.data.json
+Computing matrixes used for AI path finding
+Save AI matrixes to: city.AI.json
+Ready to run: blender --background --python cityGen3D.py
