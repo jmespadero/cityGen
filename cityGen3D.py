@@ -49,6 +49,7 @@ args={
 'createStreets' : True,      # Create streets of the city
 'createLeaves' : True,       # Create leaves on the streets
 'createBuildings' : True,    # Create buildings on specific regions
+'createRiver' : True,        # Create river
 'numMonsters' : 4,
 'outputCityFilename' : 'outputcity.blend', #Output file with just the city
 'outputTourFilename' : 'outputtour.blend', #Output file with complete game
@@ -608,6 +609,10 @@ def createBuildings(seeds, staticRegions):
 
 
 
+def createRiver():
+    print("Creating river...")
+
+
 ###########################
 # The one and only... main
 def main():
@@ -893,6 +898,10 @@ def main():
 
     if args.get('createBuildings', False):
         createBuildings(internalSeeds, staticRegions)
+
+
+    if args.get('createRiver', False):
+        createRiver()
 
 
     #Save the current file, if outputCityFilename is set.
