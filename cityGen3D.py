@@ -865,7 +865,7 @@ def main():
         makeGround([], '_groundO', '_groundM', radius=groundRadius, material='Floor3')
 
     emptyRegions = []
-    for i, (region, building) in staticRegions.items():
+    for i, (region, building, region_radius) in staticRegions.items():
         emptyRegions.append(int(region))
 
 
