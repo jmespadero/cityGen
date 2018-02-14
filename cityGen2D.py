@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
+
 City map generator from project citygen.
 Generate a new cityMap in 2D (does not use blender stuff)
 Save the data as .json file which can be read by run-cityGen3D.sh script
@@ -807,6 +808,7 @@ def newCityData(args, numBarriers=12, LloydSteps=2):
     'externalPoints': externalPoints,
     'wallVertices': wallVertices.tolist(),
     'staticRegions': static_regions,
+    'cityRadius': cityRadius,
     }
     return cityData
 

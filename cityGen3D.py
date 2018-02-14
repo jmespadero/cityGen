@@ -609,8 +609,50 @@ def createBuildings(seeds, staticRegions):
 
 
 
-def createRiver():
-    print("Creating river...")
+def createRiver(points, cityRadius, margin):
+    coordinates = []
+    distance = cityRadius * 2  # Distancia perpendicular del río al origen de coordenadas
+    section_longitude = (distance * 2) / points  # Longitud de cada sección del río
+    margin_top = distance  # Punto inicial de una sección del río en el eje de coordenadas Y
+    margin_bottom = margin_top - section_longitude  # Punto final de una sección del río en el eje de coordenadas Y
+    margin_left = distance + margin  # Límite negativo de una sección del río en el eje de coordenadas X
+    margin_right = distance - margin  # Límite positivo de una sección del río en el eje de coordenadas X
+
+    bpy.ops.mesh.primitive_cube_add(radius=10, location=(-distance, distance, 0.1))  # Punto de inicio del río
+    bpy.ops.mesh.primitive_cube_add(radius=10, location=(-distance, -distance, 0.1))  # Punto final del río
+
+    # Mientras queden puntos por colocar...
+    while points > 0:
+        vector = Vector((uniform(-margin_left, -margin_right), uniform(margin_top, margin_bottom), 0.1))
+        coordinates.append(vector)
+        # Colocamos un nuevo punto (cubo) en las coordenadas comprendidas entre margin_top, margin_bottom, margin_left y margin_right
+        bpy.ops.mesh.primitive_cube_add(radius = 4, location = (uniform(-margin_left, -margin_right), uniform(margin_top, margin_bottom), 0.1))
+        # Actualizamos los márgenes top y bottom, left y right nunca varían.
+        margin_top = margin_bottom
+        margin_bottom = margin_top - section_longitude
+        points = points - 1  # Ya hemos colocado un punto más
+
+    return coordinates
+
+
+
+def splineRiver(points, cityRadius, margin):
+    weight = 1
+    coordinates = createRiver(points, cityRadius, margin)
+
+    curvedata = bpy.data.curves.new(name = 'Curve', type = 'CURVE')
+    curvedata.dimensions = '3D'
+
+    objectdata = bpy.data.objects.new('ObjCurve', curvedata)
+    objectdata.location = (-300, 300, 0.1)
+    bpy.context.scene.objects.link(objectdata)
+
+    polyline = curvedata.splines.new('POLY')
+    polyline.points.add(len(coordinates) - 1)
+
+    for num in range(len(coordinates)):
+        x, y, z = coordinates[num]
+        polyline.points[num].co = (x, y, z, weight)
 
 
 ###########################
@@ -624,9 +666,9 @@ def main():
         cwd = os.path.dirname(filepath)+'/'
     else:
         cwd = ''
-    
+
     print("Current cwd directory:", cwd)
-    
+
     # Set a default filename to read configuration
     argsFilename = 'cg-config.json'   
 
@@ -719,6 +761,7 @@ def main():
         internalRegions = data['internalRegions']
         externalPoints = data['externalPoints']
         staticRegions = data['staticRegions']
+        cityRadius = data['cityRadius']
         # This is a hack to convert dictionaries with string keys to integer.
         # Necessary because json.dump() saves integer keys as strings
         regions = { int(k):v for k,v in regions.items() }
@@ -901,7 +944,7 @@ def main():
 
 
     if args.get('createRiver', False):
-        createRiver()
+        splineRiver(18, cityRadius, 40)
 
 
     #Save the current file, if outputCityFilename is set.
