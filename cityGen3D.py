@@ -47,9 +47,8 @@ args={
 'createDefenseWall' : True,  # Create exterior boundary of the city
 'createGround' : True,       # Create ground boundary of the city
 'createStreets' : True,      # Create streets of the city
-'createLeaves' : True,       # Create leaves on the streets
+'createLeaves' : False,       # Create leaves on the streets
 'createBuildings' : True,    # Create buildings on specific regions
-'createRiver' : True,        # Create river
 'numMonsters' : 4,
 'outputCityFilename' : 'outputcity.blend', #Output file with just the city
 'outputTourFilename' : 'outputtour.blend', #Output file with complete game
@@ -609,52 +608,6 @@ def createBuildings(seeds, staticRegions):
 
 
 
-def createRiver(points, cityRadius, margin):
-    coordinates = []
-    distance = cityRadius * 2  # Distancia perpendicular del río al origen de coordenadas
-    section_longitude = (distance * 2) / points  # Longitud de cada sección del río
-    margin_top = distance  # Punto inicial de una sección del río en el eje de coordenadas Y
-    margin_bottom = margin_top - section_longitude  # Punto final de una sección del río en el eje de coordenadas Y
-    margin_left = distance + margin  # Límite negativo de una sección del río en el eje de coordenadas X
-    margin_right = distance - margin  # Límite positivo de una sección del río en el eje de coordenadas X
-
-    bpy.ops.mesh.primitive_cube_add(radius=10, location=(-distance, distance, 0.1))  # Punto de inicio del río
-    bpy.ops.mesh.primitive_cube_add(radius=10, location=(-distance, -distance, 0.1))  # Punto final del río
-
-    # Mientras queden puntos por colocar...
-    while points > 0:
-        vector = Vector((uniform(-margin_left, -margin_right), uniform(margin_top, margin_bottom), 0.1))
-        coordinates.append(vector)
-        # Colocamos un nuevo punto (cubo) en las coordenadas comprendidas entre margin_top, margin_bottom, margin_left y margin_right
-        bpy.ops.mesh.primitive_cube_add(radius = 4, location = (uniform(-margin_left, -margin_right), uniform(margin_top, margin_bottom), 0.1))
-        # Actualizamos los márgenes top y bottom, left y right nunca varían.
-        margin_top = margin_bottom
-        margin_bottom = margin_top - section_longitude
-        points = points - 1  # Ya hemos colocado un punto más
-
-    return coordinates
-
-
-
-def splineRiver(points, cityRadius, margin):
-    weight = 1
-    coordinates = createRiver(points, cityRadius, margin)
-
-    curvedata = bpy.data.curves.new(name = 'Curve', type = 'CURVE')
-    curvedata.dimensions = '3D'
-
-    objectdata = bpy.data.objects.new('ObjCurve', curvedata)
-    objectdata.location = (-300, 300, 0.1)
-    bpy.context.scene.objects.link(objectdata)
-
-    polyline = curvedata.splines.new('POLY')
-    polyline.points.add(len(coordinates) - 1)
-
-    for num in range(len(coordinates)):
-        x, y, z = coordinates[num]
-        polyline.points[num].co = (x, y, z, weight)
-
-
 ###########################
 # The one and only... main
 def main():
@@ -941,10 +894,6 @@ def main():
 
     if args.get('createBuildings', False):
         createBuildings(internalSeeds, staticRegions)
-
-
-    if args.get('createRiver', False):
-        splineRiver(18, cityRadius, 40)
 
 
     #Save the current file, if outputCityFilename is set.

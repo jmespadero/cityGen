@@ -263,53 +263,52 @@ def forceStaticSeeds(static_seeds, seeds):
             seeds[i] = s
             i = i + 1
 
-
-
 def buildStaticSeeds(names, city_radius):
     print("Creating requested fix regions:", names)
     regionDict = {}
-    fixedSeeds=0
+    fixedSeeds = 0
     static_regions = {}
 
     for i, name in enumerate(names):
-        reg_id = "f%d_%s"%(i, name)
+        reg_id = "f%d_%s" % (i, name)
 
         # Load relative seeds from "cg-XXXXXXX.json" file
         with open("cg-" + name + ".json", 'r') as f:
             aux_list = [[0, 0]] + json.load(f)
             radius = 5 + max([np.linalg.norm(x) for x in aux_list])
-            print("cg-" + name + ".json", " radius",radius)
+            # print("Read file cg-" + name + ".json", " -> radius",radius)
 
             if (i == 0):
-                displacement = np.asarray([0.0, 0.0])
+                pos = np.asarray([0.0, 0.0])
             else:
-                displacement = np.asarray(1.5 * city_radius * np.random.random(2) - city_radius / 2)
-                # Compute signed distances from point displacement to each region
-                # r[0] is position of fixedRegion. r[2] is radius of fixedRegion
-                while (min([np.linalg.norm(r[0] - displacement) - r[2] for r in static_regions.values()]) < radius):
-                    displacement = 1.5 * city_radius * np.random.random(2) - city_radius / 2
-                    print ("Repitiendo displacement")
+                # print("previous fixed regions", [r[3] for r in static_regions.values()])
 
-                print("displacement", displacement, "origin", np.linalg.norm(displacement))
-                print(
-                "signedDistance", min([np.linalg.norm(r[0] - displacement) - r[2] for r in static_regions.values()]))
-                print(
-                "signedDistance", [np.linalg.norm(r[0] - displacement) - r[2] for r in static_regions.values()])
+                pos = (1.5 * city_radius * np.random.random(2) - city_radius / 2).round(2)
+                # Compute signed distances from point pos to each region
+                # r[3] is position of fixedRegion. r[2] is radius of fixedRegion
+                while (min([np.linalg.norm(r[3] - pos) - r[2] for r in static_regions.values()]) < radius):
+                    # print("Invalid pos. Repeat...")
+                    pos = (1.5 * city_radius * np.random.random(2) - city_radius / 2).round(2)
 
-            # Displace seeds of this region 
+            # Displace seeds of this region
             for x in aux_list:
-                x[0] = x[0] + displacement[0]
-                x[1] = x[1] + displacement[1]
-            
+                x[0] = x[0] + pos[0]
+                x[1] = x[1] + pos[1]
+
             # Add pair <name, list> to the static seeds dictionary
             regionDict[reg_id] = aux_list
 
-            #Debug info
-            print(" * Build", name, "as", reg_id, "in region", fixedSeeds)
-            static_regions[i] = (fixedSeeds, name, radius)
+            # Debug info
+            print(" * Build", name, "as", reg_id, "in region", fixedSeeds, "pos", pos)
+            static_regions[i] = [fixedSeeds, name, radius, pos]
             fixedSeeds += len(aux_list)
 
+    # Convert numpy arrays to lists
+    for id in static_regions:
+        static_regions[id][3] = static_regions[id][3].tolist()
+
     return regionDict, static_regions, fixedSeeds
+
 
 
 #def newCityData(numSeeds=90, cityRadius=20, numBarriers=12, LloydSteps=2, gateLen=0., randomSeed=None, debugSVG=False):
