@@ -595,7 +595,7 @@ def createLeaves(seeds, internalRegions, vertices):
 
 
 def createBuildings(seeds, staticRegions):
-    for i, (region, building, region_radius) in staticRegions.items():
+    for i, (region, building, region_radius, displacement) in staticRegions.items():
         if (building == 'Temple'):
             vector = Vector((0.0, 11.0))
         else:
@@ -861,7 +861,7 @@ def main():
         makeGround([], '_groundO', '_groundM', radius=groundRadius, material='Floor3')
 
     emptyRegions = []
-    for i, (region, building, region_radius) in staticRegions.items():
+    for i, (region, building, region_radius, displacement) in staticRegions.items():
         emptyRegions.append(int(region))
 
 
