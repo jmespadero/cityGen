@@ -42,10 +42,13 @@ args={
 'inputLibraries' : 'cg-library.blend',  # Set a filename for assets (houses, wall, etc...) library.
 'inputHouses' : ["House7", "House3","House4","House5","House6"],
 'inputPlayer' : 'cg-playerBoy.blend',   # Set a filename for player system.
+'inputTemple' : 'cg-temple.blend',
+'inputMarket' : 'cg-market.blend',
 'createDefenseWall' : True,  # Create exterior boundary of the city
 'createGround' : True,       # Create ground boundary of the city
 'createStreets' : True,      # Create streets of the city
-'createLeaves' : True,       # Create leaves on the streets
+'createLeaves' : False,       # Create leaves on the streets
+'createBuildings' : True,    # Create buildings on specific regions
 'numMonsters' : 4,
 'outputCityFilename' : 'outputcity.blend', #Output file with just the city
 'outputTourFilename' : 'outputtour.blend', #Output file with complete game
@@ -317,7 +320,7 @@ def makeGround(cList=[], objName="meshObj", meshName="mesh", radius=10.0, materi
 
 
 
-def makePolygon(cList, objName="meshObj", meshName="mesh", height=0.0, reduct=0.0, hide=True, nr=None, seed=None):
+def makePolygon(emptyRegions, cList, num_region, objName="meshObj", meshName="mesh", height=0.0, reduct=0.0, hide=True, nr=None, seed=None):
     """Create a polygon/prism to represent a city block
     cList    -- A list of 3D points with the vertex of the polygon (corners of the city block)
     objName  -- the name of the new object
@@ -330,6 +333,8 @@ def makePolygon(cList, objName="meshObj", meshName="mesh", height=0.0, reduct=0.
     print(".", end="")
     
     nv = len(cList)
+
+
 
     if not seed:
         #Compute center of voronoi region
@@ -364,7 +369,8 @@ def makePolygon(cList, objName="meshObj", meshName="mesh", height=0.0, reduct=0.
     # pprint(streetData)
     me.from_pydata(cList+cList2, [], streetData)
     me.update(calc_edges=True)
-    me.materials.append(bpy.data.materials['Floor1'])
+    if (num_region not in emptyRegions):
+        me.materials.append(bpy.data.materials['Floor1'])
     bpy.context.scene.objects.link(ob)
 
     # 2. Create a mesh interior of this region
@@ -394,7 +400,8 @@ def makePolygon(cList, objName="meshObj", meshName="mesh", height=0.0, reduct=0.
 
     # 4. Fill boundary of region with Curbs
     for i in range(nv):
-        duplicateAlongSegment(cList2[i-1], cList2[i], "Curb", 0.1)
+        if (num_region not in emptyRegions):
+            duplicateAlongSegment(cList2[i-1], cList2[i], "Curb", 0.1)
     
     # 5. Create Houses
     
@@ -415,10 +422,12 @@ def makePolygon(cList, objName="meshObj", meshName="mesh", height=0.0, reduct=0.
             vecyM = reduct * 1.5 * dy / dist
             cList3.append((cList[i][0]-vecx,cList[i][1]-vecy,cList[i][2]))
             cList4.append((cList[i][0]-vecxM,cList[i][1]-vecyM,cList[i][2]))
-    
+
+
     for i in range(nv):
-        duplicateAlongSegmentMix (cList3[i-1], cList3[i], 1 ,args["inputHouses"])
-        duplicateAlongSegment(cList4[i-1], cList4[i], "WallHouse", 0, True )
+        if ((num_region != 0) and (num_region != 5)):
+            duplicateAlongSegmentMix (cList3[i-1], cList3[i], 1 ,args["inputHouses"])
+            duplicateAlongSegment(cList4[i-1], cList4[i], "WallHouse", 0, True )
 
     """
     #Create a mesh for colision
@@ -520,51 +529,40 @@ def importLibrary(filename, link=False, destinationLayer=1, importScripts=True):
 
 
 
-def pointDistance(x1, y1, x2, y2):
-    distance = sqrt(pow(x2 - x1, 2) + pow(y2 - y1, 2))
-    return distance
-
-
-
 def nearestSeed(vector, seeds):
-    distance = None
-    for i in seeds:
-        d = pointDistance(vector[0], vector[1], i[0], i[1])
-        if (distance == None):
+    distance = float('inf')
+    for s in seeds:
+        d = (vector.xy - s).length
+        if (d < distance):
             distance = d
-            seed = seeds.index(i)
-        else:
-            if (d < distance):
-                distance = d
-                seed = seeds.index(i)
+            seed = seeds.index(s)
     return seed
 
 
 
-def nearestSegment(x, y , vertices, vert_coords):
-    distance = None
-    for i in vertices:
-        coordinates = vert_coords[i]
-        d = pointDistance(x, y, coordinates[0], coordinates[1])
+def nearestSegment(vector , vertices, vert_coords):
+    distance = float('inf')
+    for v in vertices:
+        d = (vector.xy - vert_coords[v]).length
 
         if (distance == None):
             distance = d
-            vertex = i
+            vertex = v
         else:
             if (d < distance):
                 distance = d
-                vertex = i
+                vertex = v
 
     vertex = vertices.index(vertex)
     segment1 = [vert_coords[vertices[vertex - 1]], vert_coords[vertices[vertex]]]
     segment2 = [vert_coords[vertices[vertex]], vert_coords[vertices[-len(vertices) + vertex + 1]]]
 
-    dist1 = ((segment1[1][0] - segment1[0][0]) * (y - segment1[0][1]) - (
-        segment1[1][1] - segment1[0][1]) * (x - segment1[0][0])) / (
+    dist1 = ((segment1[1][0] - segment1[0][0]) * (vector.y - segment1[0][1]) - (
+        segment1[1][1] - segment1[0][1]) * (vector.x - segment1[0][0])) / (
             sqrt(pow(segment1[1][0] - segment1[0][0], 2) + pow(segment1[1][1] - segment1[0][1], 2)))
 
-    dist2 = ((segment2[1][0] - segment2[0][0]) * (y - segment2[0][1]) - (
-        segment2[1][1] - segment2[0][1]) * (x - segment2[0][0])) / (
+    dist2 = ((segment2[1][0] - segment2[0][0]) * (vector.y - segment2[0][1]) - (
+        segment2[1][1] - segment2[0][1]) * (vector.x - segment2[0][0])) / (
             sqrt(pow(segment2[1][0] - segment2[0][0], 2) + pow(segment2[1][1] - segment2[0][1], 2)))
 
     if (dist1 < dist2):
@@ -581,11 +579,10 @@ def createLeaves(seeds, internalRegions, vertices):
 
     while (hojas < 3000):
         loops = loops + 1
-        (x, y) = (uniform(-300, 300), uniform(-300, 300))
-        vector = Vector((x, y, 0.1))
+        vector = Vector((uniform(-300, 300), uniform(-300, 300), 0.1))
 
         n = nearestSeed(vector, seeds)
-        (s, d) = nearestSegment(x, y , internalRegions[n], vertices)
+        (s, d) = nearestSegment(vector , internalRegions[n], vertices)
 
         if (d < 4.5 and d > 1.5):
             g1 = duplicateObject(bpy.data.objects["DryLeaf"], "_leave_" + str(hojas))
@@ -596,7 +593,21 @@ def createLeaves(seeds, internalRegions, vertices):
     print("\nLeaves created (", loops, "loops)")
 
 
-       
+
+def createBuildings(seeds, staticRegions):
+    for i, (region, building, region_radius, displacement) in staticRegions.items():
+        if (building == 'Temple'):
+            vector = Vector((0.0, 11.0))
+        else:
+            vector = Vector((-2.0, 0.0))
+
+        importLibrary(args['input' + building], destinationLayer=0, importScripts=True)
+        object = bpy.data.objects[building]
+        object.location.xy = seeds[region] + vector
+        print("Locating " + building + " in region " + str(region))
+
+
+
 ###########################
 # The one and only... main
 def main():
@@ -608,9 +619,9 @@ def main():
         cwd = os.path.dirname(filepath)+'/'
     else:
         cwd = ''
-    
+
     print("Current cwd directory:", cwd)
-    
+
     # Set a default filename to read configuration
     argsFilename = 'cg-config.json'   
 
@@ -702,6 +713,8 @@ def main():
         regions = data['regions']
         internalRegions = data['internalRegions']
         externalPoints = data['externalPoints']
+        staticRegions = data['staticRegions']
+        cityRadius = data['cityRadius']
         # This is a hack to convert dictionaries with string keys to integer.
         # Necessary because json.dump() saves integer keys as strings
         regions = { int(k):v for k,v in regions.items() }
@@ -847,13 +860,18 @@ def main():
         groundRadius = 50 + max([v.length for v in vertices])
         makeGround([], '_groundO', '_groundM', radius=groundRadius, material='Floor3')
 
+    emptyRegions = []
+    for i, (region, building, region_radius, displacement) in staticRegions.items():
+        emptyRegions.append(int(region))
+
+
     if args.get('createStreets', False):
         # Create paths and polygon for internal regions
         print("Creating Districts")
         for nr, region in enumerate(internalRegions):
             print(".", end="")
             corners = [vertices3D[i] for i in region]
-            makePolygon(corners, "houseO", "houseM", height=0.5, reduct=1.0, nr=nr, seed=seeds[nr])
+            makePolygon(emptyRegions, corners, nr, "houseO", "houseM", height=0.5, reduct=1.0, nr=nr, seed=seeds[nr])
         print(".")
 
         # Merge streets meshes in one object
@@ -869,8 +887,13 @@ def main():
         bpy.context.scene.objects.active = bpy.data.objects["_Region"]
         bpy.ops.object.join()
 
+
     if args.get('createLeaves', False):
         createLeaves(internalSeeds, internalRegions, vertices)
+
+
+    if args.get('createBuildings', False):
+        createBuildings(internalSeeds, staticRegions)
 
 
     #Save the current file, if outputCityFilename is set.

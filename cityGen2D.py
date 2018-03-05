@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
+
 City map generator from project citygen.
 Generate a new cityMap in 2D (does not use blender stuff)
 Save the data as .json file which can be read by run-cityGen3D.sh script
@@ -252,15 +253,74 @@ class Delaunay2D:
             
         return vor_coors, regions
 
-def newCityData(numSeeds=90, cityRadius=20, numBarriers=12, LloydSteps=2, gateLen=0., randomSeed=None, debugSVG=False):
+
+def forceStaticSeeds(static_seeds, seeds):
+    # Force static seeds
+    i = 0
+    for name in sorted(static_seeds): ####################################################################
+        print("fixing region", name, "len", len(static_seeds[name]))
+        for s in static_seeds[name]:
+            seeds[i] = s
+            i = i + 1
+
+def buildStaticSeeds(names, city_radius):
+    print("Creating requested fix regions:", names)
+    regionDict = {}
+    fixedSeeds = 0
+    static_regions = {}
+
+    for i, name in enumerate(names):
+        reg_id = "f%d_%s" % (i, name)
+
+        # Load relative seeds from "cg-XXXXXXX.json" file
+        with open("cg-" + name + ".json", 'r') as f:
+            aux_list = [[0, 0]] + json.load(f)
+            radius = 5 + max([np.linalg.norm(x) for x in aux_list])
+            # print("Read file cg-" + name + ".json", " -> radius",radius)
+
+            if (i == 0):
+                pos = np.asarray([0.0, 0.0])
+            else:
+                # print("previous fixed regions", [r[3] for r in static_regions.values()])
+
+                pos = (1.5 * city_radius * np.random.random(2) - city_radius / 2).round(2)
+                # Compute signed distances from point pos to each region
+                # r[3] is position of fixedRegion. r[2] is radius of fixedRegion
+                while (min([np.linalg.norm(r[3] - pos) - r[2] for r in static_regions.values()]) < radius):
+                    # print("Invalid pos. Repeat...")
+                    pos = (1.5 * city_radius * np.random.random(2) - city_radius / 2).round(2)
+
+            # Displace seeds of this region
+            for x in aux_list:
+                x[0] = x[0] + pos[0]
+                x[1] = x[1] + pos[1]
+
+            # Add pair <name, list> to the static seeds dictionary
+            regionDict[reg_id] = aux_list
+
+            # Debug info
+            print(" * Build", name, "as", reg_id, "in region", fixedSeeds, "pos", pos)
+            static_regions[i] = [fixedSeeds, name, radius, pos]
+            fixedSeeds += len(aux_list)
+
+    # Convert numpy arrays to lists
+    for id in static_regions:
+        static_regions[id][3] = static_regions[id][3].tolist()
+
+    return regionDict, static_regions, fixedSeeds
+
+
+
+#def newCityData(numSeeds=90, cityRadius=20, numBarriers=12, LloydSteps=2, gateLen=0., randomSeed=None, debugSVG=False):
+def newCityData(args, numBarriers=12, LloydSteps=2):
     """Create a new set of regions from a voronoi diagram
-    numSeeds   -- Number of seed to be used
-    cityRadius -- Approximated radius of the city
-    numBarriers -- Number of barrier nodes. Usually 12.
-    LloydSteps -- Number of Lloyd's relaxation steps to apply 
-    gateLen    -- Size of the gates in the external wall. Use 0.0 to avoid place gates
-    randomSeed -- Random seed (to make deterministic)
-    debugSVG   -- Create debug SVG files on each step.
+    args.numSeeds   -- Number of seed to be used
+    args.cityRadius -- Approximated radius of the city
+    args.numBarriers -- Number of barrier seeds. Usually 12.
+    args.LloydSteps -- Number of Lloyd's relaxation steps to apply 
+    args.gateLen    -- Size of the gates in the external wall. Use 0.0 to avoid place gates
+    args.randomSeed -- Random seed (to make deterministic)
+    args.debugSVG   -- Create debug SVG files on each step.
     """
 
     def pnt2line(pnt, s1, s2):
@@ -295,6 +355,13 @@ def newCityData(numSeeds=90, cityRadius=20, numBarriers=12, LloydSteps=2, gateLe
         nearest = s1 + line_vec * t
         return nearest
 
+    # Extract variables from args
+    numSeeds = args.numSeeds
+    cityRadius = args.cityRadius
+    randomSeed = args.randomSeed
+    debugSVG = args.debug
+    debugSVG = args.debug
+    
     print("createNewScene (numSeeds=%d, cityRadius=%g, numBarriers=%d, LloydSteps=%d" % (
     numSeeds, cityRadius, numBarriers, LloydSteps))
 
@@ -310,18 +377,18 @@ def newCityData(numSeeds=90, cityRadius=20, numBarriers=12, LloydSteps=2, gateLe
     # Generate random seed in a square
     seeds = 2 * cityRadius * np.random.random((numSeeds, 2)) - cityRadius
 
-    seeds[0] = np.array([0,0])
-    seeds[1] = np.array([-25,0])
-    seeds[2] = np.array([25,0])
-    seeds[3] = np.array([0, -32])
-    seeds[4] = np.array([0, 32])
+    # Dictionary with the specific regions coordinates inside
+    static_seeds, static_regions, fixedSeeds = buildStaticSeeds(args.models, cityRadius)
+    forceStaticSeeds(static_seeds, seeds)
+
 
     # Min distante allowed between seeds. See documentation
-    minSeedDistance = 1.9 * cityRadius / sqrt(numSeeds)
+    minSeedDistance = 1.9 * cityRadius / sqrt(numSeeds)  #Minima distancia de una semilla con otra, si es menor la distancia
+                                                         # la semilla se descartará.
     print("minSeedDistance = ", minSeedDistance)
 
     # Generate the array of seeds
-    for i in range(numSeeds):
+    for i in range(fixedSeeds, numSeeds):
 
         # Check the distance with previous seeds
         for j in range(i):
@@ -333,11 +400,8 @@ def newCityData(numSeeds=90, cityRadius=20, numBarriers=12, LloydSteps=2, gateLe
                 i -= 1
                 break
 
-    seeds[0] = np.array([0,0])
-    seeds[1] = np.array([-25,0])
-    seeds[2] = np.array([25,0])
-    seeds[3] = np.array([0, -32])
-    seeds[4] = np.array([0, 32])
+
+    forceStaticSeeds(static_seeds, seeds)
 
     # Create a dense barrier of points around the seeds, to avoid far voronoi vertex
     if numBarriers > 0:
@@ -384,11 +448,8 @@ def newCityData(numSeeds=90, cityRadius=20, numBarriers=12, LloydSteps=2, gateLe
             else:
                 print("dist=", dist, ">= DistanciaMaxima=", DistanciaMaxima)
 
-        seeds[0] = np.array([0,0])
-        seeds[1] = np.array([-25,0])
-        seeds[2] = np.array([25,0])
-        seeds[3] = np.array([0, -32])
-        seeds[4] = np.array([0, 32])
+
+        forceStaticSeeds(static_seeds, seeds)
 
         # Recompute Voronoi Diagram
         barrierSeeds = np.concatenate((seeds, barrier), axis=0)
@@ -668,7 +729,7 @@ def newCityData(numSeeds=90, cityRadius=20, numBarriers=12, LloydSteps=2, gateLe
             plotVoronoiData(vertices, internalRegions, wv, 'tmp5.gateRandomWall', cityRadius, extraR=True)
     # """
         
-    if gateLen > 0:
+    if args.gateLen > 0:
         # Place a gate in the external corner with angle nearest to 180
         nv = len(wallVertices)        
         #Compute edge vectors (vertex to its previous)
@@ -686,8 +747,8 @@ def newCityData(numSeeds=90, cityRadius=20, numBarriers=12, LloydSteps=2, gateLe
         tangent /= np.linalg.norm(tangent)
         #Displace the vertex at the corner in the direction of tangent
         gateMid = wallVertices[bestCorner]
-        gate1 = wallVertices[bestCorner] - tangent * gateLen/2
-        gate2 = wallVertices[bestCorner] + tangent * gateLen/2
+        gate1 = wallVertices[bestCorner] - tangent * args.gateLen/2
+        gate2 = wallVertices[bestCorner] + tangent * args.gateLen/2
         wv = [gate2]+wallVertices.tolist()[bestCorner+1:] + wallVertices.tolist()[:bestCorner]+[gate1]
         if debugSVG:
             plotVoronoiData(vertices, internalRegions, wv, 'tmp5.gateFlatCorner', cityRadius, extraR=True)
@@ -745,6 +806,8 @@ def newCityData(numSeeds=90, cityRadius=20, numBarriers=12, LloydSteps=2, gateLe
     'internalRegions': internalRegions,
     'externalPoints': externalPoints,
     'wallVertices': wallVertices.tolist(),
+    'staticRegions': static_regions,
+    'cityRadius': cityRadius,
     }
     return cityData
 
@@ -925,7 +988,7 @@ def main():
     import argparse
     parser = argparse.ArgumentParser(description='Citymap generator from project citygen.')
 
-    parser.add_argument('-s', '--numSeeds', type=int, default=10, required=False,
+    parser.add_argument('-s', '--numSeeds', type=int, default=14, required=False,
                         help='Number of seeds used as Voronoi input (default=10)')
     parser.add_argument('-r', '--cityRadius', type=float, default=150, required=False,
                         help='Radius of the city (default=150)')
@@ -937,6 +1000,8 @@ def main():
                         help='Initial random seed value')
     parser.add_argument('-p', '--plot', required=False,
                         help='Replot a previous generated city (default="city.data.json")')
+    parser.add_argument('-m', '--models', type=str, required=False, nargs='+', default=['Temple'], 
+                        help='Add a list of static models defined in a .json+.blend files')
     parser.add_argument('--debug', required=False, action='store_true',
                         help='Create debug SVG files')
     parser.add_argument('--matplotlib', required=False, action='store_true', 
@@ -952,7 +1017,7 @@ def main():
         
     if not args.plot:
         # Generate a new city map
-        cityData = newCityData(args.numSeeds, args.cityRadius, gateLen=args.gateLen, randomSeed=args.randomSeed, debugSVG=args.debug)
+        cityData = newCityData(args)
         cityData['cityName'] = args.cityName
         # Save cityData data as a json file
         cityDataFilename = args.cityName + '.data.json'
