@@ -47,7 +47,7 @@ args={
 'createDefenseWall' : True,  # Create exterior boundary of the city
 'createGround' : True,       # Create ground boundary of the city
 'createStreets' : True,      # Create streets of the city
-'createLeaves' : False,       # Create leaves on the streets
+'createLeaves' : False,      # Create leaves on the streets
 'createBuildings' : True,    # Create buildings on specific regions
 'numMonsters' : 4,
 'outputCityFilename' : 'outputcity.blend', #Output file with just the city
@@ -381,12 +381,12 @@ def makePolygon(emptyRegions, cList, num_region, objName="meshObj", meshName="me
     #me.materials.append(bpy.data.materials['Grass'])
     bpy.context.scene.objects.link(ob)
 
-    # OK 3. Put a tree in the center of the region
-    #g1 = duplicateObject(bpy.data.objects["Tree"], "_Tree")
-    #g1.location = (seed[0], seed[1], 0.0)
-    #bpy.ops.object.text_add(location=(seed[0], seed[1], 0.0))
-    
-    # Debug: Create a text object with the number of the region 
+
+    # Check if the region has to have curbs and houses.
+    if (num_region in emptyRegions):
+        return
+
+     # Debug: Create a text object with the number of the region
     textCurve = bpy.data.curves.new(type="FONT",name="_textCurve")
     textOb = bpy.data.objects.new("_textOb",textCurve)
     textOb.location = (seed[0], seed[1], 0.3)
@@ -398,8 +398,7 @@ def makePolygon(emptyRegions, cList, num_region, objName="meshObj", meshName="me
 
     # 4. Fill boundary of region with Curbs
     for i in range(nv):
-        if (num_region not in emptyRegions):
-            duplicateAlongSegment(cList2[i-1], cList2[i], "Curb", 0.1)
+        duplicateAlongSegment(cList2[i-1], cList2[i], "Curb", 0.1)
     
     # 5. Create Houses
     
@@ -422,9 +421,8 @@ def makePolygon(emptyRegions, cList, num_region, objName="meshObj", meshName="me
             cList4.append((cList[i][0]-vecxM,cList[i][1]-vecyM,cList[i][2]))
 
     for i in range(nv):
-        if ((num_region != 0) and (num_region != 5)):
-            duplicateAlongSegmentMix (cList3[i-1], cList3[i], 1 ,args["inputHouses"])
-            duplicateAlongSegment(cList4[i-1], cList4[i], "WallHouse", 0, True )
+        duplicateAlongSegmentMix (cList3[i-1], cList3[i], 1 ,args["inputHouses"])
+        duplicateAlongSegment(cList4[i-1], cList4[i], "WallHouse", 0, True )
 
     """
     #Create a mesh for colision
@@ -597,7 +595,6 @@ def createBuildings(seeds, staticRegions):
         object = bpy.data.objects[building]
         object.location.xy = seeds[region]
         print("Locating " + building + " in region " + str(region))
-
 
 
 ###########################
@@ -852,9 +849,8 @@ def main():
         groundRadius = 50 + max([v.length for v in vertices])
         makeGround([], '_groundO', '_groundM', radius=groundRadius, material='Floor3')
 
-    emptyRegions = []
-    for i, (region, building, region_radius, displacement) in staticRegions.items():
-        emptyRegions.append(int(region))
+
+    emptyRegions = [x[0] for x in staticRegions.values()]
 
 
     if args.get('createStreets', False):
