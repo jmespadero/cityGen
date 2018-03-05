@@ -334,8 +334,6 @@ def makePolygon(emptyRegions, cList, num_region, objName="meshObj", meshName="me
     
     nv = len(cList)
 
-
-
     if not seed:
         #Compute center of voronoi region
         seed = [0.0,0.0]
@@ -422,7 +420,6 @@ def makePolygon(emptyRegions, cList, num_region, objName="meshObj", meshName="me
             vecyM = reduct * 1.5 * dy / dist
             cList3.append((cList[i][0]-vecx,cList[i][1]-vecy,cList[i][2]))
             cList4.append((cList[i][0]-vecxM,cList[i][1]-vecyM,cList[i][2]))
-
 
     for i in range(nv):
         if ((num_region != 0) and (num_region != 5)):
@@ -596,14 +593,9 @@ def createLeaves(seeds, internalRegions, vertices):
 
 def createBuildings(seeds, staticRegions):
     for i, (region, building, region_radius, displacement) in staticRegions.items():
-        if (building == 'Temple'):
-            vector = Vector((0.0, 11.0))
-        else:
-            vector = Vector((-2.0, 0.0))
-
         importLibrary(args['input' + building], destinationLayer=0, importScripts=True)
         object = bpy.data.objects[building]
-        object.location.xy = seeds[region] + vector
+        object.location.xy = seeds[region]
         print("Locating " + building + " in region " + str(region))
 
 
