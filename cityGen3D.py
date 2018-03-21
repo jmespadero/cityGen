@@ -598,34 +598,18 @@ def createBuildings(seeds, staticRegions):
         print("Locating " + building + " in region " + str(region))
 
 
-def createRiver(points, cityRadius, margin):
-    coordinates_left = []
-    coordinates_right = []
-    distance = cityRadius * 2  # Distancia perpendicular del río al origen de coordenadas
-    section_longitude = (distance * 2) / points  # Longitud de cada sección del río
-    margin_top = distance  # Punto inicial de una sección del río en el eje de coordenadas Y
-    margin_bottom = margin_top - section_longitude  # Punto final de una sección del río en el eje de coordenadas Y
-    margin_left = distance + margin  # Límite negativo de una sección del río en el eje de coordenadas X
-    margin_right = distance - margin  # Límite positivo de una sección del río en el eje de coordenadas X
+def createRiver(distance, factor):
+    #Step 1: Creating init and end points (A and B).
+    a = Vector((-distance, distance, 0.1))
+    b = Vector((-distance, -distance, 0.1))
+    bpy.ops.mesh.primitive_cube_add(radius = 5, location = (a.x, a.y, 0.1))
+    bpy.ops.mesh.primitive_cube_add(radius = 5, location = (b.x, b.y, 0.1))
 
-    bpy.ops.mesh.primitive_cube_add(radius=10, location=(-distance, distance, 0.1))  # Punto de inicio del río
-    bpy.ops.mesh.primitive_cube_add(radius=10, location=(-distance, -distance, 0.1))  # Punto final del río
-
-    # Mientras queden puntos por colocar...
-    while points > 0:
-        x_axis = uniform(-margin_left, -margin_right)
-        y_axis = uniform(margin_top, margin_bottom)
-        coordinates_left.append(Vector((x_axis - 25, y_axis, 0.1)))
-        coordinates_right.append(Vector((x_axis + 25, y_axis, 0.1)))
-        # Colocamos un nuevo punto (cubo) en las coordenadas comprendidas entre margin_top, margin_bottom, margin_left y margin_right duplicado en -25 y + 25 puntos
-        bpy.ops.mesh.primitive_cube_add(radius=10, location=(x_axis - 25, y_axis, 0.1))
-        bpy.ops.mesh.primitive_cube_add(radius=10, location=(x_axis + 25, y_axis, 0.1))
-        # Actualizamos los márgenes top y bottom, left y right nunca varían.
-        margin_top = margin_bottom
-        margin_bottom = margin_top - section_longitude
-        points = points - 1  # Ya hemos colocado un punto más (se toma como un punto del esqueleto del rio, aunque realmente son 2: izquierdo y derecho)
-
-    return coordinates_left, coordinates_right
+    #Step 2: Calculate new river point.
+    v = Vector((b.y - a.y, -(b.x - a.x))) * uniform(-factor, factor)
+    p = Vector(((a.x + b.x) * 0.5 + v.x, (a.y + b.y) * 0.5 + v.y))
+    bpy.ops.mesh.primitive_cube_add(radius=5, location=((a.x + b.x) * 0.5, (a.y + b.y) * 0.5, 0.1))
+    bpy.ops.mesh.primitive_cube_add(radius=5, location=(p.x, p.y, 0.1))
 
 
 
@@ -908,16 +892,16 @@ def main():
         bpy.ops.object.join()
 
 
-    if args.get('createLeaves', False):
-        createLeaves(internalSeeds, internalRegions, vertices)
+    #if args.get('createLeaves', False):
+        #createLeaves(internalSeeds, internalRegions, vertices)
 
 
-    if args.get('createBuildings', False):
-        createBuildings(internalSeeds, staticRegions)
+    #if args.get('createBuildings', False):
+        #createBuildings(internalSeeds, staticRegions)
 
 
     if args.get('createRiver', False):
-        createRiver(18, cityRadius, 20)
+        createRiver(cityRadius * 2, 0.23)
 
 
     #Save the current file, if outputCityFilename is set.
