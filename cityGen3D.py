@@ -598,18 +598,35 @@ def createBuildings(seeds, staticRegions):
         print("Locating " + building + " in region " + str(region))
 
 
-def createRiver(distance, factor):
-    #Step 1: Creating init and end points (A and B).
+
+def newRiverPoint(p1, p2, factor, list, res):
+    # Calculate medium point
+    pm = Vector(((p1.x + p2.x) * 0.5, (p1.y + p2.y) * 0.5))
+    bpy.ops.mesh.primitive_cube_add(radius=2, location=(pm.x, pm.y, 0.1))
+    # Calculate displacement
+    ds = Vector(((p1.y - pm.y), -(p1.x - pm.x))) * uniform(-factor, factor)
+    # Calculate point 3 coordinates
+    p3 = Vector(((pm.x + ds.x), (pm.y + ds.y)))
+    bpy.ops.mesh.primitive_cube_add(radius=5, location=(p3.x, p3.y, 0.1))
+    # Adding the new point to the list
+    list.append(p3)
+
+    # New recursive level
+    if (res > 1):
+        newRiverPoint(p1, p3, factor, list, res - 1)
+        newRiverPoint(p3, p2, factor, list, res - 1)
+
+
+
+def createRiver(distance, factor, resolution):
+    # Create the first point pair and draw it for debugging.
     a = Vector((-distance, distance, 0.1))
     b = Vector((-distance, -distance, 0.1))
-    bpy.ops.mesh.primitive_cube_add(radius = 5, location = (a.x, a.y, 0.1))
-    bpy.ops.mesh.primitive_cube_add(radius = 5, location = (b.x, b.y, 0.1))
+    bpy.ops.mesh.primitive_cube_add(radius = 10, location = (a.x, a.y, 0.1))
+    bpy.ops.mesh.primitive_cube_add(radius = 10, location = (b.x, b.y, 0.1))
 
-    #Step 2: Calculate new river point.
-    v = Vector((b.y - a.y, -(b.x - a.x))) * uniform(-factor, factor)
-    p = Vector(((a.x + b.x) * 0.5 + v.x, (a.y + b.y) * 0.5 + v.y))
-    bpy.ops.mesh.primitive_cube_add(radius=5, location=((a.x + b.x) * 0.5, (a.y + b.y) * 0.5, 0.1))
-    bpy.ops.mesh.primitive_cube_add(radius=5, location=(p.x, p.y, 0.1))
+    # Recursive algorithm
+    newRiverPoint(a, b, factor, [], resolution)
 
 
 
@@ -901,7 +918,7 @@ def main():
 
 
     if args.get('createRiver', False):
-        createRiver(cityRadius * 2, 0.23)
+        createRiver(cityRadius * 2, 0.40, 3)
 
 
     #Save the current file, if outputCityFilename is set.
