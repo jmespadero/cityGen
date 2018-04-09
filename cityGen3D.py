@@ -600,15 +600,10 @@ def createBuildings(seeds, staticRegions):
 
 
 def newRiverPoint(p1, p2, factor, list, res):
-    # New recursive level
     if (res > 0):
-        # Calculate medium point
         pm = Vector(((p1.x + p2.x) * 0.5, (p1.y + p2.y) * 0.5))
-        # Calculate displacement
         ds = Vector(((p1.y - pm.y), -(p1.x - pm.x))) * uniform(-factor, factor)
-        # Calculate point 3 coordinates
-        p3 = Vector(((pm.x + ds.x), (pm.y + ds.y)))
-        bpy.ops.mesh.primitive_cube_add(radius=5, location=(p3.x, p3.y, 0.1))
+        p3 = Vector(((pm.x + ds.x), (pm.y + ds.y), 0.1))
 
         newRiverPoint(p1, p3, factor, list, res - 1)
         list.append(p3) # Adding the new point here, the list will be ordered
@@ -618,26 +613,50 @@ def newRiverPoint(p1, p2, factor, list, res):
 
 def createRiverSkeleton(distance, factor, resolution):
     list = []
-
-    # Create the first point pair and draw it for debugging.
     a = Vector((-distance, distance, 0.1))
     b = Vector((-distance, -distance, 0.1))
-    bpy.ops.mesh.primitive_cube_add(radius = 5, location = (a.x, a.y, 0.1))
-    bpy.ops.mesh.primitive_cube_add(radius = 5, location = (b.x, b.y, 0.1))
 
-    # Recursive algorithm
     list.append(a)
     newRiverPoint(a, b, factor, list, resolution)
     list.append(b)
+
+    for i in range(len(list) - 1):
+        duplicateAlongSegment(list[i], list[i + 1], "Floor2", 0.1)
 
     return list
 
 
 
 def createRiverPoints(list):
-    print("***************************************************************")
-    print("Numero de puntos:", len(list))
+    river_side_a = []
+    river_side_b = []
 
+    for index in range(len(list)):
+        p1 = list[index]
+
+        # Because the last point could throw a NullPointerException, we create the last segment with [index] and [index - 1]
+        if index < len(list) - 1:
+            p2 = list[index + 1]
+        else:
+            p2 = list[index - 1]
+
+        p1p2 = Vector(((p1.y - p2.y), -(p1.x - p2.x)))
+        p3 = Vector(((p1.x + p1p2.x), (p1.y + p1p2.y), 0.1))
+        p4 = Vector(((p1.x - p1p2.x), (p1.y - p1p2.y), 0.1))
+
+        # As we have created the last segment upside down, now have to appendthe last two points to the list according to that idea.
+        if index < len(list) - 1:
+            river_side_a.append(p3)
+            river_side_b.append(p4)
+        else:
+            river_side_a.append(p4)
+            river_side_b.append(p3)
+
+    for i in range(len(river_side_a) - 1):
+        duplicateAlongSegment(river_side_a[i], river_side_a[i + 1], "Floor2", 0.1)
+
+    for i in range(len(river_side_b) - 1):
+        duplicateAlongSegment(river_side_b[i], river_side_b[i + 1], "Floor2", 0.1)
 
 
 ###########################
@@ -928,7 +947,7 @@ def main():
 
 
     if args.get('createRiver', False):
-        createRiverPoints(createRiverSkeleton(cityRadius * 2, 0.40, 3))
+        createRiverPoints(createRiverSkeleton(cityRadius * 2, 0.15, 3))
 
 
     #Save the current file, if outputCityFilename is set.
