@@ -631,26 +631,41 @@ def createRiverPoints(list):
     river_side_a = []
     river_side_b = []
 
-    for index in range(len(list)):
-        p1 = list[index]
+    p1 = list[0]
+    p2 = list[len(list) - 1]
+    ds = Vector(((p1.y - p2.y), -(p1.x - p2.x)))   # * 0.10
+    print("Desplazamiento 0:", ds)
 
-        # Because the last point could throw a NullPointerException, we create the last segment with [index] and [index - 1]
-        if index < len(list) - 1:
-            p2 = list[index + 1]
-        else:
-            p2 = list[index - 1]
+    p3 = Vector(((p1.x + ds.x), (p1.y + ds.y), 0.1))
+    p4 = Vector(((p1.x - ds.x), (p1.y - ds.y), 0.1))
 
-        p1p2 = Vector(((p1.y - p2.y), -(p1.x - p2.x)))
-        p3 = Vector(((p1.x + p1p2.x), (p1.y + p1p2.y), 0.1))
-        p4 = Vector(((p1.x - p1p2.x), (p1.y - p1p2.y), 0.1))
+    river_side_a.append(p3)
+    river_side_b.append(p4)
 
-        # As we have created the last segment upside down, now have to appendthe last two points to the list according to that idea.
-        if index < len(list) - 1:
-            river_side_a.append(p3)
-            river_side_b.append(p4)
-        else:
-            river_side_a.append(p4)
-            river_side_b.append(p3)
+    for index in range(1, len(list) - 1):
+        p0 = list[index]
+        p1 = list[index - 1]
+        p2 = list[index + 1]
+
+        p1p2 = Vector(((p1.y - p2.y), -(p1.x - p2.x)))  # * 0.40
+        p3 = Vector(((p0.x + p1p2.x), (p0.y + p1p2.y), 0.1))
+        p4 = Vector(((p0.x - p1p2.x), (p0.y - p1p2.y), 0.1))
+
+        river_side_a.append(p3)
+        river_side_b.append(p4)
+
+        print("Desplazamiento", index, ":", p1p2)
+
+    p1 = list[0]
+    p2 = list[len(list) - 1]
+    ds = Vector(((p1.y - p2.y), -(p1.x - p2.x)))  # * 0.10
+
+    p3 = Vector(((p2.x + ds.x), (p2.y + ds.y), 0.1))
+    p4 = Vector(((p2.x - ds.x), (p2.y - ds.y), 0.1))
+
+    river_side_a.append(p3)
+    river_side_b.append(p4)
+    print("Desplazamiento,", len(list) - 1, ":", ds)
 
     for i in range(len(river_side_a) - 1):
         duplicateAlongSegment(river_side_a[i], river_side_a[i + 1], "Floor2", 0.1)
@@ -947,7 +962,7 @@ def main():
 
 
     if args.get('createRiver', False):
-        createRiverPoints(createRiverSkeleton(cityRadius * 2, 0.15, 3))
+        createRiverPoints(createRiverSkeleton(cityRadius * 2, 0.25, 3))
 
 
     #Save the current file, if outputCityFilename is set.
