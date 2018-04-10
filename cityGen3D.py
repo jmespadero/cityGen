@@ -402,7 +402,7 @@ def makePolygon(emptyRegions, cList, num_region, objName="meshObj", meshName="me
         duplicateAlongSegment(cList2[i-1], cList2[i], "Curb", 0.1)
     
     # 5. Create Houses
-    
+    """
     #Compute new reduced region coordinates
     cList3 = []
     cList4 = []
@@ -424,7 +424,7 @@ def makePolygon(emptyRegions, cList, num_region, objName="meshObj", meshName="me
     for i in range(nv):
         duplicateAlongSegmentMix (cList3[i-1], cList3[i], 1 ,args["inputHouses"])
         duplicateAlongSegment(cList4[i-1], cList4[i], "WallHouse", 0, True )
-
+"""
     """
     #Create a mesh for colision
     me = bpy.data.meshes.new(meshName)   # create a new mesh
@@ -624,16 +624,17 @@ def createRiverSkeleton(distance, factor, resolution):
 
 
 
-def createRiverPoints(list):
+def createRiverPoints(list, width):
     river_side_a = []
     river_side_b = []
+    ordered_points = []
 
     for index in range(1, len(list) - 1):
         p0 = list[index]
         p1 = list[index - 1]
         p2 = list[index + 1]
 
-        p1p2 = Vector(((p1.y - p2.y), -(p1.x - p2.x))) * 0.25
+        p1p2 = Vector(((p1.y - p2.y), -(p1.x - p2.x))) * width
         p3 = Vector(((p0.x + p1p2.x), (p0.y + p1p2.y), 0.1))
         p4 = Vector(((p0.x - p1p2.x), (p0.y - p1p2.y), 0.1))
 
@@ -645,6 +646,22 @@ def createRiverPoints(list):
 
     for i in range(len(river_side_b) - 1):
         duplicateAlongSegment(river_side_b[i], river_side_b[i + 1], "Floor2", 0.1)
+
+    ordered_points.append(river_side_a)
+    ordered_points.append(river_side_b[::-1])
+
+    return ordered_points
+
+
+
+def createRiverMesh(points):
+    mesh = bpy.data.meshes.new("_River")
+    object = bpy.data.objects.new("_River", mesh)
+    mesh.from_pydata(points, [], points)
+    mesh.update(calc_edges = True)
+    mesh.materials.append(bpy.data.materials["Water"])
+    bpy.context.scene.objects.link(object)
+
 
 
 ###########################
@@ -935,7 +952,8 @@ def main():
 
 
     if args.get('createRiver', False):
-        createRiverPoints(createRiverSkeleton(cityRadius * 2, 0.25, 3))
+        points= createRiverPoints(createRiverSkeleton(cityRadius * 2, 0.25, 3), 0.25)
+        createRiverMesh(points)
 
 
     #Save the current file, if outputCityFilename is set.
