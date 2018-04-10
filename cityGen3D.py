@@ -620,9 +620,6 @@ def createRiverSkeleton(distance, factor, resolution):
     newRiverPoint(a, b, factor, list, resolution)
     list.append(b)
 
-    for i in range(len(list) - 1):
-        duplicateAlongSegment(list[i], list[i + 1], "Floor2", 0.1)
-
     return list
 
 
@@ -631,41 +628,17 @@ def createRiverPoints(list):
     river_side_a = []
     river_side_b = []
 
-    p1 = list[0]
-    p2 = list[len(list) - 1]
-    ds = Vector(((p1.y - p2.y), -(p1.x - p2.x)))   # * 0.10
-    print("Desplazamiento 0:", ds)
-
-    p3 = Vector(((p1.x + ds.x), (p1.y + ds.y), 0.1))
-    p4 = Vector(((p1.x - ds.x), (p1.y - ds.y), 0.1))
-
-    river_side_a.append(p3)
-    river_side_b.append(p4)
-
     for index in range(1, len(list) - 1):
         p0 = list[index]
         p1 = list[index - 1]
         p2 = list[index + 1]
 
-        p1p2 = Vector(((p1.y - p2.y), -(p1.x - p2.x)))  # * 0.40
+        p1p2 = Vector(((p1.y - p2.y), -(p1.x - p2.x))) * 0.25
         p3 = Vector(((p0.x + p1p2.x), (p0.y + p1p2.y), 0.1))
         p4 = Vector(((p0.x - p1p2.x), (p0.y - p1p2.y), 0.1))
 
         river_side_a.append(p3)
         river_side_b.append(p4)
-
-        print("Desplazamiento", index, ":", p1p2)
-
-    p1 = list[0]
-    p2 = list[len(list) - 1]
-    ds = Vector(((p1.y - p2.y), -(p1.x - p2.x)))  # * 0.10
-
-    p3 = Vector(((p2.x + ds.x), (p2.y + ds.y), 0.1))
-    p4 = Vector(((p2.x - ds.x), (p2.y - ds.y), 0.1))
-
-    river_side_a.append(p3)
-    river_side_b.append(p4)
-    print("Desplazamiento,", len(list) - 1, ":", ds)
 
     for i in range(len(river_side_a) - 1):
         duplicateAlongSegment(river_side_a[i], river_side_a[i + 1], "Floor2", 0.1)
