@@ -613,8 +613,8 @@ def newRiverPoint(p1, p2, factor, list, res):
 
 def createRiverSkeleton(distance, factor, resolution):
     list = []
-    a = Vector((-distance, distance, 0.1))
-    b = Vector((-distance, -distance, 0.1))
+    a = Vector((-distance * 1.5, distance * 2, 0.1))
+    b = Vector((-distance * 1.5, -distance * 2, 0.1))
 
     list.append(a)
     newRiverPoint(a, b, factor, list, resolution)
@@ -628,6 +628,7 @@ def createRiverPoints(list, width):
     river_side_a = []
     river_side_b = []
     ordered_points = []
+    faces_data = []
 
     for index in range(1, len(list) - 1):
         p0 = list[index]
@@ -647,17 +648,21 @@ def createRiverPoints(list, width):
     for i in range(len(river_side_b) - 1):
         duplicateAlongSegment(river_side_b[i], river_side_b[i + 1], "Floor2", 0.1)
 
-    ordered_points.append(river_side_a)
-    ordered_points.append(river_side_b[::-1])
+    ordered_points = river_side_a + river_side_b[::-1]
+    last_index = len(ordered_points) - 1
 
-    return ordered_points
+    for i in range(len(river_side_a) - 1):
+        faces_data.append((i, last_index - (i + 1), i + 1))
+        faces_data.append((i, last_index - (i + 1), last_index - i))
+
+    return ordered_points, faces_data
 
 
 
-def createRiverMesh(points):
+def createRiverMesh(points, faces):
     mesh = bpy.data.meshes.new("_River")
     object = bpy.data.objects.new("_River", mesh)
-    mesh.from_pydata(points, [], points)
+    mesh.from_pydata(points, [], faces)
     mesh.update(calc_edges = True)
     mesh.materials.append(bpy.data.materials["Water"])
     bpy.context.scene.objects.link(object)
@@ -952,8 +957,8 @@ def main():
 
 
     if args.get('createRiver', False):
-        points= createRiverPoints(createRiverSkeleton(cityRadius * 2, 0.25, 3), 0.25)
-        createRiverMesh(points)
+        points, faces = createRiverPoints(createRiverSkeleton(cityRadius * 2, 0.25, 6), 0.25)
+        createRiverMesh(points, faces)
 
 
     #Save the current file, if outputCityFilename is set.
