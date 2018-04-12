@@ -49,6 +49,7 @@ args={
 'createStreets' : True,      # Create streets of the city
 'createLeaves' : False,      # Create leaves on the streets
 'createRiver' : True,        # Create river
+'createTrail' : True,        # Create trail
 'createBuildings' : True,    # Create buildings on specific regions
 'numMonsters' : 4,
 'outputCityFilename' : 'outputcity.blend', #Output file with just the city
@@ -396,12 +397,13 @@ def makePolygon(emptyRegions, cList, num_region, objName="meshObj", meshName="me
     textOb.data.body = str(nr)
     bpy.context.scene.objects.link(textOb)
     
-
+    """
     # 4. Fill boundary of region with Curbs
     for i in range(nv):
         duplicateAlongSegment(cList2[i-1], cList2[i], "Curb", 0.1)
     
     # 5. Create Houses
+    """
     """
     #Compute new reduced region coordinates
     cList3 = []
@@ -611,14 +613,11 @@ def newRiverPoint(p1, p2, factor, list, res):
 
 
 
-def createRiverSkeleton(distance, factor, resolution):
-    list = []
-    a = Vector((-distance * 1.5, distance * 2, 0.1))
-    b = Vector((-distance * 1.5, -distance * 2, 0.1))
-
-    list.append(a)
-    newRiverPoint(a, b, factor, list, resolution)
-    list.append(b)
+def createSpline(origin, end, factor, resolution, list):
+    list.append(origin)
+    # Adding the new point here (calling the recursive step), the list will be ordered
+    newRiverPoint(origin, end, factor, list, resolution)
+    list.append(end)
 
     return list
 
@@ -627,7 +626,6 @@ def createRiverSkeleton(distance, factor, resolution):
 def createRiverPoints(list, width):
     river_side_a = []
     river_side_b = []
-    ordered_points = []
     faces_data = []
 
     for index in range(1, len(list) - 1):
@@ -635,22 +633,20 @@ def createRiverPoints(list, width):
         p1 = list[index - 1]
         p2 = list[index + 1]
 
-        p1p2 = Vector(((p1.y - p2.y), -(p1.x - p2.x))) * width
-        p3 = Vector(((p0.x + p1p2.x), (p0.y + p1p2.y), 0.1))
-        p4 = Vector(((p0.x - p1p2.x), (p0.y - p1p2.y), 0.1))
+        # The param 'width' controls the width of the river, after the normalizing of it.
+        ds = Vector(((p1.y - p2.y), -(p1.x - p2.x))).normalized() * width
+        p3 = Vector(((p0.x + ds.x), (p0.y + ds.y), 0.1))
+        p4 = Vector(((p0.x - ds.x), (p0.y - ds.y), 0.1))
 
+        # Here, we are creating the two river sides point lists.
         river_side_a.append(p3)
         river_side_b.append(p4)
 
-    for i in range(len(river_side_a) - 1):
-        duplicateAlongSegment(river_side_a[i], river_side_a[i + 1], "Floor2", 0.1)
-
-    for i in range(len(river_side_b) - 1):
-        duplicateAlongSegment(river_side_b[i], river_side_b[i + 1], "Floor2", 0.1)
-
+    # Creating an ordered list of the two river sides point lists
     ordered_points = river_side_a + river_side_b[::-1]
     last_index = len(ordered_points) - 1
 
+    # Creating the triangle faces list to pass it to the from_pydata function to generate the river mesh.
     for i in range(len(river_side_a) - 1):
         faces_data.append((i, last_index - (i + 1), i + 1))
         faces_data.append((i, last_index - (i + 1), last_index - i))
@@ -659,14 +655,17 @@ def createRiverPoints(list, width):
 
 
 
-def createRiverMesh(points, faces):
-    mesh = bpy.data.meshes.new("_River")
-    object = bpy.data.objects.new("_River", mesh)
+def createMesh(points, faces, name, material):
+    # The new mesh
+    mesh = bpy.data.meshes.new(name)
+    # The object referencing the new mesh
+    object = bpy.data.objects.new(name, mesh)
+    # Generating the mesh
     mesh.from_pydata(points, [], faces)
     mesh.update(calc_edges = True)
-    mesh.materials.append(bpy.data.materials["Water"])
+    # Giving a material to the mesh
+    mesh.materials.append(bpy.data.materials[material])
     bpy.context.scene.objects.link(object)
-
 
 
 ###########################
@@ -957,8 +956,26 @@ def main():
 
 
     if args.get('createRiver', False):
-        points, faces = createRiverPoints(createRiverSkeleton(cityRadius * 2, 0.25, 6), 0.25)
-        createRiverMesh(points, faces)
+        distance = cityRadius * 2
+        origin = Vector((-distance * 1.5, distance * 2, 0.1))
+        end = Vector((-distance * 1.5, -distance * 2, 0.1))
+
+        skeleton_list = createSpline(origin, end, 0.25, 7, [])
+        points, faces = createRiverPoints(skeleton_list, 20)
+        createMesh(points, faces, "_River", "Water")
+
+
+    if args.get('createTrail', False):
+        ds_gate = Vector(((gate1.y - 0), -(gate1.x - 0))) * 0.04
+        ds_end = Vector(((gate1.x - 0), (gate1.y - 0))) * 2
+
+        gate = Vector(((gate1.x + ds_gate.x), (gate1.y + ds_gate.y)))
+        end = Vector(((gate1.x + ds_end.x), (gate1.y + ds_end.y)))
+
+        skeleton_list = createSpline(gate, end, 0.25, 7, [])
+        points, faces = createRiverPoints(skeleton_list, 5)
+        createMesh(points, faces, "_Trail", "Floor1")
+
 
 
     #Save the current file, if outputCityFilename is set.
