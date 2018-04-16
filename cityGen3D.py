@@ -602,6 +602,13 @@ def createBuildings(seeds, staticRegions):
 
 
 def newRMDFractalPoint(p1, p2, factor, list, res):
+    """ New recursive level of the RMD Fractal algorithm
+            origin    -- The origin of the curve
+            end    -- The end of the curve
+            factor    -- the percentage of lateral dispersion for the curve
+            resolution    -- number of recursive levels (the exponent in base 2 for number of edges of the curve)
+            skeleton    -- the list of points (must be empty)
+            """
     if (res > 0):
         pm = (p1 + p2) * 0.5
         ds = Vector(((p1.y - pm.y), -(p1.x - pm.x), 0.0)) * uniform(-factor, factor)
@@ -613,20 +620,20 @@ def newRMDFractalPoint(p1, p2, factor, list, res):
 
 
 
-def newRMDFractal(origin, end, factor, resolution, list = []):
-    """Create a curve using the Random Midpoint Displacement Fractal algorithm
+def newRMDFractal(origin, end, factor, resolution, skeleton = []):
+    """ Create a polyline using the Random Midpoint Displacement Fractal algorithm
         origin    -- The origin of the curve
         end    -- The end of the curve
         factor    -- the percentage of lateral dispersion for the curve
         resolution    -- number of recursive levels (the exponent in base 2 for number of edges of the curve)
-        list    -- the list of points (must be empty)
+        skeleton    -- the list of points (must be empty)
         """
-    list.append(origin)
+    skeleton.append(origin)
     # Adding the new point here (calling the recursive step), the list will be ordered
-    newRMDFractalPoint(origin, end, factor, list, resolution)
-    list.append(end)
+    newRMDFractalPoint(origin, end, factor, skeleton, resolution)
+    skeleton.append(end)
 
-    return list
+    return skeleton
 
 
 
@@ -637,6 +644,7 @@ def meshFromSkeleton(skeleton, width, river_side_a, river_side_b, faces_data, na
         p2 = skeleton[index + 1]
 
         # The param 'width' controls the width of the river, after the normalizing of it.
+        # This code line is equivalent to '(p1 - p2) * cross(V(0,0,1))'
         ds = Vector(((p1.y - p2.y), -(p1.x - p2.x), 0.0)).normalized() * width
         p3 = p0 + ds
         p4 = p0 - ds
