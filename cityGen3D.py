@@ -397,14 +397,14 @@ def makePolygon(emptyRegions, cList, num_region, objName="meshObj", meshName="me
     textOb.data.body = str(nr)
     bpy.context.scene.objects.link(textOb)
     
-    """
+
     # 4. Fill boundary of region with Curbs
     for i in range(nv):
         duplicateAlongSegment(cList2[i-1], cList2[i], "Curb", 0.1)
     
     # 5. Create Houses
-    """
-    """
+
+
     #Compute new reduced region coordinates
     cList3 = []
     cList4 = []
@@ -426,7 +426,7 @@ def makePolygon(emptyRegions, cList, num_region, objName="meshObj", meshName="me
     for i in range(nv):
         duplicateAlongSegmentMix (cList3[i-1], cList3[i], 1 ,args["inputHouses"])
         duplicateAlongSegment(cList4[i-1], cList4[i], "WallHouse", 0, True )
-"""
+
     """
     #Create a mesh for colision
     me = bpy.data.meshes.new(meshName)   # create a new mesh
@@ -670,6 +670,20 @@ def meshFromSkeleton(skeleton, width, river_side_a, river_side_b, faces_data, na
     bpy.context.scene.objects.link(object)
 
 
+
+def createSandCircle(center, radius):
+    #create radius one circle mesh
+    angle=2*3.1415927 /24
+    cpoints=[Vector((cos(i*angle),sin(i*angle),0.4)) for i in range(24)]
+
+    mesh = bpy.data.meshes.new("gateArena")
+    mesh.from_pydata(cpoints, [], [list(range(24))])
+    mesh.update(calc_edges=True)
+    mesh.materials.append(bpy.data.materials["Sand"])
+    object = bpy.data.objects.new("gateArena", mesh)
+    object.location = center
+    object.scale=Vector((radius, radius, 1))
+    bpy.context.scene.objects.link(object)
 
 ###########################
 # The one and only... main
@@ -954,8 +968,8 @@ def main():
         #createLeaves(internalSeeds, internalRegions, vertices)
 
 
-    #if args.get('createBuildings', False):
-        #createBuildings(internalSeeds, staticRegions)
+    if args.get('createBuildings', False):
+        createBuildings(internalSeeds, staticRegions)
 
 
     if args.get('createRiver', False):
@@ -967,14 +981,12 @@ def main():
 
 
     if args.get('createTrail', False):
-        ds_gate = Vector(((gate1.y - 0), -(gate1.x - 0))) * 0.04
-        ds_end = Vector(((gate1.x - 0), (gate1.y - 0))) * 2
+        origin = gateMid.to_3d()
+        trailWidth = 5
 
-        gate = Vector(((gate1.x + ds_gate.x), (gate1.y + ds_gate.y), 0.1))
-        end = Vector(((gate1.x + ds_end.x), (gate1.y + ds_end.y), 0.1))
-
-        skeleton_list = newRMDFractal(gate, end, 0.20, 7, [])
-        meshFromSkeleton(skeleton_list, 5, [], [], [], "_Trail", "Floor1")
+        createSandCircle(gateMid.to_3d(), 2*(gate1-gateMid).length)
+        skeleton_list = newRMDFractal(origin, (origin * 3), 0.20, 7, [])
+        meshFromSkeleton(skeleton_list, trailWidth, [], [], [], "_Trail", "Sand")
 
 
 
