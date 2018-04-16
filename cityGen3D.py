@@ -48,6 +48,8 @@ args={
 'createGround' : True,       # Create ground boundary of the city
 'createStreets' : True,      # Create streets of the city
 'createLeaves' : False,      # Create leaves on the streets
+'createRiver' : True,        # Create river
+'createTrail' : True,        # Create trail
 'createBuildings' : True,    # Create buildings on specific regions
 'numMonsters' : 4,
 'outputCityFilename' : 'outputcity.blend', #Output file with just the city
@@ -401,7 +403,8 @@ def makePolygon(emptyRegions, cList, num_region, objName="meshObj", meshName="me
         duplicateAlongSegment(cList2[i-1], cList2[i], "Curb", 0.1)
     
     # 5. Create Houses
-    
+
+
     #Compute new reduced region coordinates
     cList3 = []
     cList4 = []
@@ -596,6 +599,91 @@ def createBuildings(seeds, staticRegions):
         object.location.xy = seeds[region]
         print("Locating " + building + " in region " + str(region))
 
+
+
+def newRMDFractalPoint(p1, p2, factor, list, res):
+    """ New recursive level of the RMD Fractal algorithm
+            origin    -- The origin of the curve
+            end    -- The end of the curve
+            factor    -- the percentage of lateral dispersion for the curve
+            resolution    -- number of recursive levels (the exponent in base 2 for number of edges of the curve)
+            skeleton    -- the list of points (must be empty)
+            """
+    if (res > 0):
+        pm = (p1 + p2) * 0.5
+        ds = Vector(((p1.y - pm.y), -(p1.x - pm.x), 0.0)) * uniform(-factor, factor)
+        p3 = pm + ds
+
+        newRMDFractalPoint(p1, p3, factor, list, res - 1)
+        list.append(p3) # Adding the new point here, the list will be ordered
+        newRMDFractalPoint(p3, p2, factor, list, res - 1)
+
+
+
+def newRMDFractal(origin, end, factor, resolution, skeleton = []):
+    """ Create a polyline using the Random Midpoint Displacement Fractal algorithm
+        origin    -- The origin of the curve
+        end    -- The end of the curve
+        factor    -- the percentage of lateral dispersion for the curve
+        resolution    -- number of recursive levels (the exponent in base 2 for number of edges of the curve)
+        skeleton    -- the list of points (must be empty)
+        """
+    skeleton.append(origin)
+    # Adding the new point here (calling the recursive step), the list will be ordered
+    newRMDFractalPoint(origin, end, factor, skeleton, resolution)
+    skeleton.append(end)
+
+    return skeleton
+
+
+
+def meshFromSkeleton(skeleton, width, river_side_a, river_side_b, faces_data, name = "mesh", material = None):
+    for index in range(1, len(skeleton) - 1):
+        p0 = skeleton[index]
+        p1 = skeleton[index - 1]
+        p2 = skeleton[index + 1]
+
+        # The param 'width' controls the width of the river, after the normalizing of it.
+        # This code line is equivalent to '(p1 - p2) * cross(V(0,0,1))'
+        ds = Vector(((p1.y - p2.y), -(p1.x - p2.x), 0.0)).normalized() * width
+        p3 = p0 + ds
+        p4 = p0 - ds
+
+        # Here, we are creating the two river sides point lists.
+        river_side_a.append(p3)
+        river_side_b.append(p4)
+
+    # Creating an ordered list of the two river sides point lists
+    ordered_points = river_side_a + river_side_b[::-1]
+    last_index = len(ordered_points) - 1
+
+    # Creating the triangle faces list to pass it to the from_pydata function to generate the river mesh.
+    for i in range(len(river_side_a) - 1):
+        faces_data.append((i, last_index - (i + 1), i + 1))
+        faces_data.append((i, last_index - (i + 1), last_index - i))
+
+    mesh = bpy.data.meshes.new(name)
+    object = bpy.data.objects.new(name, mesh)
+    mesh.from_pydata(ordered_points, [], faces_data)
+    mesh.update(calc_edges=True)
+    mesh.materials.append(bpy.data.materials[material])
+    bpy.context.scene.objects.link(object)
+
+
+
+def createSandCircle(center, radius):
+    #create radius one circle mesh
+    angle=2*3.1415927 /24
+    cpoints=[Vector((cos(i*angle),sin(i*angle),0.4)) for i in range(24)]
+
+    mesh = bpy.data.meshes.new("gateArena")
+    mesh.from_pydata(cpoints, [], [list(range(24))])
+    mesh.update(calc_edges=True)
+    mesh.materials.append(bpy.data.materials["Sand"])
+    object = bpy.data.objects.new("gateArena", mesh)
+    object.location = center
+    object.scale=Vector((radius, radius, 1))
+    bpy.context.scene.objects.link(object)
 
 ###########################
 # The one and only... main
@@ -876,12 +964,30 @@ def main():
         bpy.ops.object.join()
 
 
-    if args.get('createLeaves', False):
-        createLeaves(internalSeeds, internalRegions, vertices)
+    #if args.get('createLeaves', False):
+        #createLeaves(internalSeeds, internalRegions, vertices)
 
 
     if args.get('createBuildings', False):
         createBuildings(internalSeeds, staticRegions)
+
+
+    if args.get('createRiver', False):
+        distance = cityRadius * 2
+        skeleton_list = newRMDFractal(Vector((-distance, distance * 2, 0.1)),
+                                      Vector((-distance, -distance * 2, 0.1)),
+                                      0.25, 7, [])
+        meshFromSkeleton(skeleton_list, 20, [], [], [], "_River", "Water")
+
+
+    if args.get('createTrail', False):
+        origin = gateMid.to_3d()
+        trailWidth = 5
+
+        createSandCircle(gateMid.to_3d(), 2*(gate1-gateMid).length)
+        skeleton_list = newRMDFractal(origin, (origin * 3), 0.20, 7, [])
+        meshFromSkeleton(skeleton_list, trailWidth, [], [], [], "_Trail", "Sand")
+
 
 
     #Save the current file, if outputCityFilename is set.
@@ -889,6 +995,7 @@ def main():
         outputCityFilename = args['outputCityFilename']
         print('Saving blender model as:', outputCityFilename)
         bpy.ops.wm.save_as_mainfile(filepath=cwd+outputCityFilename, compress=True, copy=False)
+
 
     ###########################################################################
     #        Create lets-take-a-nice-walk game
