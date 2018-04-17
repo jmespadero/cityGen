@@ -322,6 +322,29 @@ def makeGround(cList=[], objName="meshObj", meshName="mesh", radius=10.0, materi
 
 
 
+def createHousesMeshes(bottom_vertex, up_vertex, faces, heigh, name, material):
+    for i in range(len(bottom_vertex)):
+        (x, y, z) = bottom_vertex[i]
+        up_vertex.append((x, y, z + heigh))
+
+    ordered_vertex = bottom_vertex + up_vertex[::-1]
+    limit = len(ordered_vertex) - 1
+
+    for i in range(len(bottom_vertex)):
+        if (i < len(bottom_vertex) - 1):
+            faces.append((i, i + 1, limit - (i + 1), limit - i))
+        else:
+            faces.append((i, 0, limit, limit - i))
+
+    mesh = bpy.data.meshes.new(name)
+    object = bpy.data.objects.new(name, mesh)
+    mesh.from_pydata(ordered_vertex, [], faces)
+    mesh.update(calc_edges=True)
+    mesh.materials.append(bpy.data.materials[material])
+    bpy.context.scene.objects.link(object)
+
+
+
 def makePolygon(emptyRegions, cList, num_region, objName="meshObj", meshName="mesh", height=0.0, reduct=0.0, hide=True, nr=None, seed=None):
     """Create a polygon/prism to represent a city block
     cList    -- A list of 3D points with the vertex of the polygon (corners of the city block)
@@ -404,58 +427,23 @@ def makePolygon(emptyRegions, cList, num_region, objName="meshObj", meshName="me
     
     # 5. Create Houses
 
-
-    #Compute new reduced region coordinates
+    # Compute new reduced region coordinates
     cList3 = []
-    cList4 = []
     reduct = reduct * 6
     for i in range(nv):
-        dx = cList[i][0]-seed[0]
-        dy = cList[i][1]-seed[1]
-        dist = sqrt(dx*dx+dy*dy)
+        dx = cList[i][0] - seed[0]
+        dy = cList[i][1] - seed[1]
+        dist = sqrt(dx * dx + dy * dy)
         if dist < reduct:
             cList3.append(cList[i])
         else:
             vecx = reduct * dx / dist
             vecy = reduct * dy / dist
-            vecxM = reduct * 1.5 * dx / dist
-            vecyM = reduct * 1.5 * dy / dist
-            cList3.append((cList[i][0]-vecx,cList[i][1]-vecy,cList[i][2]))
-            cList4.append((cList[i][0]-vecxM,cList[i][1]-vecyM,cList[i][2]))
+            cList3.append((cList[i][0] - vecx, cList[i][1] - vecy, cList[i][2]))
 
-    for i in range(nv):
-        duplicateAlongSegmentMix (cList3[i-1], cList3[i], 1 ,args["inputHouses"])
-        duplicateAlongSegment(cList4[i-1], cList4[i], "WallHouse", 0, True )
+    createHousesMeshes(cList3, [], [], 6, "HouseWall", "Plaster")
 
-    """
-    #Create a mesh for colision
-    me = bpy.data.meshes.new(meshName)   # create a new mesh
-    ob = bpy.data.objects.new(objName, me) # create an object with that mesh
-    bpy.context.scene.objects.link(ob)  # Link object to scene
 
-    # Fill the mesh with verts, edges, faces
-    me.from_pydata(cList2,[],[tuple(range(len(cList2)))])   # (0,1,2,3..N)
-    me.update(calc_edges=True)    # Update mesh with new data
-
-    #Avoid extrusion if height == 0
-    if (not height):
-        return
-
-    #Extrude the mesh in the direction of +Z axis
-    if (bpy.context.scene.objects.active):
-        bpy.context.scene.objects.active.select = False
-    bpy.context.scene.objects.active = ob
-    ob.select = True
-    bpy.ops.object.mode_set(mode = 'EDIT')
-    hVec=Vector((0.0,0.0,height))
-    bpy.ops.mesh.extrude_region_move(TRANSFORM_OT_translate={"value":hVec})
-    me.update(calc_edges=True)    # Update mesh with new data
-    bpy.ops.object.mode_set(mode = 'OBJECT')
-
-    ob.select = False
-    #Hide this region
-    ob.hide = hide
-    """
 
 def updateExternalTexts():
     """ Check modified external scripts in the scene and update if possible
@@ -968,8 +956,8 @@ def main():
         #createLeaves(internalSeeds, internalRegions, vertices)
 
 
-    if args.get('createBuildings', False):
-        createBuildings(internalSeeds, staticRegions)
+    #if args.get('createBuildings', False):
+        #createBuildings(internalSeeds, staticRegions)
 
 
     if args.get('createRiver', False):
