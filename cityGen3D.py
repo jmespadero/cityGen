@@ -32,6 +32,7 @@ from pprint import pprint
 from mathutils import Vector
 from datetime import datetime
 from random import uniform
+from random import randint
 
 #Set default values for args
 args={
@@ -44,6 +45,7 @@ args={
 'inputPlayer' : 'cg-playerBoy.blend',   # Set a filename for player system.
 'inputTemple' : 'cg-temple.blend',
 'inputMarket' : 'cg-market.blend',
+'inputAssets' : 'cg-house-assets/cg-libWindow.blend', # Set a file name to read windows and doors objects
 'createDefenseWall' : True,  # Create exterior boundary of the city
 'createGround' : True,       # Create ground boundary of the city
 'createStreets' : True,      # Create streets of the city
@@ -294,6 +296,8 @@ def duplicateAlongSegmentMix(pt1, pt2, gapSize, objList=None):
         g1.location = loc
         iniPoint = iniPoint + pathVec * totalSize
 
+
+
 def makeGround(cList=[], objName="meshObj", meshName="mesh", radius=10.0, material='Floor3'):
     """Create a polygon to represent the ground around a city 
     cList    -- A list of 3D points with the vertex of the polygon (corners of the city block)
@@ -322,11 +326,7 @@ def makeGround(cList=[], objName="meshObj", meshName="mesh", radius=10.0, materi
 
 
 
-def createHousesMeshes(bottom_vertex, up_vertex, faces, heigh, name, material):
-    for i in range(len(bottom_vertex)):
-        (x, y, z) = bottom_vertex[i]
-        up_vertex.append((x, y, z + heigh))
-
+def createHousesMesh(bottom_vertex, up_vertex, faces, heigh, name, material):
     ordered_vertex = bottom_vertex + up_vertex[::-1]
     limit = len(ordered_vertex) - 1
 
@@ -342,6 +342,64 @@ def createHousesMeshes(bottom_vertex, up_vertex, faces, heigh, name, material):
     mesh.update(calc_edges=True)
     mesh.materials.append(bpy.data.materials[material])
     bpy.context.scene.objects.link(object)
+
+
+
+def tupleToVectorList(tuples, result):
+    for i in range(len(tuples)):
+        (x, y, z) = tuples[i]
+        result.append(Vector((x, y, z)))
+    return result
+
+
+
+def optimizePolyline(points, widths, new_points):
+    for i in range(len(points)):
+        aux = []
+        a = points[i - 1]
+        b = points[i]
+        d_tot = sqrt(pow(b.x - a.x, 2) + pow(b.y - a.y, 2))
+        d_par = d_tot
+        houses = 0
+        new_points.append(a)
+
+        while (d_par >= widths[0]):
+            for j in range(len(widths)):
+                if (widths[j] <= d_par):
+                    aux.append(widths[j])
+                    houses = houses + 1
+                    d_par = d_par - widths[j]
+
+        d_par = d_par / houses
+        sum = 0
+        for j in range(len(aux) - 1):
+            sum = sum + aux[j] + d_par
+            percentage = sum / d_tot
+            point = a * (1 - percentage) + b * percentage
+            new_points.append(point)
+
+    return new_points
+
+
+
+def getRoofPoints(points, roof, heigh):
+    for i in range(len(points)):
+        v = points[i]
+        roof.append(Vector((v.x, v.y, heigh)))
+    return roof
+
+
+
+def createHouses(base_points, house_types):
+    base_points = tupleToVectorList(base_points, [])
+    base_points = optimizePolyline(base_points, house_types, [])
+    roof_points = getRoofPoints(base_points, [], 6)
+
+    createHousesMesh(base_points, roof_points, [], 6, "HouseWall", "Plaster")
+
+
+
+
 
 
 
@@ -441,7 +499,10 @@ def makePolygon(emptyRegions, cList, num_region, objName="meshObj", meshName="me
             vecy = reduct * dy / dist
             cList3.append((cList[i][0] - vecx, cList[i][1] - vecy, cList[i][2]))
 
-    createHousesMeshes(cList3, [], [], 6, "HouseWall", "Plaster")
+    house_types = [5, 10, 14]
+    if num_region == 1:
+        createHouses(cList3, house_types)
+
 
 
 
@@ -927,7 +988,7 @@ def main():
 
 
     emptyRegions = [x[0] for x in staticRegions.values()]
-
+    importLibrary(args['inputAssets'], destinationLayer=2, importScripts=True)
 
     if args.get('createStreets', False):
         # Create paths and polygon for internal regions
