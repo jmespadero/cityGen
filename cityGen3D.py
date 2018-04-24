@@ -327,14 +327,6 @@ def makeGround(cList=[], objName="meshObj", meshName="mesh", radius=10.0, materi
 
 
 
-def tupleToVectorList(tuples, result):
-    for i in range(len(tuples)):
-        (x, y, z) = tuples[i]
-        result.append(Vector((x, y, z)))
-    return result
-
-
-
 def optimizePolyline(points, widths, new_points):
     for i in range(len(points)):
         aux = []
