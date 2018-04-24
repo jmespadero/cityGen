@@ -45,7 +45,8 @@ args={
 'inputPlayer' : 'cg-playerBoy.blend',   # Set a filename for player system.
 'inputTemple' : 'cg-temple.blend',
 'inputMarket' : 'cg-market.blend',
-'inputAssets' : 'cg-house-assets/cg-libWindow.blend', # Set a file name to read windows and doors objects
+'inputDoors' : 'cg-house-assets/cg-libDoors.blend', # Set a file name to read doors objects
+'inputWindows' : 'cg-house-assets/cg-libWindow.blend', # Set a file name to read windows objects
 'createDefenseWall' : True,  # Create exterior boundary of the city
 'createGround' : True,       # Create ground boundary of the city
 'createStreets' : True,      # Create streets of the city
@@ -326,25 +327,6 @@ def makeGround(cList=[], objName="meshObj", meshName="mesh", radius=10.0, materi
 
 
 
-def createHousesMesh(bottom_vertex, up_vertex, faces, heigh, name, material):
-    ordered_vertex = bottom_vertex + up_vertex[::-1]
-    limit = len(ordered_vertex) - 1
-
-    for i in range(len(bottom_vertex)):
-        if (i < len(bottom_vertex) - 1):
-            faces.append((i, i + 1, limit - (i + 1), limit - i))
-        else:
-            faces.append((i, 0, limit, limit - i))
-
-    mesh = bpy.data.meshes.new(name)
-    object = bpy.data.objects.new(name, mesh)
-    mesh.from_pydata(ordered_vertex, [], faces)
-    mesh.update(calc_edges=True)
-    mesh.materials.append(bpy.data.materials[material])
-    bpy.context.scene.objects.link(object)
-
-
-
 def tupleToVectorList(tuples, result):
     for i in range(len(tuples)):
         (x, y, z) = tuples[i]
@@ -358,7 +340,7 @@ def optimizePolyline(points, widths, new_points):
         aux = []
         a = points[i - 1]
         b = points[i]
-        d_tot = sqrt(pow(b.x - a.x, 2) + pow(b.y - a.y, 2))
+        d_tot = (b - a).length
         d_par = d_tot
         houses = 0
         new_points.append(a)
@@ -382,24 +364,44 @@ def optimizePolyline(points, widths, new_points):
 
 
 
-def getRoofPoints(points, roof, heigh):
+def createHousesMesh(bottom_vertex, up_vertex, faces, heigh, name, material):
+    ordered_vertex = bottom_vertex + up_vertex[::-1]
+    limit = len(ordered_vertex) - 1
+
+    for i in range(len(bottom_vertex)):
+        if (i < len(bottom_vertex) - 1):
+            faces.append((i, i + 1, limit - (i + 1), limit - i))
+        else:
+            faces.append((i, 0, limit, limit - i))
+
+    mesh = bpy.data.meshes.new(name)
+    object = bpy.data.objects.new(name, mesh)
+    mesh.from_pydata(ordered_vertex, [], faces)
+    mesh.update(calc_edges=True)
+    mesh.materials.append(bpy.data.materials[material])
+    bpy.context.scene.objects.link(object)
+
+
+
+def createDoors(points):
+    object = bpy.data.objects["Door4Frame"]
     for i in range(len(points)):
-        v = points[i]
-        roof.append(Vector((v.x, v.y, heigh)))
-    return roof
+        a = points[i - 1]
+        b = points[i]
+        percentage = uniform(0.20, 0.80)
+        p = a * (1 - percentage) + (b * percentage)
+        object = object.copy()
+        object.location = (p.x, p.y, p.z)
+
+
 
 
 
 def createHouses(base_points, house_types):
-    base_points = tupleToVectorList(base_points, [])
     base_points = optimizePolyline(base_points, house_types, [])
-    roof_points = getRoofPoints(base_points, [], 6)
-
+    roof_points = [Vector((v.x, v.y, 6)) for v in base_points]
     createHousesMesh(base_points, roof_points, [], 6, "HouseWall", "Plaster")
-
-
-
-
+    createDoors(base_points)
 
 
 
@@ -500,6 +502,7 @@ def makePolygon(emptyRegions, cList, num_region, objName="meshObj", meshName="me
             cList3.append((cList[i][0] - vecx, cList[i][1] - vecy, cList[i][2]))
 
     house_types = [5, 10, 14]
+    cList3 = [Vector(v) for v in cList3]
     if num_region == 1:
         createHouses(cList3, house_types)
 
@@ -988,7 +991,8 @@ def main():
 
 
     emptyRegions = [x[0] for x in staticRegions.values()]
-    importLibrary(args['inputAssets'], destinationLayer=2, importScripts=True)
+    importLibrary(args['inputDoors'], destinationLayer=2, importScripts=True)
+    importLibrary(args['inputWindows'], destinationLayer=3, importScripts=True)
 
     if args.get('createStreets', False):
         # Create paths and polygon for internal regions
