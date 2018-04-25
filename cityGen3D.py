@@ -375,32 +375,30 @@ def createDoors(points):
     for i in range(len(points)):
         a = points[i - 1]
         b = points[i]
+        angle = (Vector((0, 1, 0))).angle(b - a)
+        print("Ángulo en grados:", angle / 0.0174533)
         percentage = uniform(0.20, 0.80)
         p = a * (1 - percentage) + (b * percentage)
         object = object.copy()
         object.location = (p.x, p.y, p.z)
-        object.rotation_euler = (0, 0, 90)
+        object.rotation_euler = (0, 0, angle)
 
 
 
 
 
-def createHouses(base_points, house_types):
-    optimized_points = optimizePolyline(base_points, house_types, [])
+def createHouses(base_points, house_widths):
+    optimized_points = optimizePolyline(base_points, house_widths, [])
 
     for i in range(len(optimized_points)):
         a = optimized_points[i - 1]
         b = optimized_points[i]
 
-        if (i % 2 == 0):
-            material = "Plaster"
-        else:
-            material = "StoneWall"
+        if (i % 2 == 0): material = "Plaster"
+        else: material = "StoneWall"
 
-        if ((a in base_points) or (b in base_points)):
-            h = 7
-        else:
-            h = randint(6, 10)
+        if ((a in base_points) or (b in base_points)): h = 7
+        else: h = randint(6, 10)
 
         createHouseMesh(a, b, h, "HouseWall", material)
 
@@ -504,10 +502,10 @@ def makePolygon(emptyRegions, cList, num_region, objName="meshObj", meshName="me
             vecy = reduct * dy / dist
             cList3.append((cList[i][0] - vecx, cList[i][1] - vecy, cList[i][2]))
 
-    house_types = [8, 12, 15]
+    house_widths = [8, 12, 15]
     cList3 = [Vector(v) for v in cList3]
     if num_region == 1:
-        createHouses(cList3, house_types)
+        createHouses(cList3, house_widths)
 
 
 
