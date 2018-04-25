@@ -356,19 +356,14 @@ def optimizePolyline(points, widths, new_points):
 
 
 
-def createHousesMesh(bottom_vertex, up_vertex, faces, heigh, name, material):
-    ordered_vertex = bottom_vertex + up_vertex[::-1]
-    limit = len(ordered_vertex) - 1
-
-    for i in range(len(bottom_vertex)):
-        if (i < len(bottom_vertex) - 1):
-            faces.append((i, i + 1, limit - (i + 1), limit - i))
-        else:
-            faces.append((i, 0, limit, limit - i))
+def createHouseMesh(point1, point2, heigh, name, material):
+    v = Vector((0, 0, heigh))
+    vertex_list = [point1, point2, point2 + v, point1 + v]
+    faces = [(0, 1, 2, 3)]
 
     mesh = bpy.data.meshes.new(name)
     object = bpy.data.objects.new(name, mesh)
-    mesh.from_pydata(ordered_vertex, [], faces)
+    mesh.from_pydata(vertex_list, [], faces)
     mesh.update(calc_edges=True)
     mesh.materials.append(bpy.data.materials[material])
     bpy.context.scene.objects.link(object)
@@ -384,16 +379,32 @@ def createDoors(points):
         p = a * (1 - percentage) + (b * percentage)
         object = object.copy()
         object.location = (p.x, p.y, p.z)
+        object.rotation_euler = (0, 0, 90)
 
 
 
 
 
 def createHouses(base_points, house_types):
-    base_points = optimizePolyline(base_points, house_types, [])
-    roof_points = [Vector((v.x, v.y, 6)) for v in base_points]
-    createHousesMesh(base_points, roof_points, [], 6, "HouseWall", "Plaster")
-    createDoors(base_points)
+    optimized_points = optimizePolyline(base_points, house_types, [])
+
+    for i in range(len(optimized_points)):
+        a = optimized_points[i - 1]
+        b = optimized_points[i]
+
+        if (i % 2 == 0):
+            material = "Plaster"
+        else:
+            material = "StoneWall"
+
+        if ((a in base_points) or (b in base_points)):
+            h = 7
+        else:
+            h = randint(6, 10)
+
+        createHouseMesh(a, b, h, "HouseWall", material)
+
+    createDoors(optimized_points)
 
 
 
@@ -493,7 +504,7 @@ def makePolygon(emptyRegions, cList, num_region, objName="meshObj", meshName="me
             vecy = reduct * dy / dist
             cList3.append((cList[i][0] - vecx, cList[i][1] - vecy, cList[i][2]))
 
-    house_types = [5, 10, 14]
+    house_types = [8, 12, 15]
     cList3 = [Vector(v) for v in cList3]
     if num_region == 1:
         createHouses(cList3, house_types)
