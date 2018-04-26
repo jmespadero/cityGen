@@ -371,21 +371,19 @@ def createHouseMesh(point1, point2, heigh, name, material):
 
 
 def createDoors(points):
-    object = bpy.data.objects["Door4Frame"]
+    object = bpy.data.objects["Door4"]
     for i in range(len(points)):
         a = points[i - 1]
         b = points[i]
-        print(a - b)
         angle = (Vector((1, 0, 0))).angle(b - a)
-        print(angle)
+        if ((b - a).y < 0):
+            angle = -angle
         percentage = uniform(0.20, 0.80)
         p = a * (1 - percentage) + (b * percentage)
         object = object.copy()
         object.location = (p.x, p.y, p.z)
         object.rotation_euler = (0, 0, angle)
         object.scale = (1.5, 1.5, 1.5)
-
-
 
 
 
