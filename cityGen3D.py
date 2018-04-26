@@ -375,13 +375,15 @@ def createDoors(points):
     for i in range(len(points)):
         a = points[i - 1]
         b = points[i]
-        angle = (Vector((0, 1, 0))).angle(b - a)
-        print("Ángulo en grados:", angle / 0.0174533)
+        print(a - b)
+        angle = (Vector((1, 0, 0))).angle(b - a)
+        print(angle)
         percentage = uniform(0.20, 0.80)
         p = a * (1 - percentage) + (b * percentage)
         object = object.copy()
         object.location = (p.x, p.y, p.z)
         object.rotation_euler = (0, 0, angle)
+        object.scale = (1.5, 1.5, 1.5)
 
 
 
