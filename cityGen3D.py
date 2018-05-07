@@ -59,9 +59,12 @@ args={
 'outputTourFilename' : 'outputtour.blend', #Output file with complete game
 'outputGameFilename' : 'outputgame.blend', #Output file with complete game
 }
-               
+
+
 #################################################################
 # Functions to create a new cityMap scene (does need run inside blender)
+
+
 
 def duplicateObject(sourceObj, objName="copy", select=False, scene=bpy.context.scene):
     """Duplicate a object in the scene.
@@ -83,6 +86,7 @@ def duplicateObject(sourceObj, objName="copy", select=False, scene=bpy.context.s
     ob_new.select = select
 
     return ob_new
+
 
 
 def duplicateAlongSegment(pt1, pt2, objName, gapSize, force=False):
@@ -155,7 +159,8 @@ def duplicateAlongSegment(pt1, pt2, objName, gapSize, force=False):
 
     return objList
 
- 
+
+
 def knapsack_unbounded_dp(items, C, maxofequalhouse):
     NAME, SIZE, VALUE = range(3)
     # order by max value per item size
@@ -186,17 +191,16 @@ def knapsack_unbounded_dp(items, C, maxofequalhouse):
                     sack[c][1][i] +=1
         else:
             continue               
-                       
-                    
- 
+
     value, bagged = sack[C]
     numbagged = sum(bagged)
     size = sum(items[i][1]*n for i,n in enumerate(bagged))
     # convert to (iten, count) pairs) in name order
     bagged = sorted((items[i][NAME], n) for i,n in enumerate(bagged) if n)
-    
-    
+
     return value, size, numbagged, bagged
+
+
 
 def knapsack_unbounded_dp_control(pathLen, gapSize, objList=None):
     
@@ -250,8 +254,7 @@ def duplicateAlongSegmentMix(pt1, pt2, gapSize, objList=None):
     objName -- the name of blender obj to be copied
     gapSize -- Desired space between objects. Will be adjusted to fit path
     """
-    
-    
+
     objName=objList[0]
     #Compute the orientation of segment pt1-pt2
     dx = pt1[0]-pt2[0]
@@ -265,14 +268,12 @@ def duplicateAlongSegmentMix(pt1, pt2, gapSize, objList=None):
     ang = acos(dy/sqrt((dx**2)+(dy**2)))
     if dx > 0:
         ang = -ang
-        
-    
+
     # Compute the direction of the segment
     pathVec = Vector(pt2)-Vector(pt1)
     pathLen = pathVec.length
     pathVec.normalize() 
-    
-   
+
     list,spaceUsed = knapsack_unbounded_dp_control(pathLen,gapSize,objList)
     objList=[]
     for m in list:
@@ -356,38 +357,111 @@ def optimizePolyline(points, widths, new_points):
 
 
 
-def createHouseMesh(point1, point2, heigh, name, material):
-    v = Vector((0, 0, heigh))
-    vertex_list = [point1, point2, point2 + v, point1 + v]
-    faces = [(0, 1, 2, 3)]
-
+def createHouseMesh(points, faces, name, material):
     mesh = bpy.data.meshes.new(name)
     object = bpy.data.objects.new(name, mesh)
-    mesh.from_pydata(vertex_list, [], faces)
+    mesh.from_pydata(points, [], faces)
     mesh.update(calc_edges=True)
     mesh.materials.append(bpy.data.materials[material])
     bpy.context.scene.objects.link(object)
 
 
 
-def createDoors(points):
+def getAngle(a, b, v=Vector((1,0,0))):
+    angle = v.angle(b - a)
+    if ((b - a).y < 0):
+        angle = -angle
+
+    return angle
+
+
+
+def createHouseDoor(a, b):
     object = bpy.data.objects["Door4"]
-    for i in range(len(points)):
-        a = points[i - 1]
-        b = points[i]
-        angle = (Vector((1, 0, 0))).angle(b - a)
-        if ((b - a).y < 0):
-            angle = -angle
-        percentage = uniform(0.20, 0.80)
-        p = a * (1 - percentage) + (b * percentage)
-        object = object.copy()
-        object.location = (p.x, p.y, p.z)
-        object.rotation_euler = (0, 0, angle)
-        object.scale = (1.5, 1.5, 1.5)
+
+    # Computing angle for door rotation
+    angle = getAngle(a, b)
+
+    # Cumputing the door location point, between point a and b
+    door_per = object.dimensions.x / (a - b).length
+    percentage = uniform(door_per, 1 - (door_per))
+    p = a * (1 - percentage) + (b * percentage)
+
+    # Creating the door
+    object = object.copy()
+    object.location = (p.x, p.y, p.z)
+    object.rotation_euler = (0, 0, angle)
+
+    return object.dimensions.z
 
 
 
-def createHouses(base_points, house_widths):
+def createHouseWindows(a, b, h, door_h):
+    object = bpy.data.objects["WindowsOutwards2Frame"]
+    h = h - door_h
+    z = object.dimensions.z * 1.5
+    x = object.dimensions.x * 3
+    w = (a - b).length
+
+    # print("h =", h)
+    # print("z =", z)
+    rest_x = h % z
+    # print("rest_x = h % z =", rest_x)
+    levels_h = (h - rest_x) / z
+    # print("levels_h = (h - rest_x) / z =", levels_h)
+
+    level_h = rest_x / levels_h
+    # print("level_h = rest_x / levels_h =", level_h)
+    level_h = z + level_h
+    # print("level_h = z + level_h =", level_h)
+    angle = getAngle(a, b, Vector((1, 0, 0)))
+
+    win_per = object.dimensions.x / w
+    rest_x = w % x
+    levels_x = (w - rest_x) / x
+    level_x = rest_x / levels_x
+    level_x = x + level_x
+
+    for i in range(int(levels_h)):
+        h = door_h + level_h * 0.5
+
+        limit_l = win_per
+        for j in range(int(levels_x)):
+            print("En el nivel", i, "colocamos", levels_x , "ventanas en la altura", h)
+
+            percentage = uniform(limit_l, (1 / level_x) - win_per)
+            p = a * (1 - percentage) + (b * percentage)
+
+            o = object.copy()
+            o.location = (p.x, p.y, h)
+            o.rotation_euler = (0, 0, angle)
+            o.scale = (1.5, 1.5, 1.5)
+
+            win_per = win_per * 3
+            level_x = level_x + level_x
+            limit_l = limit_l + level_x
+
+        door_h = door_h + level_h
+
+    print("************************************************************")
+
+
+
+def createHouse(point1, point2, heigh, name, material):
+    # Step 1: Creating the mesh computing his points and his faces (the quad)
+    v = Vector((0, 0, heigh))
+    vertex_list = [point1, point2, point2 + v, point1 + v]
+    createHouseMesh(vertex_list, [(0, 1, 2, 3)], name, material)
+
+    # Step 2: Creating the house's door
+    door_heigh = createHouseDoor(point1, point2)
+
+    # Step 3: Creating the house's windows
+    createHouseWindows(point1, point2, heigh, door_heigh + 1)
+
+
+
+def createRegionHouses(base_points, house_widths):
     optimized_points = optimizePolyline(base_points, house_widths, [])
 
     for i in range(len(optimized_points)):
@@ -398,11 +472,9 @@ def createHouses(base_points, house_widths):
         else: material = "StoneWall"
 
         if ((a in base_points) or (b in base_points)): h = 7
-        else: h = randint(6, 10)
+        else: h = randint(6, 12)
 
-        createHouseMesh(a, b, h, "HouseWall", material)
-
-    createDoors(optimized_points)
+        createHouse(a, b, h, "HouseWall", material)
 
 
 
@@ -502,10 +574,9 @@ def makePolygon(emptyRegions, cList, num_region, objName="meshObj", meshName="me
             vecy = reduct * dy / dist
             cList3.append((cList[i][0] - vecx, cList[i][1] - vecy, cList[i][2]))
 
-    house_widths = [8, 12, 15]
-    cList3 = [Vector(v) for v in cList3]
+
     if num_region == 1:
-        createHouses(cList3, house_widths)
+        createRegionHouses([Vector(v) for v in cList3], [8, 12, 15])
 
 
 
