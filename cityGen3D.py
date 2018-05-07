@@ -397,7 +397,7 @@ def createHouseDoor(a, b):
 
 
 def createHouseWindows(a, b, h, door_h):
-    object = bpy.data.objects["WindowsOutwards2Frame"]
+    object = bpy.data.objects["Window1"]
     h = h - door_h
     z = object.dimensions.z * 1.5
     x = object.dimensions.x * 3
