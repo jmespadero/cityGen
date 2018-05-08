@@ -376,92 +376,38 @@ def getAngle(a, b, v=Vector((1,0,0))):
 
 
 
-def createHouseDoor(a, b):
-    object = bpy.data.objects["Door4"]
-
-    # Computing angle for door rotation
-    angle = getAngle(a, b)
-
-    # Cumputing the door location point, between point a and b
-    door_per = object.dimensions.x / (a - b).length
-    percentage = uniform(door_per, 1 - (door_per))
-    p = a * (1 - percentage) + (b * percentage)
-
-    # Creating the door
-    object = object.copy()
-    object.location = (p.x, p.y, p.z)
-    object.rotation_euler = (0, 0, angle)
-
-    return object.dimensions.z
+def createAsset(a, b, h, asset):
+    print("Creating the asset...")
 
 
 
-def createHouseWindows(a, b, h, door_h):
-    object = bpy.data.objects["Window1"]
-    h = h - door_h
-    z = object.dimensions.z * 1.5
-    x = object.dimensions.x * 3
-    w = (a - b).length
+def createHouseAssets(a, b, h, data):
+    house_length = (b - a).length
 
-    # print("h =", h)
-    # print("z =", z)
-    rest_x = h % z
-    # print("rest_x = h % z =", rest_x)
-    levels_h = (h - rest_x) / z
-    # print("levels_h = (h - rest_x) / z =", levels_h)
+    if (house_length <= 10):
+        houses = [data[index] for index in [0, 1, 2, 3, 4]]
+    elif (house_length > 10 and house_length < 15):
+        houses = [data[index] for index in [5, 6, 7, 8, 9]]
+    elif (house_length >= 15):
+        houses = [data[index] for index in [10, 11, 12]]
 
-    level_h = rest_x / levels_h
-    # print("level_h = rest_x / levels_h =", level_h)
-    level_h = z + level_h
-    # print("level_h = z + level_h =", level_h)
-    angle = getAngle(a, b, Vector((1, 0, 0)))
+    house = random.choice(houses)
 
-    win_per = object.dimensions.x / w
-    rest_x = w % x
-    levels_x = (w - rest_x) / x
-    level_x = rest_x / levels_x
-    level_x = x + level_x
-
-    for i in range(int(levels_h)):
-        h = door_h + level_h * 0.5
-
-        limit_l = win_per
-        for j in range(int(levels_x)):
-            print("En el nivel", i, "colocamos", levels_x , "ventanas en la altura", h)
-
-            percentage = uniform(limit_l, (1 / level_x) - win_per)
-            p = a * (1 - percentage) + (b * percentage)
-
-            o = object.copy()
-            o.location = (p.x, p.y, h)
-            o.rotation_euler = (0, 0, angle)
-            o.scale = (1.5, 1.5, 1.5)
-
-            win_per = win_per * 3
-            level_x = level_x + level_x
-            limit_l = limit_l + level_x
-
-        door_h = door_h + level_h
-
-    print("************************************************************")
+    for i in range(len(house)):
+        createAsset(a, b, h, house[i])
 
 
 
-def createHouse(point1, point2, heigh, name, material):
+def createHouse(point1, point2, heigh, name, material, data):
     # Step 1: Creating the mesh computing his points and his faces (the quad)
     v = Vector((0, 0, heigh))
     vertex_list = [point1, point2, point2 + v, point1 + v]
     createHouseMesh(vertex_list, [(0, 1, 2, 3)], name, material)
-
-    # Step 2: Creating the house's door
-    door_heigh = createHouseDoor(point1, point2)
-
-    # Step 3: Creating the house's windows
-    createHouseWindows(point1, point2, heigh, door_heigh + 1)
+    createHouseAssets(point1, point2, heigh, data)
 
 
 
-def createRegionHouses(base_points, house_widths):
+def createRegionHouses(base_points, house_widths, houseAssets):
     optimized_points = optimizePolyline(base_points, house_widths, [])
 
     for i in range(len(optimized_points)):
@@ -474,11 +420,11 @@ def createRegionHouses(base_points, house_widths):
         if ((a in base_points) or (b in base_points)): h = 7
         else: h = randint(6, 12)
 
-        createHouse(a, b, h, "HouseWall", material)
+        createHouse(a, b, h, "HouseWall", material, houseAssets)
 
 
 
-def makePolygon(emptyRegions, cList, num_region, objName="meshObj", meshName="mesh", height=0.0, reduct=0.0, hide=True, nr=None, seed=None):
+def makePolygon(emptyRegions, houseAssets, cList, num_region, objName="meshObj", meshName="mesh", height=0.0, reduct=0.0, hide=True, nr=None, seed=None):
     """Create a polygon/prism to represent a city block
     cList    -- A list of 3D points with the vertex of the polygon (corners of the city block)
     objName  -- the name of the new object
@@ -576,7 +522,7 @@ def makePolygon(emptyRegions, cList, num_region, objName="meshObj", meshName="me
 
 
     if num_region == 1:
-        createRegionHouses([Vector(v) for v in cList3], [8, 12, 15])
+        createRegionHouses([Vector(v) for v in cList3], [8, 12, 15], houseAssets)
 
 
 
@@ -915,6 +861,7 @@ def main():
         internalRegions = data['internalRegions']
         externalPoints = data['externalPoints']
         staticRegions = data['staticRegions']
+        houseAssets = data['houseTemplates']
         cityRadius = data['cityRadius']
         # This is a hack to convert dictionaries with string keys to integer.
         # Necessary because json.dump() saves integer keys as strings
@@ -1072,7 +1019,7 @@ def main():
         for nr, region in enumerate(internalRegions):
             print(".", end="")
             corners = [vertices3D[i] for i in region]
-            makePolygon(emptyRegions, corners, nr, "houseO", "houseM", height=0.5, reduct=1.0, nr=nr, seed=seeds[nr])
+            makePolygon(emptyRegions, houseAssets, corners, nr, "houseO", "houseM", height=0.5, reduct=1.0, nr=nr, seed=seeds[nr])
         print(".")
 
         # Merge streets meshes in one object
