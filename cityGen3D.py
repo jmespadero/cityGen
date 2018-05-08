@@ -47,6 +47,7 @@ args={
 'inputMarket' : 'cg-market.blend',
 'inputDoors' : 'cg-house-assets/cg-libDoors.blend', # Set a file name to read doors objects
 'inputWindows' : 'cg-house-assets/cg-libWindow.blend', # Set a file name to read windows objects
+'inputBalconys' : 'cg-house-assets/cg-libBalcony.blend', # Set a file name to read balcony objects
 'createDefenseWall' : True,  # Create exterior boundary of the city
 'createGround' : True,       # Create ground boundary of the city
 'createStreets' : True,      # Create streets of the city
@@ -367,7 +368,7 @@ def createHouseMesh(points, faces, name, material):
 
 
 
-def getAngle(a, b, v=Vector((1,0,0))):
+def getAngle(a, b, v = Vector((1,0,0))):
     angle = v.angle(b - a)
     if ((b - a).y < 0):
         angle = -angle
@@ -377,7 +378,15 @@ def getAngle(a, b, v=Vector((1,0,0))):
 
 
 def createAsset(a, b, h, asset):
-    print("Creating the asset...")
+    name = asset[0]
+    u = asset[1]
+    v = asset[2]
+    c = a + Vector((0, 0, h))
+    point = a + (b - a) * u + (c - a) * v
+
+    object = bpy.data.objects[name].copy()
+    object.location = point
+    object.rotation_euler = (0, 0, getAngle(a, b))
 
 
 
@@ -1012,6 +1021,7 @@ def main():
     emptyRegions = [x[0] for x in staticRegions.values()]
     importLibrary(args['inputDoors'], destinationLayer=2, importScripts=True)
     importLibrary(args['inputWindows'], destinationLayer=3, importScripts=True)
+    importLibrary(args['inputBalconys'], destinationLayer=4, importScripts=True)
 
     if args.get('createStreets', False):
         # Create paths and polygon for internal regions
