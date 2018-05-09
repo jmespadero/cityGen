@@ -254,6 +254,95 @@ class Delaunay2D:
         return vor_coors, regions
 
 
+
+def createHouseTemplates():
+    return [[["Door1", 0.50, 0.00],
+             ["Window4", 0.33, 0.75],
+             ["Window4", 0.66, 0.75]],
+            [["Door1", 0.65, 0.00],
+             ["Window1", 0.30, 0.30],
+             ["Window2", 0.30, 0.75],
+             ["Window2", 0.65, 0.75]],
+            [["Door4", 0.50, 0.00],
+             ["Window2", 0.30, 0.60],
+             ["Window2", 0.30, 0.80],
+             ["Window2", 0.70, 0.60],
+             ["Window2", 0.70, 0.80]],
+            [["Door4", 0.50, 0.00],
+             ["Window3", 0.25, 0.65],
+             ["Window3", 0.50, 0.65],
+             ["Window3", 0.75, 0.65]],
+            [["Door4", 0.50, 0.00],
+             ["Balcony1", 0.50, 0.60],
+             ["Window4", 0.50, 0.50],
+             ["Door1", 0.45, 0.60]],
+
+            [["Door4", 0.25, 0.00],
+             ["Window1", 0.65, 0.30],
+             ["Window1", 0.85, 0.30],
+             ["Window3", 0.20, 0.75],
+             ["Window3", 0.40, 0.75],
+             ["Window3", 0.60, 0.75],
+             ["Window3", 0.80, 0.75]],
+            [["Door4", 0.50, 0.00],
+             ["Window3", 0.10, 0.30],
+             ["Window3", 0.25, 0.30],
+             ["Window3", 0.75, 0.30],
+             ["Window3", 0.90, 0.30],
+             ["Window5", 0.175, 0.70],
+             ["Window5", 0.825, 0.70],
+             ["WindowsDoubleLow1Boards", 0.42, 0.63],
+             ["WindowsDoubleLow1Boards", 0.58, 0.63]],
+            [["Door1", 0.25, 0.00],
+             ["Window5", 0.55, 0.25],
+             ["Window5", 0.85, 0.25],
+             ["Window2", 0.20, 0.63],
+             ["Window2", 0.50, 0.63],
+             ["Window2", 0.20, 0.87],
+             ["Window2", 0.80, 0.87]],
+            [["Door1", 0.20, 0.00],
+             ["Door1", 0.80, 0.00],
+             ["Window6", 0.20, 0.50],
+             ["Window6", 0.80, 0.50],
+             ["Window1", 0.50, 0.30],
+             ["Window2", 0.20, 0.80],
+             ["Window2", 0.40, 0.80],
+             ["Window2", 0.60, 0.80],
+             ["Window2", 0.80, 0.80]],
+            [["Door4", 0.50, 0.00],
+             ["Balcony2", 0.50, 0.60],
+             ["Door1", 0.55, 0.60],
+             ["Window1", 0.15, 0.30],
+             ["Window1", 0.85, 0.30],
+             ["Window3", 0.15, 0.55],
+             ["Window3", 0.15, 0.80],
+             ["Window3", 0.85, 0.55],
+             ["Window3", 0.85, 0.80]],
+
+            [["Door4", 0.25, 0.00],
+             ["Door1", 0.80, 0.00],
+             ["Window1", 0.60, 0.30],
+             ["Window2", 0.60, 0.70],
+             ["Window4", 0.80, 0.65]],
+            [["Door4", 0.25, 0.00],
+             ["Balcony2", 0.75, 0.50],
+             ["Door1", 0.75, 0.50],
+             ["Window1", 0.75, 0.25],
+             ["Window4", 0.25, 0.50],
+             ["Window2", 0.15, 0.70],
+             ["Window2", 0.35, 0.70]],
+            [["Door4", 0.80, 0.00],
+             ["Balcony3", 0.30, 0.60],
+             ["Door1", 0.20, 0.60],
+             ["Door1", 0.20, 0.00],
+             ["Window2", 0.40, 0.80],
+             ["Window1", 0.70, 0.55],
+             ["Window2", 0.70, 0.85],
+             ["Window1", 0.90, 0.55],
+             ["Window2", 0.90, 0.85]]]
+
+
+
 def forceStaticSeeds(static_seeds, seeds):
     # Force static seeds
     i = 0
@@ -380,6 +469,8 @@ def newCityData(args, numBarriers=12, LloydSteps=2):
     # Dictionary with the specific regions coordinates inside
     static_seeds, static_regions, fixedSeeds = buildStaticSeeds(args.models, cityRadius)
     forceStaticSeeds(static_seeds, seeds)
+
+    houseTemplates = createHouseTemplates()
 
 
     # Min distante allowed between seeds. See documentation
@@ -808,6 +899,7 @@ def newCityData(args, numBarriers=12, LloydSteps=2):
     'wallVertices': wallVertices.tolist(),
     'staticRegions': static_regions,
     'cityRadius': cityRadius,
+    'houseTemplates': houseTemplates,
     }
     return cityData
 

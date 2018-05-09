@@ -1,3 +1,4 @@
+
 """
 Game generator from project citygen
 Reads a .json file generated with cityGen2D.py, and build a 3D model of the city
@@ -378,27 +379,43 @@ def getAngle(a, b, v = Vector((1,0,0))):
 
 
 def createAsset(a, b, h, asset):
-    name = asset[0]
-    u = asset[1]
-    v = asset[2]
+    # Computing the point where the asset will be located
     c = a + Vector((0, 0, h))
-    point = a + (b - a) * u + (c - a) * v
+    point = a + (b - a) * asset[1] + (c - a) * asset[2]
 
-    object = bpy.data.objects[name].copy()
+    # Computing the asset rotation angle and creating it
+    object = bpy.data.objects[asset[0]].copy()
     object.location = point
     object.rotation_euler = (0, 0, getAngle(a, b))
+    object.scale = (1.5, 1.5, 1.5)
 
 
 
 def createHouseAssets(a, b, h, data):
     house_length = (b - a).length
 
+
     if (house_length <= 10):
-        houses = [data[index] for index in [0, 1, 2, 3, 4]]
+        if (h < 8):
+            houses = [data[index] for index in [0, 1]]
+        elif (h >= 8 and h < 10):
+            houses = [data[index] for index in [2, 3]]
+        elif (h >= 10):
+            houses = [data[index] for index in [4]]
     elif (house_length > 10 and house_length < 15):
-        houses = [data[index] for index in [5, 6, 7, 8, 9]]
+        if (h < 8):
+            houses = [data[index] for index in [5, 6]]
+        elif (h >= 8 and h < 10):
+            houses = [data[index] for index in [7, 8]]
+        elif (h >= 10):
+            houses = [data[index] for index in [9]]
     elif (house_length >= 15):
-        houses = [data[index] for index in [10, 11, 12]]
+        if (h < 8):
+            houses = [data[index] for index in [10]]
+        elif (h >= 8 and h < 10):
+            houses = [data[index] for index in [11]]
+        elif (h >= 10):
+            houses = [data[index] for index in [12]]
 
     house = random.choice(houses)
 
@@ -531,7 +548,7 @@ def makePolygon(emptyRegions, houseAssets, cList, num_region, objName="meshObj",
 
 
     if num_region == 1:
-        createRegionHouses([Vector(v) for v in cList3], [8, 12, 15], houseAssets)
+        createRegionHouses([Vector(v) for v in cList3], [8, 13, 16], houseAssets)
 
 
 
