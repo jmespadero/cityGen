@@ -49,6 +49,7 @@ args={
 'inputDoors' : 'cg-house-assets/cg-libDoors.blend', # Set a file name to read doors objects
 'inputWindows' : 'cg-house-assets/cg-libWindow.blend', # Set a file name to read windows objects
 'inputBalconys' : 'cg-house-assets/cg-libBalcony.blend', # Set a file name to read balcony objects
+'inputRoofs' : 'cg-house-assets/cg-libExtraRoofs.blend', # Set a file name to read roof objects
 'createDefenseWall' : True,  # Create exterior boundary of the city
 'createGround' : True,       # Create ground boundary of the city
 'createStreets' : True,      # Create streets of the city
@@ -387,7 +388,7 @@ def createAsset(a, b, h, asset):
     object = bpy.data.objects[asset[0]].copy()
     object.location = point
     object.rotation_euler = (0, 0, getAngle(a, b))
-    object.scale = (1.5, 1.5, 1.5)
+    object.scale = (asset[3], asset[3], asset[3])
 
 
 
@@ -424,12 +425,27 @@ def createHouseAssets(a, b, h, data):
 
 
 
+def createHouseRoof(a, b, h):
+    a = a + Vector((0, 0, h))
+    b = b + Vector((0, 0, h))
+
+    point = (a + b) * 0.5
+    length = (b - a).length
+
+    object = bpy.data.objects["Roof1"].copy()
+    object.location = point
+    object.rotation_euler = (0, 0, getAngle(a, b))
+    object.dimensions[0] = length
+
+
+
 def createHouse(point1, point2, heigh, name, material, data):
     # Step 1: Creating the mesh computing his points and his faces (the quad)
     v = Vector((0, 0, heigh))
     vertex_list = [point1, point2, point2 + v, point1 + v]
     createHouseMesh(vertex_list, [(0, 1, 2, 3)], name, material)
     createHouseAssets(point1, point2, heigh, data)
+    createHouseRoof(point1, point2, heigh)
 
 
 
@@ -667,24 +683,19 @@ def nearestSegment(vector , vertices, vert_coords):
 
 
 def createLeaves(seeds, internalRegions, vertices):
-    print("Creating leaves...")
     hojas = 0
-    loops = 0
 
     while (hojas < 3000):
-        loops = loops + 1
         vector = Vector((uniform(-300, 300), uniform(-300, 300), 0.1))
 
         n = nearestSeed(vector, seeds)
         (s, d) = nearestSegment(vector , internalRegions[n], vertices)
-
+        
         if (d < 4.5 and d > 1.5):
             g1 = duplicateObject(bpy.data.objects["DryLeaf"], "_leave_" + str(hojas))
             g1.location = vector
             g1.rotation_euler = (0, 0, uniform(0, 360))
             hojas = hojas + 1
-
-    print("\nLeaves created (", loops, "loops)")
 
 
 
@@ -1036,9 +1047,11 @@ def main():
 
 
     emptyRegions = [x[0] for x in staticRegions.values()]
-    importLibrary(args['inputDoors'], destinationLayer=2, importScripts=True)
-    importLibrary(args['inputWindows'], destinationLayer=3, importScripts=True)
-    importLibrary(args['inputBalconys'], destinationLayer=4, importScripts=True)
+    importLibrary(args['inputDoors'], destinationLayer = 2, importScripts = True)
+    importLibrary(args['inputWindows'], destinationLayer = 3, importScripts = True)
+    importLibrary(args['inputBalconys'], destinationLayer = 4, importScripts = True)
+    importLibrary(args['inputRoofs'], destinationLayer = 5, importScripts = True)
+
 
     if args.get('createStreets', False):
         # Create paths and polygon for internal regions
