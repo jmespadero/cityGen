@@ -441,11 +441,12 @@ def createHouseRoof(a, b, h):
 
 def createHouse(point1, point2, heigh, name, material, data):
     # Step 1: Creating the mesh computing his points and his faces (the quad)
-    v = Vector((0, 0, heigh))
-    vertex_list = [point1, point2, point2 + v, point1 + v]
-    createHouseMesh(vertex_list, [(0, 1, 2, 3)], name, material)
+    v1 = Vector((0, 0, heigh))
+    v2 = Vector((0, 0, 1.5))
+    vertex_list = [point1, point2, point2 + v1, ((point1 + v1) + (point2 + v1)) * 0.5 + v2, point1 + v1]
+    createHouseMesh(vertex_list, [(0, 1, 2), (0, 2, 4), (2, 3, 4)], name, material)
     createHouseAssets(point1, point2, heigh, data)
-    createHouseRoof(point1, point2, heigh)
+    # createHouseRoof(point1, point2, heigh)
 
 
 
@@ -455,6 +456,7 @@ def createRegionHouses(base_points, house_widths, houseAssets):
     for i in range(len(optimized_points)):
         a = optimized_points[i - 1]
         b = optimized_points[i]
+        c = optimized_points[i - 2]
 
         if (i % 2 == 0): material = "Plaster"
         else: material = "StoneWall"
