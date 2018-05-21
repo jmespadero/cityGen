@@ -31,6 +31,7 @@ import math, json, random, os, sys
 from math import sqrt, acos, sin, cos
 from pprint import pprint
 from mathutils import Vector
+from mathutils import Euler
 from datetime import datetime
 from random import uniform
 from random import randint
@@ -446,25 +447,41 @@ def createHouse(point1, point2, heigh, name, material, data):
     vertex_list = [point1, point2, point2 + v1, ((point1 + v1) + (point2 + v1)) * 0.5 + v2, point1 + v1]
     createHouseMesh(vertex_list, [(0, 1, 2), (0, 2, 4), (2, 3, 4)], name, material)
     createHouseAssets(point1, point2, heigh, data)
-    # createHouseRoof(point1, point2, heigh)
+
+
+
+def createWall(c, a, b, h, name, material):
+    v = Vector((0, 0, h))
+    d = a
+    angle = getAngle(c, a, (b - a)) / 2
+    d.rotate(Euler((0, 0, angle)))
+
+    vertex_list = [a, d, d + v, a + v]
+    createHouseMesh(vertex_list, [(0, 1, 3), (1, 2, 3)], name, material)
 
 
 
 def createRegionHouses(base_points, house_widths, houseAssets):
     optimized_points = optimizePolyline(base_points, house_widths, [])
+    last_heigh = 0
 
     for i in range(len(optimized_points)):
+        c = optimized_points[i - 2]
         a = optimized_points[i - 1]
         b = optimized_points[i]
-        c = optimized_points[i - 2]
 
         if (i % 2 == 0): material = "Plaster"
         else: material = "StoneWall"
 
-        if ((a in base_points) or (b in base_points)): h = 7
-        else: h = randint(6, 12)
+        if ((a in base_points) or (b in base_points)): heigh = 7
+        else: heigh = randint(6, 12)
 
-        createHouse(a, b, h, "HouseWall", material, houseAssets)
+        #if (last_heigh > 0):
+        #    createWall(c, a, b, max(last_heigh, heigh), "HouseWall", material)
+
+        createHouse(a, b, heigh, "HouseWall", material, houseAssets)
+        last_heigh = heigh
+
 
 
 
@@ -565,8 +582,8 @@ def makePolygon(emptyRegions, houseAssets, cList, num_region, objName="meshObj",
             cList3.append((cList[i][0] - vecx, cList[i][1] - vecy, cList[i][2]))
 
 
-    #if num_region == 1:
-    createRegionHouses([Vector(v) for v in cList3], [8, 13, 16], houseAssets)
+    if num_region == 1:
+        createRegionHouses([Vector(v) for v in cList3], [8, 13, 16], houseAssets)
 
 
 
