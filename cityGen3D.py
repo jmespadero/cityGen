@@ -379,6 +379,21 @@ def getAngle(a, b, v = Vector((1,0,0))):
 
 
 
+def createHouseRoof(a, b, h):
+    a = a + Vector((0, 0, h))
+    b = b + Vector((0, 0, h))
+
+    point = (a + b) * 0.5
+    length = (b - a).length
+
+    object = bpy.data.objects["Roof1"].copy()
+    object.location = point
+    object.rotation_euler = (0, 0, getAngle(a, b))
+    object.dimensions[0] = length
+
+
+
+
 def createAsset(a, b, h, asset):
     # Computing the point where the asset will be located
     c = a + Vector((0, 0, h))
@@ -389,12 +404,12 @@ def createAsset(a, b, h, asset):
     object.location = point
     object.rotation_euler = (0, 0, getAngle(a, b))
     object.scale = (asset[3], asset[3], asset[3])
+    createHouseRoof(a, b, h)
 
 
 
 def createHouseAssets(a, b, h, data):
     house_length = (b - a).length
-
 
     if (house_length <= 10):
         if (h < 8):
@@ -419,23 +434,8 @@ def createHouseAssets(a, b, h, data):
             houses = [data[index] for index in [12]]
 
     house = random.choice(houses)
-
     for i in range(len(house)):
         createAsset(a, b, h, house[i])
-
-
-
-def createHouseRoof(a, b, h):
-    a = a + Vector((0, 0, h))
-    b = b + Vector((0, 0, h))
-
-    point = (a + b) * 0.5
-    length = (b - a).length
-
-    object = bpy.data.objects["Roof1"].copy()
-    object.location = point
-    object.rotation_euler = (0, 0, getAngle(a, b))
-    object.dimensions[0] = length
 
 
 
@@ -565,8 +565,8 @@ def makePolygon(emptyRegions, houseAssets, cList, num_region, objName="meshObj",
             cList3.append((cList[i][0] - vecx, cList[i][1] - vecy, cList[i][2]))
 
 
-    if num_region == 1:
-        createRegionHouses([Vector(v) for v in cList3], [8, 13, 16], houseAssets)
+    #if num_region == 1:
+    createRegionHouses([Vector(v) for v in cList3], [8, 13, 16], houseAssets)
 
 
 
