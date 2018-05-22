@@ -27,6 +27,7 @@ DONE:
   * Fix armatures when set position to an armatured object (see initPos)
 """
 import bpy
+import bmesh
 import math, json, random, os, sys
 from math import sqrt, acos, sin, cos
 from pprint import pprint
@@ -363,6 +364,15 @@ def optimizePolyline(points, widths, new_points):
 
 def createHouseMesh(points, faces, name, material):
     mesh = bpy.data.meshes.new(name)
+
+    bmesh = bmesh.new()
+    bmesh.from_mesh(mesh)
+
+    for v in bmesh.verts:
+        v.co.c += 1.0
+
+    bmesh.to_mesh(mesh)
+    
     object = bpy.data.objects.new(name, mesh)
     mesh.from_pydata(points, [], faces)
     mesh.update(calc_edges=True)
