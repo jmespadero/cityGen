@@ -362,22 +362,27 @@ def optimizePolyline(points, widths, new_points):
 
 
 
-def createHouseMesh(points, faces, name, material):
+def createHouseMesh(origin, points, faces, name, material):
     mesh = bpy.data.meshes.new(name)
 
-    bmesh = bmesh.new()
-    bmesh.from_mesh(mesh)
-
-    for v in bmesh.verts:
-        v.co.c += 1.0
-
-    bmesh.to_mesh(mesh)
-    
     object = bpy.data.objects.new(name, mesh)
     mesh.from_pydata(points, [], faces)
     mesh.update(calc_edges=True)
     mesh.materials.append(bpy.data.materials[material])
     bpy.context.scene.objects.link(object)
+
+    # Create a UV Map for the mesh to adapt its material
+    bm = bmesh.new()
+    bm.from_mesh(mesh)
+    uv_layer = bm.loops.layers.uv.verify()
+    bm.faces.layers.tex.verify()
+
+    # Each mesh have several faces
+    for f in bm.faces:
+        # Each face have several loops (corners), and the algorithm iterates for those corners giving them a UV coordinates
+        for l in f.loops:
+            l[uv_layer].uv = Vector(((l.vert.co - origin).length, l.vert.co.z))
+    bm.to_mesh(mesh)
 
 
 
@@ -455,7 +460,7 @@ def createHouse(point1, point2, heigh, name, material, data):
     v1 = Vector((0, 0, heigh))
     v2 = Vector((0, 0, 1.5))
     vertex_list = [point1, point2, point2 + v1, ((point1 + v1) + (point2 + v1)) * 0.5 + v2, point1 + v1]
-    createHouseMesh(vertex_list, [(0, 1, 2), (0, 2, 4), (2, 3, 4)], name, material)
+    createHouseMesh(point1, vertex_list, [(0, 1, 2), (0, 2, 4), (2, 3, 4)], name, material)
     createHouseAssets(point1, point2, heigh, data)
 
 
