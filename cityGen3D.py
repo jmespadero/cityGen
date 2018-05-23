@@ -476,7 +476,16 @@ def createWall(c, a, b, h, name, material):
 
 
 
-def createRegionHouses(base_points, house_widths, houseAssets):
+def loadTemplates(cwd, file):
+    with open(cwd + file, 'r') as f:
+        data = json.load(f)
+
+    return data["houseTemplates"]
+
+
+
+def createRegionHouses(cwd, base_points, house_widths):
+    houseAssets = loadTemplates(cwd, "cg-templates.json")
     optimized_points = optimizePolyline(base_points, house_widths, [])
     last_heigh = 0
 
@@ -494,13 +503,13 @@ def createRegionHouses(base_points, house_widths, houseAssets):
         #if (last_heigh > 0):
         #    createWall(c, a, b, max(last_heigh, heigh), "HouseWall", material)
 
-        createHouse(a, b, heigh, "HouseWall", material, houseAssets)
+        createHouse(a, b, heigh, "HouseWall", "StoneWall", houseAssets)
         last_heigh = heigh
 
 
 
 
-def makePolygon(emptyRegions, houseAssets, cList, num_region, objName="meshObj", meshName="mesh", height=0.0, reduct=0.0, hide=True, nr=None, seed=None):
+def makePolygon(cwd, emptyRegions, cList, num_region, objName="meshObj", meshName="mesh", height=0.0, reduct=0.0, hide=True, nr=None, seed=None):
     """Create a polygon/prism to represent a city block
     cList    -- A list of 3D points with the vertex of the polygon (corners of the city block)
     objName  -- the name of the new object
@@ -598,7 +607,7 @@ def makePolygon(emptyRegions, houseAssets, cList, num_region, objName="meshObj",
 
 
     if num_region == 1:
-        createRegionHouses([Vector(v) for v in cList3], [8, 13, 16], houseAssets)
+        createRegionHouses(cwd, [Vector(v) for v in cList3], [8, 13, 16])
 
 
 
@@ -932,7 +941,6 @@ def main():
         internalRegions = data['internalRegions']
         externalPoints = data['externalPoints']
         staticRegions = data['staticRegions']
-        houseAssets = data['houseTemplates']
         cityRadius = data['cityRadius']
         # This is a hack to convert dictionaries with string keys to integer.
         # Necessary because json.dump() saves integer keys as strings
@@ -1093,7 +1101,7 @@ def main():
         for nr, region in enumerate(internalRegions):
             print(".", end="")
             corners = [vertices3D[i] for i in region]
-            makePolygon(emptyRegions, houseAssets, corners, nr, "houseO", "houseM", height=0.5, reduct=1.0, nr=nr, seed=seeds[nr])
+            makePolygon(cwd, emptyRegions, corners, nr, "houseO", "houseM", height=0.5, reduct=1.0, nr=nr, seed=seeds[nr])
         print(".")
 
         # Merge streets meshes in one object

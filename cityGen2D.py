@@ -255,95 +255,6 @@ class Delaunay2D:
 
 
 
-def createHouseTemplates():
-    return [[["Door1", 0.50, 0.00, 1.50, "Roof1"],
-             ["Window4", 0.33, 0.75, 1.50, "Roof1"],
-             ["Window4", 0.66, 0.75, 1.50, "Roof1"]],
-            [["Door1", 0.65, 0.00, 1.50, "Roof1"],
-             ["Window2", 0.30, 0.30, 1.50, "Roof1"],
-             ["Window1", 0.30, 0.75, 1.50, "Roof1"],
-             ["Window1", 0.65, 0.75, 1.50, "Roof1"]],
-            [["Door4", 0.50, 0.00, 1.50, "Roof1"],
-             ["Window2", 0.30, 0.60, 1.50, "Roof1"],
-             ["Window2", 0.30, 0.80, 1.50, "Roof1"],
-             ["Window2", 0.70, 0.60, 1.50, "Roof1"],
-             ["Window2", 0.70, 0.80, 1.50, "Roof1"]],
-            [["Door4", 0.50, 0.00, 1.50, "Roof1"],
-             ["Window3", 0.25, 0.65, 1.50, "Roof1"],
-             ["Window3", 0.50, 0.65, 1.50, "Roof1"],
-             ["Window3", 0.75, 0.65, 1.50, "Roof1"]],
-            [["Door1", 0.50, 0.00, 1.50, "Roof1"],
-             ["Door1Boards", 0.50, 0.00, 1.50, "Roof1"],
-             ["Balcony1", 0.50, 0.60, 1.50, "Roof1"],
-             ["Window4", 0.50, 0.50, 1.50, "Roof1"],
-             ["Door1", 0.45, 0.61, 1.00, "Roof1"],
-             ["Door1Boards", 0.45, 0.61, 1.00, "Roof1"]],
-
-            [["Door4", 0.25, 0.00, 1.50, "Roof1"],
-             ["Window3", 0.65, 0.30, 1.50, "Roof1"],
-             ["Window3", 0.85, 0.30, 1.50, "Roof1"],
-             ["Window1", 0.20, 0.75, 1.50, "Roof1"],
-             ["Window1", 0.40, 0.75, 1.50, "Roof1"],
-             ["Window1", 0.60, 0.75, 1.50, "Roof1"],
-             ["Window1", 0.80, 0.75, 1.50, "Roof1"]],
-            [["Door4", 0.50, 0.00, 1.50, "Roof1"],
-             ["Window3", 0.10, 0.30, 1.50, "Roof1"],
-             ["Window3", 0.25, 0.30, 1.50, "Roof1"],
-             ["Window3", 0.75, 0.30, 1.50, "Roof1"],
-             ["Window3", 0.90, 0.30, 1.50, "Roof1"],
-             ["Window5", 0.175, 0.70, 1.50, "Roof1"],
-             ["Window5", 0.825, 0.70, 1.50, "Roof1"]],
-            [["Door1", 0.25, 0.00, 1.50, "Roof1"],
-             ["Window2", 0.55, 0.25, 1.50, "Roof1"],
-             ["Window2", 0.85, 0.25, 1.50, "Roof1"],
-             ["Window2", 0.20, 0.63, 1.50, "Roof1"],
-             ["Window2", 0.50, 0.63, 1.50, "Roof1"],
-             ["Window3", 0.20, 0.87, 1.50, "Roof1"],
-             ["Window3", 0.80, 0.87, 1.50, "Roof1"]],
-            [["Door1", 0.20, 0.00, 1.50, "Roof1"],
-             ["Door1", 0.80, 0.00, 1.50, "Roof1"],
-             ["Window2", 0.50, 0.30, 1.50, "Roof1"],
-             ["Window1", 0.20, 0.80, 1.50, "Roof1"],
-             ["Window1", 0.40, 0.80, 1.50, "Roof1"],
-             ["Window1", 0.60, 0.80, 1.50, "Roof1"],
-             ["Window1", 0.80, 0.80, 1.50, "Roof1"]],
-            [["Door4", 0.50, 0.00, 1.50, "Roof1"],
-             ["Balcony2", 0.50, 0.60, 1.50, "Roof1"],
-             ["Door1", 0.55, 0.61, 1.00, "Roof1"],
-             ["Window2", 0.15, 0.30, 1.50, "Roof1"],
-             ["Window2", 0.85, 0.30, 1.50, "Roof1"],
-             ["Window3", 0.15, 0.55, 1.50, "Roof1"],
-             ["Window3", 0.15, 0.80, 1.50, "Roof1"],
-             ["Window3", 0.85, 0.55, 1.50, "Roof1"],
-             ["Window3", 0.85, 0.80, 1.50, "Roof1"]],
-
-            [["Door4", 0.25, 0.00, 1.50, "Roof1"],
-             ["Window3", 0.15, 0.80, 1.50, "Roof1"],
-             ["Window3", 0.25, 0.80, 1.50, "Roof1"],
-             ["Window3", 0.35, 0.80, 1.50, "Roof1"],
-             ["Door1", 0.80, 0.00, 1.50, "Roof1"],
-             ["Window2", 0.60, 0.30, 1.50, "Roof1"],
-             ["Window1", 0.60, 0.70, 1.50, "Roof1"],
-             ["Window4", 0.80, 0.65, 1.50, "Roof1"]],
-            [["Door4", 0.25, 0.00, 1.50, "Roof1"],
-             ["Balcony2", 0.75, 0.50, 1.50, "Roof1"],
-             ["Door1", 0.75, 0.51, 1.00, "Roof1"],
-             ["Window2", 0.75, 0.25, 1.50, "Roof1"],
-             ["Window4", 0.25, 0.50, 1.50, "Roof1"],
-             ["Window2", 0.15, 0.70, 1.50, "Roof1"],
-             ["Window2", 0.35, 0.70, 1.50, "Roof1"]],
-            [["Door4", 0.80, 0.00, 1.50, "Roof1"],
-             ["Balcony3", 0.30, 0.60, 1.50, "Roof1"],
-             ["Door1", 0.20, 0.61, 1.00, "Roof1"],
-             ["Door1", 0.20, 0.00, 1.50, "Roof1"],
-             ["Window2", 0.40, 0.75, 1.00, "Roof1"],
-             ["Window2", 0.70, 0.55, 1.50, "Roof1"],
-             ["Window1", 0.70, 0.85, 1.50, "Roof1"],
-             ["Window2", 0.90, 0.55, 1.50, "Roof1"],
-             ["Window1", 0.90, 0.85, 1.50, "Roof1"]]]
-
-
-
 def forceStaticSeeds(static_seeds, seeds):
     # Force static seeds
     i = 0
@@ -470,8 +381,6 @@ def newCityData(args, numBarriers=12, LloydSteps=2):
     # Dictionary with the specific regions coordinates inside
     static_seeds, static_regions, fixedSeeds = buildStaticSeeds(args.models, cityRadius)
     forceStaticSeeds(static_seeds, seeds)
-
-    houseTemplates = createHouseTemplates()
 
 
     # Min distante allowed between seeds. See documentation
@@ -900,7 +809,6 @@ def newCityData(args, numBarriers=12, LloydSteps=2):
     'wallVertices': wallVertices.tolist(),
     'staticRegions': static_regions,
     'cityRadius': cityRadius,
-    'houseTemplates': houseTemplates,
     }
     return cityData
 
