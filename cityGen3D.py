@@ -362,7 +362,7 @@ def optimizePolyline(points, widths, new_points):
 
 
 
-def createHouseMesh(origin, points, faces, name, material):
+def createHouseMesh(origin, points, faces, uvs, name, material):
     mesh = bpy.data.meshes.new(name)
 
     object = bpy.data.objects.new(name, mesh)
@@ -381,7 +381,8 @@ def createHouseMesh(origin, points, faces, name, material):
     for f in bm.faces:
         # Each face have several loops (corners), and the algorithm iterates for those corners giving them a UV coordinates
         for l in f.loops:
-            l[uv_layer].uv = Vector(((l.vert.co - origin).length, l.vert.co.z))
+            # We're giving the uvs index list value for each uv coordinates
+            l[uv_layer].uv = uvs[l.vert.index]
     bm.to_mesh(mesh)
 
 
@@ -404,8 +405,10 @@ def createHouseRoof(a, b, h):
 
     object = bpy.data.objects["Roof1"].copy()
     object.location = point
-    object.rotation_euler = (0, 0, getAngle(a, b))
     object.dimensions[0] = length
+    object.scale[1] *= 5 / object.dimensions[1]
+    object.rotation_euler = (0, 0, getAngle(a, b))
+
 
 
 
@@ -455,24 +458,36 @@ def createHouseAssets(a, b, h, data):
 
 
 
-def createHouse(point1, point2, heigh, name, material, data):
+def createHouse(a, b, c, d, heigh, name, material, data):
     # Step 1: Creating the mesh computing his points and his faces (the quad)
     v1 = Vector((0, 0, heigh))
+
+    # Computing the left wall of the house
+    ab = (b - a).normalized() * 5
+    angle = (c - a).angle(ab)
+    ab.rotate(Euler((0, 0, angle / 2)))
+    ab += a
+
+    # Computing the right wall of the house
+    bd = (d - b).normalized() * 5
+    angle = (a - b).angle(bd)
+    bd.rotate(Euler((0, 0, angle / 2)))
+    bd += b
+
+    # Creating the vertex_list and the faces list (ordered)
     v2 = Vector((0, 0, 1.5))
-    vertex_list = [point1, point2, point2 + v1, ((point1 + v1) + (point2 + v1)) * 0.5 + v2, point1 + v1]
-    createHouseMesh(point1, vertex_list, [(0, 1, 2), (0, 2, 4), (2, 3, 4)], name, material)
-    createHouseAssets(point1, point2, heigh, data)
+    vertex_list = [ab, a, b, bd, bd + v1, b + v1, ((a + v1) + (b + v1)) * 0.5 + v2, a + v1, ab + v1]
+    faces = [(0, 1, 8), (1, 7, 8), (1, 2, 7), (2, 5, 7), (2, 4, 5), (2, 3, 4), (5, 6, 7)]
 
+    # Computing the correct UV coordinates before rotating the wall
+    uvs = [Vector(((x - a).xy.length, x.z)) for x in vertex_list]
 
+    # Correct UV coordinates for vertex bd and bd+v1
+    uvs[3] = Vector(((bd - b).xy.length, 0))
+    uvs[4] = Vector(((bd - b).xy.length, heigh))
 
-def createWall(c, a, b, h, name, material):
-    v = Vector((0, 0, h))
-    d = a
-    angle = getAngle(c, a, (b - a)) / 2
-    d.rotate(Euler((0, 0, angle)))
-
-    vertex_list = [a, d, d + v, a + v]
-    createHouseMesh(vertex_list, [(0, 1, 3), (1, 2, 3)], name, material)
+    createHouseMesh(a, vertex_list, faces, uvs, name, material)
+    createHouseAssets(a, b, heigh, data)
 
 
 
@@ -487,12 +502,12 @@ def loadTemplates(cwd, file):
 def createRegionHouses(cwd, base_points, house_widths):
     houseAssets = loadTemplates(cwd, "cg-templates.json")
     optimized_points = optimizePolyline(base_points, house_widths, [])
-    last_heigh = 0
 
     for i in range(len(optimized_points)):
-        c = optimized_points[i - 2]
-        a = optimized_points[i - 1]
-        b = optimized_points[i]
+        c = optimized_points[i - 3]
+        a = optimized_points[i - 2]
+        b = optimized_points[i - 1]
+        d = optimized_points[i]
 
         if (i % 2 == 0): material = "Plaster"
         else: material = "StoneWall"
@@ -500,11 +515,7 @@ def createRegionHouses(cwd, base_points, house_widths):
         if ((a in base_points) or (b in base_points)): heigh = 7
         else: heigh = randint(6, 12)
 
-        #if (last_heigh > 0):
-        #    createWall(c, a, b, max(last_heigh, heigh), "HouseWall", material)
-
-        createHouse(a, b, heigh, "HouseWall", "StoneWall", houseAssets)
-        last_heigh = heigh
+        createHouse(a, b, c, d, heigh, "HouseWall", material, houseAssets)
 
 
 
