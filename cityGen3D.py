@@ -367,7 +367,7 @@ def createHouseMesh(origin, points, faces, uvs, name, material):
 
     object = bpy.data.objects.new(name, mesh)
     mesh.from_pydata(points, [], faces)
-    mesh.update(calc_edges=True)
+    mesh.update(calc_edges = True)
     mesh.materials.append(bpy.data.materials[material])
     bpy.context.scene.objects.link(object)
 
@@ -396,20 +396,29 @@ def getAngle(a, b, v = Vector((1,0,0))):
 
 
 
-def createHouseRoof(a, b, h):
-    a = a + Vector((0, 0, h))
-    b = b + Vector((0, 0, h))
+def createHouseRoof(points, uvs):
+    mesh = bpy.data.meshes.new("_Roof")
+    object = bpy.data.objects.new("_Roof", mesh)
 
-    point = (a + b) * 0.5
-    length = (b - a).length
+    faces = [(0, 2, 1), (0, 5, 2), (5, 3, 2), (5, 4, 3)]
+    mesh.from_pydata(points, [], faces)
+    mesh.update(calc_edges = True)
+    mesh.materials.append(bpy.data.materials["RoofTiles"])
+    bpy.context.scene.objects.link(object)
 
-    object = bpy.data.objects["Roof1"].copy()
-    object.location = point
-    object.dimensions[0] = length
-    object.scale[1] *= 5 / object.dimensions[1]
-    object.rotation_euler = (0, 0, getAngle(a, b))
+    # Create a UV Map for the mesh to adapt its material
+    bm = bmesh.new()
+    bm.from_mesh(mesh)
+    uv_layer = bm.loops.layers.uv.verify()
+    bm.faces.layers.tex.verify()
 
-
+    # Each mesh have several faces
+    for f in bm.faces:
+        # Each face have several loops (corners), and the algorithm iterates for those corners giving them a UV coordinates
+        for l in f.loops:
+            # We're giving the uvs index list value for each uv coordinates
+            l[uv_layer].uv = uvs[l.vert.index]
+    bm.to_mesh(mesh)
 
 
 
@@ -423,7 +432,6 @@ def createAsset(a, b, h, asset):
     object.location = point
     object.rotation_euler = (0, 0, getAngle(a, b))
     object.scale = (asset[3], asset[3], asset[3])
-    createHouseRoof(a, b, h)
 
 
 
@@ -488,6 +496,12 @@ def createHouse(a, b, c, d, heigh, name, material, data):
 
     createHouseMesh(a, vertex_list, faces, uvs, name, material)
     createHouseAssets(a, b, heigh, data)
+
+    roof_points = vertex_list[4:]
+    p_aux = ((bd + v1) + (ab + v1)) * 0.5 + v2
+    roof_points.append(p_aux)
+    uvs = [Vector(((x - roof_points[0]).xy.length, x.z)) for x in roof_points]
+    createHouseRoof(roof_points, uvs)
 
 
 
