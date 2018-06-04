@@ -501,6 +501,7 @@ def createHouse(a, b, c, d, heigh, name, material, data):
     p_aux = ((bd + v1) + (ab + v1)) * 0.5 + v2
     roof_points.append(p_aux)
     uvs = [Vector(((x - roof_points[0]).xy.length, x.z)) for x in roof_points]
+    uvs = [(0, 0), (1, 0), (1, 1), (1, 0), (0, 0), (0, 1)]
     createHouseRoof(roof_points, uvs)
 
 
