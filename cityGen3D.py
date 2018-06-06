@@ -420,6 +420,12 @@ def createHouseRoof(points, uvs):
             l[uv_layer].uv = uvs[l.vert.index]
     bm.to_mesh(mesh)
 
+    # Create roof bars
+    for i in range(1, 3):
+        roofbar = bpy.data.objects["RoofBar"].copy()
+        roofbar.location = (points[i + 1] + points[i]) * 0.5
+        roofbar.rotation_euler = (0, getAngle(points[3], points[1], Vector((0, 0, 1))), getAngle(points[i + 1], points[i]))
+
 
 
 def createAsset(a, b, h, asset):
@@ -527,7 +533,9 @@ def createRegionHouses(cwd, base_points, house_widths):
         if (i % 2 == 0): material = "Plaster"
         else: material = "StoneWall"
 
-        if ((a in base_points) or (b in base_points)): heigh = 7
+        if ((a in base_points) or (b in base_points)):
+            heigh = 7
+            material = "StoneWall"
         else: heigh = randint(6, 12)
 
         createHouse(a, b, c, d, heigh, "HouseWall", material, houseAssets)
