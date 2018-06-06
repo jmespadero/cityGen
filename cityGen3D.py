@@ -424,7 +424,8 @@ def createHouseRoof(points, uvs):
     for i in range(1, 3):
         roofbar = bpy.data.objects["RoofBar"].copy()
         roofbar.location = (points[i + 1] + points[i]) * 0.5
-        roofbar.rotation_euler = (0, getAngle(points[2], points[3], Vector((0, 0, 1))), getAngle(points[i + 1], points[i]))
+        roofbar.rotation_euler = (0, getAngle(points[i + 1], points[i], Vector((0, 0, 1))) + 1.57, getAngle(points[i + 1], points[i]))
+        roofbar.dimensions.x = (points[i + 1] - points[i]).length
 
 
 
