@@ -312,7 +312,7 @@ def buildStaticSeeds(names, city_radius):
 
 
 #def newCityData(numSeeds=90, cityRadius=20, numBarriers=12, LloydSteps=2, gateLen=0., randomSeed=None, debugSVG=False):
-def newCityData(args, numBarriers=12, LloydSteps=2):
+def newCityData(args, numBarriers=12, LloydSteps=4):
     """Create a new set of regions from a voronoi diagram
     args.numSeeds   -- Number of seed to be used
     args.cityRadius -- Approximated radius of the city
@@ -428,6 +428,8 @@ def newCityData(args, numBarriers=12, LloydSteps=2):
 
     # Plot initial voronoi diagram
     if debugSVG:
+        #plotVoronoiData(vor_vertices, [], seeds, 'tmp0.1.seeds', cityRadius)
+        #plotVoronoiData(vor_vertices, [], barrierSeeds, 'tmp0.2.barrierSeeds', cityRadius)
         plotVoronoiData(vor_vertices, internalRegions, barrierSeeds, 'tmp0.initialVoronoi', cityRadius)
 
     ###########################################################        
@@ -561,7 +563,7 @@ def newCityData(args, numBarriers=12, LloydSteps=2):
     print("externalPoints:", externalPoints)
     
     ###########################################################
-    # Smooth externalPoints to get a rounder shape.
+    # Smooth externalPoints distance to origin to get a rounder shape.
     externalRadius = 0
     for i in externalPoints:
         externalRadius += np.linalg.norm(vor_vertices[i])
@@ -573,7 +575,7 @@ def newCityData(args, numBarriers=12, LloydSteps=2):
         # 75% of original position + 25% circle position
         vor_vertices[i] *= 0.75 + 0.25 * externalRadius / r
 
-    # Plot data after recentering
+    # Plot data after smoothing
     if debugSVG:
         plotVoronoiData(vor_vertices, internalRegions, barrierSeeds, 'tmp3.1.smooth', cityRadius)
 
