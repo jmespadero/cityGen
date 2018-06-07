@@ -90,45 +90,39 @@ def duplicateAlongSegment(pt1, pt2, objName, gapSize, force=False):
     gapSize -- Desired space between objects. Will be adjusted to fit path
     """
 
-    #Compute the orientation of segment pt1-pt2
-    dx = pt1[0]-pt2[0]
-    dy = pt1[1]-pt2[1]
+    pt1 = Vector(pt1)
+    pt2 = Vector(pt2)
 
-    # return if pt1 == pt2
-    if dx == 0 and dy == 0:
-        return []
+    # Compute the direction of the segment
+    pathVec = pt2-pt1
+    pathLen = pathVec.length
+    pathVec.normalize()
 
     # Compute the angle with the Y-axis
-    ang = acos(dy/sqrt((dx**2)+(dy**2)))
-    if dx > 0:
-        ang = -ang
-
+    ang = (-pathVec.xy).angle_signed(Vector((0,1)))
+    
     # Get the size of the replicated object in the Y dimension
     ob = bpy.data.objects[objName]
     objSize = (ob.bound_box[7][1]-ob.bound_box[0][1])*ob.scale[1]
     totalSize = objSize+gapSize
 
-    # Compute the direction of the segment
-    pathVec = Vector(pt2)-Vector(pt1)
-    pathLen = pathVec.length
-    pathVec.normalize()
-
-    if (objSize > pathLen):
+    # Check object size 
+    if pathLen == 0 or (objSize > pathLen):
         return []
-
+              
     #if gapSize is not zero, change the gap to one that adjust the object
     #Compute the num of (obj+gap) segments in the interval (pt1-pt2)
     if gapSize != 0:
         numObj = round(pathLen/totalSize)
         step = pathLen/numObj
         stepVec = pathVec * step
-        iniPoint = Vector(pt1)+(stepVec * 0.5)
+        iniPoint = pt1+(stepVec * 0.5)
     else:
         numObj = math.floor(pathLen/objSize)
         step = objSize
         stepVec = pathVec * step
         delta = pathLen-step*numObj #xke? (delta es el espacio que falta para completar una fila)
-        iniPoint = Vector(pt1)+(stepVec*0.5) #se multiplicaba esto por delta, xke?
+        iniPoint = pt1+(stepVec*0.5) #se multiplicaba esto por delta, xke?
         
 
     #Duplicate the object along the path, numObj times
@@ -144,7 +138,7 @@ def duplicateAlongSegment(pt1, pt2, objName, gapSize, force=False):
         g1.location = loc
         objList.append(g1)
     if force:
-            loc = Vector(pt2) - stepVec * 0.5
+            loc = pt2 - stepVec * 0.5
             g1 = duplicateObject(ob, "_%s" % (objName))
             g1.rotation_euler = (0, 0, ang)
             g1.location = loc
@@ -248,50 +242,42 @@ def duplicateAlongSegmentMix(pt1, pt2, gapSize, objList=None):
     gapSize -- Desired space between objects. Will be adjusted to fit path
     """
     
-    
-    objName=objList[0]
-    #Compute the orientation of segment pt1-pt2
-    dx = pt1[0]-pt2[0]
-    dy = pt1[1]-pt2[1]
-
-    # return if pt1 == pt2
-    if dx == 0 and dy == 0:
-        return
-
-    # Compute the angle with the Y-axis
-    ang = acos(dy/sqrt((dx**2)+(dy**2)))
-    if dx > 0:
-        ang = -ang
-        
+    pt1 = Vector(pt1)
+    pt2 = Vector(pt2)
     
     # Compute the direction of the segment
-    pathVec = Vector(pt2)-Vector(pt1)
+    pathVec = pt2-pt1
     pathLen = pathVec.length
-    pathVec.normalize() 
+    pathVec.normalize()
+
+    # Compute the angle with the Y-axis
+    ang = (-pathVec.xy).angle_signed(Vector((0,1)))
     
-   
+    # Check object size 
+    if pathLen == 0 :
+        return 
+                 
     list,spaceUsed = knapsack_unbounded_dp_control(pathLen,gapSize,objList)
     objList=[]
     for m in list:
         for n in range(m[1]):
             objList.append(m[0])
-    
-    random.shuffle(objList)
-    delta = (int(pathLen*10)-spaceUsed)/10
+                
     if objList == []:
         return
-    delta = delta/len(objList)
+
+    random.shuffle(objList)
     
-    iniPoint = Vector(pt1)
-   
-    for i in objList:
-        ob = bpy.data.objects[i]
+    delta = (int(pathLen*10)-spaceUsed)/(10*len(objList))    
+    iniPoint = pt1
+
+    for objName in objList:
+        ob = bpy.data.objects[objName]
         objSize = (ob.bound_box[7][1]-ob.bound_box[0][1])*ob.scale[1]
         totalSize = objSize+gapSize+delta
-        loc = iniPoint
-        g1 = duplicateObject(ob, "_%s" % (objName))
+        g1 = duplicateObject(ob, "_%s" % objName)
         g1.rotation_euler = (0, 0, ang)
-        g1.location = loc
+        g1.location = iniPoint
         iniPoint = iniPoint + pathVec * totalSize
 
 def makeGround(cList=[], objName="meshObj", meshName="mesh", radius=10.0, material='Floor3'):
