@@ -29,6 +29,7 @@ DONE:
 import bpy
 import bmesh
 import math, json, random, os, sys
+from pyquaternion import Quaternion
 from math import sqrt, acos, sin, cos
 from pprint import pprint
 from mathutils import Vector
@@ -334,6 +335,7 @@ def makeGround(cList=[], objName="meshObj", meshName="mesh", radius=10.0, materi
 
 
 def optimizePolyline(points, widths, new_points):
+    # Iterate along the cList3 points (all this points are region vertex)
     for i in range(len(points)):
         aux = []
         a = points[i - 1]
@@ -341,7 +343,7 @@ def optimizePolyline(points, widths, new_points):
         d_tot = (b - a).length
         d_par = d_tot
         houses = 0
-        new_points.append(a)
+        new_points.append((a, True))
 
         while (d_par >= widths[0]):
             for j in range(len(widths)):
@@ -350,14 +352,16 @@ def optimizePolyline(points, widths, new_points):
                     houses = houses + 1
                     d_par = d_par - widths[j]
 
+        # d_par is the extra distante of the segment, too small to create another house
         d_par = d_par / houses
         sum = 0
         for j in range(len(aux) - 1):
             sum = sum + aux[j] + d_par
             percentage = sum / d_tot
             point = a * (1 - percentage) + b * percentage
-            new_points.append(point)
+            new_points.append((point, False))
 
+    print(new_points)
     return new_points
 
 
@@ -424,7 +428,13 @@ def createHouseRoof(points, uvs):
     for i in range(1, 3):
         roofbar = bpy.data.objects["RoofBar"].copy()
         roofbar.location = (points[i + 1] + points[i]) * 0.5
-        roofbar.rotation_euler = (0, getAngle(points[i + 1], points[i], Vector((0, 0, 1))) + 1.57, getAngle(points[i + 1], points[i]))
+
+        roofbar_direction = (points[i + 1] - points[i]).normalized()
+        axis = Vector((1, 0, 0)).cross(roofbar_direction)
+        rotation = Quaternion(axis, acos(roofbar_direction.x))
+        roofbar.rotation_euler = rotation.to_euler()
+
+        roofbar.rotation_euler = (0, angle, getAngle(points[i + 1], points[i]))
         roofbar.dimensions.x = (points[i + 1] - points[i]).length
 
 
@@ -473,33 +483,45 @@ def createHouseAssets(a, b, h, data):
 
 
 
-def createHouse(a, b, c, d, heigh, name, material, data):
-    # Step 1: Creating the mesh computing his points and his faces (the quad)
+def createHouse(a, av, b, bv, c, d, heigh, name, material, data):
     v1 = Vector((0, 0, heigh))
+    v2 = Vector((0, 0, 1.5))
 
-    # Computing the left wall of the house
-    ab = (b - a).normalized() * 5
-    angle = (c - a).angle(ab)
-    ab.rotate(Euler((0, 0, angle / 2)))
-    ab += a
+    # Computing the left wall of the house (av is a boolean that let know if a is a vertex of the region)
+    if not av:
+        ab = (b - a).normalized() * 5
+        angle = (c - a).angle(ab)
+        ab.rotate(Euler((0, 0, angle / 2)))
+        ab += a
 
-    # Computing the right wall of the house
-    bd = (d - b).normalized() * 5
-    angle = (a - b).angle(bd)
-    bd.rotate(Euler((0, 0, angle / 2)))
-    bd += b
+    # Computing the right wall of the house (bv is a boolean that let know if b is a vertex of the region)
+    if not bv:
+        bd = (d - b).normalized() * 5
+        angle = (a - b).angle(bd)
+        bd.rotate(Euler((0, 0, angle / 2)))
+        bd += b
 
     # Creating the vertex_list and the faces list (ordered)
-    v2 = Vector((0, 0, 1.5))
-    vertex_list = [ab, a, b, bd, bd + v1, b + v1, ((a + v1) + (b + v1)) * 0.5 + v2, a + v1, ab + v1]
-    faces = [(0, 1, 8), (1, 7, 8), (1, 2, 7), (2, 5, 7), (2, 4, 5), (2, 3, 4), (5, 6, 7)]
-
-    # Computing the correct UV coordinates before rotating the wall
-    uvs = [Vector(((x - a).xy.length, x.z)) for x in vertex_list]
-
-    # Correct UV coordinates for vertex bd and bd+v1
-    uvs[3] = Vector(((bd - b).xy.length, 0))
-    uvs[4] = Vector(((bd - b).xy.length, heigh))
+    if (not av and not bv):
+        vertex_list = [ab, a, b, bd, bd + v1, b + v1, ((a + v1) + (b + v1)) * 0.5 + v2, a + v1, ab + v1]
+        faces = [(0, 1, 8), (1, 7, 8), (1, 2, 7), (2, 5, 7), (2, 4, 5), (2, 3, 4), (5, 6, 7)]
+        uvs = [Vector(((x - a).xy.length, x.z)) for x in vertex_list]
+        uvs[3] = Vector(((bd - b).xy.length, 0))
+        uvs[4] = Vector(((bd - b).xy.length, heigh))
+    if (not av and bv):
+        vertex_list = [ab, a, b, b + v1, ((a + v1) + (b + v1)) * 0.5 + v2, a + v1, ab + v1]
+        faces = [(0, 1, 6), (1, 5, 6), (1, 2, 5), (2, 3, 5), (3, 4, 5)]
+        uvs = [Vector(((x - a).xy.length, x.z)) for x in vertex_list]
+    if (av and not bv):
+        vertex_list = [a, b, bd, bd + v1, b + v1, ((a + v1) + (b + v1)) * 0.5 + v2, a + v1]
+        faces = [(0, 1, 6), (1, 4, 6), (1, 2, 4), (2, 3, 4), (4, 5, 6)]
+        uvs = [Vector(((x - a).xy.length, x.z)) for x in vertex_list]
+        uvs[2] = Vector(((bd - b).xy.length, 0))
+        uvs[3] = Vector(((bd - b).xy.length, heigh))
+    if (av and bv):
+        vertex_list = [a, b, b + v1, ((a + v1) + (b + v1)) * 0.5 + v2, a + v1]
+        faces = [(0, 1, 4), (1, 2, 4), (2, 3, 4)]
+        uvs = [Vector(((x - a).xy.length, x.z)) for x in vertex_list]
 
     createHouseMesh(a, vertex_list, faces, uvs, name, material)
     createHouseAssets(a, b, heigh, data)
@@ -507,7 +529,6 @@ def createHouse(a, b, c, d, heigh, name, material, data):
     roof_points = vertex_list[4:]
     p_aux = ((bd + v1) + (ab + v1)) * 0.5 + v2
     roof_points.append(p_aux)
-    uvs = [Vector(((x - roof_points[0]).xy.length, x.z)) for x in roof_points]
     uvs = [(0, 0), (1, 0), (1, 1), (1, 0), (0, 0), (0, 1)]
     createHouseRoof(roof_points, uvs)
 
@@ -526,10 +547,10 @@ def createRegionHouses(cwd, base_points, house_widths):
     optimized_points = optimizePolyline(base_points, house_widths, [])
 
     for i in range(len(optimized_points)):
-        c = optimized_points[i - 3]
-        a = optimized_points[i - 2]
-        b = optimized_points[i - 1]
-        d = optimized_points[i]
+        c, cv = optimized_points[i - 3]
+        a, av = optimized_points[i - 2]
+        b, bv = optimized_points[i - 1]
+        d, dv = optimized_points[i]
 
         if (i % 2 == 0): material = "Plaster"
         else: material = "StoneWall"
@@ -539,7 +560,7 @@ def createRegionHouses(cwd, base_points, house_widths):
             material = "StoneWall"
         else: heigh = randint(6, 12)
 
-        createHouse(a, b, c, d, heigh, "HouseWall", material, houseAssets)
+        createHouse(a, av, b, bv, c, d, heigh, "HouseWall", material, houseAssets)
 
 
 
