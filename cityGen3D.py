@@ -380,12 +380,14 @@ def createHouseMesh(origin, points, faces, uvs, name, material):
     bm.to_mesh(mesh)
 
 
+
 def getAngle(a, b, v=Vector((1, 0, 0))):
     angle = v.angle(b - a)
     if ((b - a).y < 0):
         angle = -angle
 
     return angle
+
 
 
 def createHouseRoof(points, faces, uvs):
@@ -467,6 +469,7 @@ def createHouseAssets(a, b, h, data):
         createAsset(a, b, h, house[i])
 
 
+
 def createHouse(a, b, c, d, heigh, name, material, data, corners):
     # Step 1: Creating the mesh computing his points and his faces (the quad)
     v1 = Vector((0, 0, heigh))
@@ -515,6 +518,7 @@ def createHouse(a, b, c, d, heigh, name, material, data, corners):
     createHouseRoof(roof_points, faces, uvs)
 
 
+
 def loadTemplates(cwd, file):
     with open(cwd + file, 'r') as f:
         data = json.load(f)
@@ -522,10 +526,11 @@ def loadTemplates(cwd, file):
     return data["houseTemplates"]
 
 
+
 def createRegionHouses(cwd, base_points, house_widths):
     houseAssets = loadTemplates(cwd, "cg-templates.json")
     optimized_points, corners = optimizePolyline(base_points, house_widths, [])
-    textures = ["StoneWall", "Plaster", "StoneAux"]
+    textures = ["StoneWall", "Plaster", "Wall_1", "Wall_2", "Wall_3"]
 
     for i in range(len(optimized_points)):
         c = optimized_points[i - 3]
@@ -533,18 +538,15 @@ def createRegionHouses(cwd, base_points, house_widths):
         b = optimized_points[i - 1]
         d = optimized_points[i]
 
-        if (i % 2 == 0):
-            material = "Plaster"
-        else:
-            material = "StoneWall"
+        material = random.choice(textures)
 
-        if ((a in base_points) or (b in base_points)):
+        if ((a in corners) or (b in corners)):
             heigh = 7
-            material = "StoneWall"
         else:
             heigh = randint(6, 12)
 
         createHouse(a, b, c, d, heigh, "HouseWall", material, houseAssets, corners)
+
 
 
 def makePolygon(cwd, emptyRegions, cList, num_region, objName="meshObj", meshName="mesh", height=0.0, reduct=0.0,
@@ -642,8 +644,9 @@ def makePolygon(cwd, emptyRegions, cList, num_region, objName="meshObj", meshNam
             vecy = reduct * dy / dist
             cList3.append((cList[i][0] - vecx, cList[i][1] - vecy, cList[i][2]))
 
-    if num_region == 1:
-        createRegionHouses(cwd, [Vector(v) for v in cList3], [8, 13, 16])
+    # if num_region == 1:
+    createRegionHouses(cwd, [Vector(v) for v in cList3], [8, 13, 16])
+
 
 
 def updateExternalTexts():
@@ -661,6 +664,7 @@ def updateExternalTexts():
             bpy.ops.text.resolve_conflict(ctx, resolution='RELOAD')
             # Restore context
             ctx['area'].type = oldAreaType
+
 
 
 def importLibrary(filename, link=False, destinationLayer=1, importScripts=True):
@@ -716,6 +720,7 @@ def importLibrary(filename, link=False, destinationLayer=1, importScripts=True):
     updateExternalTexts()
 
 
+
 def nearestSeed(vector, seeds):
     distance = float('inf')
     for s in seeds:
@@ -724,6 +729,7 @@ def nearestSeed(vector, seeds):
             distance = d
             seed = seeds.index(s)
     return seed
+
 
 
 def nearestSegment(vector, vertices, vert_coords):
@@ -757,6 +763,7 @@ def nearestSegment(vector, vertices, vert_coords):
         return (segment2, dist2)
 
 
+
 def createLeaves(seeds, internalRegions, vertices, radius, leaves):
     hojas = 0
 
@@ -773,12 +780,14 @@ def createLeaves(seeds, internalRegions, vertices, radius, leaves):
             hojas = hojas + 1
 
 
+
 def createBuildings(seeds, staticRegions):
     for i, (region, building, region_radius, displacement) in staticRegions.items():
         importLibrary(args['input' + building], destinationLayer=0, importScripts=True)
         object = bpy.data.objects[building]
         object.location.xy = seeds[region]
         print("Locating " + building + " in region " + str(region))
+
 
 
 def newRMDFractalPoint(p1, p2, factor, list, res):
@@ -847,20 +856,6 @@ def meshFromSkeleton(skeleton, width, river_side_a, river_side_b, faces_data, na
     mesh.materials.append(bpy.data.materials[material])
     bpy.context.scene.objects.link(object)
 
-
-def createSandCircle(center, radius):
-    # create radius one circle mesh
-    angle = 2 * 3.1415927 / 24
-    cpoints = [Vector((cos(i * angle), sin(i * angle), 0.4)) for i in range(24)]
-
-    mesh = bpy.data.meshes.new("gateArena")
-    mesh.from_pydata(cpoints, [], [list(range(24))])
-    mesh.update(calc_edges=True)
-    mesh.materials.append(bpy.data.materials["Sand"])
-    object = bpy.data.objects.new("gateArena", mesh)
-    object.location = center
-    object.scale = Vector((radius, radius, 1))
-    bpy.context.scene.objects.link(object)
 
 
 ###########################
@@ -1161,7 +1156,6 @@ def main():
         origin = gateMid.to_3d()
         trailWidth = 5
 
-        createSandCircle(gateMid.to_3d(), 2 * (gate1 - gateMid).length)
         skeleton_list = newRMDFractal(origin, (origin * 3), 0.20, 7, [])
         meshFromSkeleton(skeleton_list, trailWidth, [], [], [], "_Trail", "Sand")
 
