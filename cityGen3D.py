@@ -53,11 +53,12 @@ args = {
     'createDefenseWall': True,  # Create exterior boundary of the city
     'createGround': True,  # Create ground boundary of the city
     'createStreets': True,  # Create streets of the city
-    'createLeaves': False,  # Create leaves on the streets
+    'createLeaves': True,  # Create leaves on the streets
     'createRiver': True,  # Create river
     'createTrail': True,  # Create trail
     'createBuildings': True,  # Create buildings on specific regions
     'numMonsters': 4,
+    'numBats': 10,  # Number of bats distributed into the map
     'outputCityFilename': 'outputcity.blend',  # Output file with just the city
     'outputTourFilename': 'outputtour.blend',  # Output file with complete game
     'outputGameFilename': 'outputgame.blend',  # Output file with complete game
@@ -644,7 +645,6 @@ def makePolygon(cwd, emptyRegions, cList, num_region, objName="meshObj", meshNam
             vecy = reduct * dy / dist
             cList3.append((cList[i][0] - vecx, cList[i][1] - vecy, cList[i][2]))
 
-    # if num_region == 1:
     createRegionHouses(cwd, [Vector(v) for v in cList3], [8, 13, 16])
 
 
@@ -767,6 +767,7 @@ def nearestSegment(vector, vertices, vert_coords):
 def createLeaves(seeds, internalRegions, vertices, radius, leaves):
     hojas = 0
 
+    print("Creating leaves in the streets...")
     while (hojas < leaves):
         vector = Vector((uniform(-radius, radius), uniform(-radius, radius), 0.1))
 
@@ -1138,17 +1139,17 @@ def main():
         bpy.context.scene.objects.active = bpy.data.objects["_Region"]
         bpy.ops.object.join()
 
-    #if args.get('createLeaves', False):
-        #leaves = 3000
-        #createLeaves(internalSeeds, internalRegions, vertices, cityRadius, leaves)
+    if args.get('createLeaves', False):
+        leaves = 3000
+        createLeaves(internalSeeds, internalRegions, vertices, cityRadius, leaves)
 
-    #if args.get('createBuildings', False):
-        #createBuildings(internalSeeds, staticRegions)
+    if args.get('createBuildings', False):
+        createBuildings(internalSeeds, staticRegions)
 
     if args.get('createRiver', False):
         distance = cityRadius * 2
-        skeleton_list = newRMDFractal(Vector((-distance, distance * 2, 0.1)),
-                                      Vector((-distance, -distance * 2, 0.1)),
+        skeleton_list = newRMDFractal(Vector((-distance * 1.5, distance * 2, 0.1)),
+                                      Vector((-distance * 1.5, -distance * 2, 0.1)),
                                       0.25, 7, [])
         meshFromSkeleton(skeleton_list, 20, [], [], [], "_River", "Water")
 

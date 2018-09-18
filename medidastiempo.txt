@@ -1,0 +1,330 @@
+time ./cityGen2D.py -s 20 -r 2000
+createNewScene (numSeeds=20, cityRadius=2000, numBarriers=12, LloydSteps=2
+Using randomSeed 18353
+Creating requested fix regions: ['Temple']
+ * Build Temple as f0_Temple in region 0 pos [ 0.  0.]
+fixing region f0_Temple len 5
+minSeedDistance =  849.7058314499201
+fixing region f0_Temple len 5
+Lloyd Iteration 1 of 2
+fixing region f0_Temple len 5
+Lloyd Iteration 2 of 2
+fixing region f0_Temple len 5
+Check and merge pairs of vertex too near...
+Distance from vertex 48 to vertex 49 = 8.98626349261 
+Repacking unusedVertex {49}
+vertexToReuse= [49]
+vertexToRemove= [65]
+Using Vertex 49 instead vertex 65
+numVertex after repacking 65
+internalRegions= 20  externalRegions= 12
+externalPoints: [0, 1, 40, 60, 16, 15, 24, 30, 37, 55, 22, 44, 2, 62, 43, 27, 63, 41, 28, 53, 20]
+Average external radius 2828.4876136
+Current centroid [0 0] Nearest Vertex [-12.5 -16. ]
+City Area (inside external boundary): 24846670.3348
+Creating Wall Vertices
+Best corner for a gate 13 near external vertex -> 62
+Save graph data to: city.data.json
+Computing matrixes used for AI path finding
+Save AI matrixes to: city.AI.json
+Ready to run: blender --background --python cityGen3D.py
+time ./cityGen2D.py -s 40 -r 4000
+createNewScene (numSeeds=40, cityRadius=4000, numBarriers=12, LloydSteps=2
+Using randomSeed 55279
+Creating requested fix regions: ['Temple']
+ * Build Temple as f0_Temple in region 0 pos [ 0.  0.]
+fixing region f0_Temple len 5
+minSeedDistance =  1201.665510863984
+fixing region f0_Temple len 5
+Lloyd Iteration 1 of 2
+dist= 5089.83508438 >= DistanciaMaxima= 5040.0
+fixing region f0_Temple len 5
+Lloyd Iteration 2 of 2
+dist= 5111.83066049 >= DistanciaMaxima= 5040.0
+dist= 5074.79510895 >= DistanciaMaxima= 5040.0
+fixing region f0_Temple len 5
+Check and merge pairs of vertex too near...
+internalRegions= 40  externalRegions= 12
+externalPoints: [11, 95, 90, 84, 87, 54, 26, 14, 60, 24, 77, 68, 31, 48, 75, 30, 29, 94, 43, 63, 52, 102, 32, 85, 70]
+Average external radius 5946.32296979
+Current centroid [0 0] Nearest Vertex [-12.5 -16. ]
+City Area (inside external boundary): 109393810.226
+Creating Wall Vertices
+Best corner for a gate 13 near external vertex -> 48
+Save graph data to: city.data.json
+Computing matrixes used for AI path finding
+Save AI matrixes to: city.AI.json
+Ready to run: blender --background --python cityGen3D.py
+time ./cityGen2D.py -s 60 -r 6000
+createNewScene (numSeeds=60, cityRadius=6000, numBarriers=12, LloydSteps=2
+Using randomSeed 48017
+Creating requested fix regions: ['Temple']
+ * Build Temple as f0_Temple in region 0 pos [ 0.  0.]
+fixing region f0_Temple len 5
+minSeedDistance =  1471.7336715588183
+fixing region f0_Temple len 5
+Lloyd Iteration 1 of 2
+dist= 8225.67889732 >= DistanciaMaxima= 7560.0
+dist= 8245.42012024 >= DistanciaMaxima= 7560.0
+fixing region f0_Temple len 5
+Lloyd Iteration 2 of 2
+dist= 8220.39862803 >= DistanciaMaxima= 7560.0
+dist= 7761.95664496 >= DistanciaMaxima= 7560.0
+dist= 8284.01647694 >= DistanciaMaxima= 7560.0
+fixing region f0_Temple len 5
+Check and merge pairs of vertex too near...
+internalRegions= 60  externalRegions= 12
+externalPoints: [123, 78, 16, 33, 92, 47, 6, 126, 96, 4, 11, 83, 3, 51, 41, 77, 95, 71, 74, 64, 89, 68, 124, 118, 70, 35, 59, 86, 137, 93, 43, 108]
+Average external radius 9145.45276495
+Current centroid [0 0] Nearest Vertex [-12.5 -16. ]
+City Area (inside external boundary): 260193708.698
+Creating Wall Vertices
+Best corner for a gate 9 near external vertex -> 4
+Save graph data to: city.data.json
+Computing matrixes used for AI path finding
+Save AI matrixes to: city.AI.json
+Ready to run: blender --background --python cityGen3D.py
+time ./cityGen2D.py -s 80 -r 8000
+createNewScene (numSeeds=80, cityRadius=8000, numBarriers=12, LloydSteps=2
+Using randomSeed 47637
+Creating requested fix regions: ['Temple']
+ * Build Temple as f0_Temple in region 0 pos [ 0.  0.]
+fixing region f0_Temple len 5
+minSeedDistance =  1699.4116628998402
+fixing region f0_Temple len 5
+Lloyd Iteration 1 of 2
+dist= 10106.8920321 >= DistanciaMaxima= 10080.0
+dist= 10606.8822906 >= DistanciaMaxima= 10080.0
+dist= 10849.1432776 >= DistanciaMaxima= 10080.0
+fixing region f0_Temple len 5
+Lloyd Iteration 2 of 2
+dist= 10185.2406815 >= DistanciaMaxima= 10080.0
+dist= 10891.3825139 >= DistanciaMaxima= 10080.0
+dist= 10388.8266954 >= DistanciaMaxima= 10080.0
+fixing region f0_Temple len 5
+Check and merge pairs of vertex too near...
+internalRegions= 80  externalRegions= 12
+externalPoints: [131, 151, 179, 123, 41, 102, 157, 61, 144, 162, 139, 168, 78, 55, 137, 92, 43, 17, 177, 119, 5, 16, 161, 9, 11, 185, 8, 44, 111, 156, 74, 166, 134]
+Average external radius 12161.9501283
+Current centroid [0 0] Nearest Vertex [-12.5 -16. ]
+City Area (inside external boundary): 462347146.749
+Creating Wall Vertices
+Best corner for a gate 15 near external vertex -> 92
+Save graph data to: city.data.json
+Computing matrixes used for AI path finding
+Save AI matrixes to: city.AI.json
+Ready to run: blender --background --python cityGen3D.py
+time ./cityGen2D.py -s 100 -r 10000
+createNewScene (numSeeds=100, cityRadius=10000, numBarriers=12, LloydSteps=2
+Using randomSeed 46461
+Creating requested fix regions: ['Temple']
+ * Build Temple as f0_Temple in region 0 pos [ 0.  0.]
+fixing region f0_Temple len 5
+minSeedDistance =  1900.0
+fixing region f0_Temple len 5
+Lloyd Iteration 1 of 2
+dist= 13427.8211767 >= DistanciaMaxima= 12600.0
+dist= 13280.3337891 >= DistanciaMaxima= 12600.0
+dist= 13301.4156512 >= DistanciaMaxima= 12600.0
+dist= 12817.0055819 >= DistanciaMaxima= 12600.0
+fixing region f0_Temple len 5
+Lloyd Iteration 2 of 2
+dist= 13440.7672972 >= DistanciaMaxima= 12600.0
+dist= 12797.6048949 >= DistanciaMaxima= 12600.0
+dist= 13408.128749 >= DistanciaMaxima= 12600.0
+dist= 13318.169708 >= DistanciaMaxima= 12600.0
+dist= 12904.4571324 >= DistanciaMaxima= 12600.0
+fixing region f0_Temple len 5
+Check and merge pairs of vertex too near...
+Distance from vertex 13 to vertex 189 = 1.11492647272 
+Repacking unusedVertex {189}
+vertexToReuse= [189]
+vertexToRemove= [225]
+Using Vertex 189 instead vertex 225
+numVertex after repacking 225
+internalRegions= 100  externalRegions= 12
+externalPoints: [0, 117, 122, 133, 30, 113, 166, 140, 120, 168, 42, 106, 7, 176, 109, 21, 87, 172, 22, 214, 181, 213, 218, 59, 62, 101, 47, 26, 163, 77, 202, 94, 56, 111, 82]
+Average external radius 15490.8026886
+Current centroid [0 0] Nearest Vertex [-12.5  16. ]
+City Area (inside external boundary): 738856533.395
+Creating Wall Vertices
+Best corner for a gate 22 near external vertex -> 218
+Save graph data to: city.data.json
+Computing matrixes used for AI path finding
+Save AI matrixes to: city.AI.json
+Ready to run: blender --background --python cityGen3D.py
+time ./cityGen2D.py -s 120 -r 12000
+createNewScene (numSeeds=120, cityRadius=12000, numBarriers=12, LloydSteps=2
+Using randomSeed 34365
+Creating requested fix regions: ['Temple']
+ * Build Temple as f0_Temple in region 0 pos [ 0.  0.]
+fixing region f0_Temple len 5
+minSeedDistance =  2081.345718519631
+fixing region f0_Temple len 5
+Lloyd Iteration 1 of 2
+dist= 16596.460094 >= DistanciaMaxima= 15120.0
+dist= 15777.6596222 >= DistanciaMaxima= 15120.0
+dist= 17209.0838949 >= DistanciaMaxima= 15120.0
+dist= 16608.8142081 >= DistanciaMaxima= 15120.0
+fixing region f0_Temple len 5
+Lloyd Iteration 2 of 2
+dist= 16800.0559615 >= DistanciaMaxima= 15120.0
+dist= 15135.2229617 >= DistanciaMaxima= 15120.0
+dist= 15925.7076321 >= DistanciaMaxima= 15120.0
+dist= 17307.9899498 >= DistanciaMaxima= 15120.0
+dist= 15516.7387295 >= DistanciaMaxima= 15120.0
+dist= 16673.4910697 >= DistanciaMaxima= 15120.0
+fixing region f0_Temple len 5
+Check and merge pairs of vertex too near...
+Distance from vertex 5 to vertex 144 = 2.83796618617 
+Repacking unusedVertex {144}
+vertexToReuse= [144]
+vertexToRemove= [265]
+Using Vertex 144 instead vertex 265
+numVertex after repacking 265
+internalRegions= 120  externalRegions= 12
+externalPoints: [128, 102, 236, 100, 195, 120, 41, 68, 65, 229, 130, 37, 239, 112, 220, 18, 13, 38, 221, 194, 121, 21, 85, 28, 224, 103, 185, 154, 244, 19, 15, 4, 217, 118, 151, 17, 55, 6]
+Average external radius 18509.5799725
+Current centroid [0 0] Nearest Vertex [-12.5  16. ]
+City Area (inside external boundary): 1072758121.02
+Creating Wall Vertices
+Best corner for a gate 1 near external vertex -> 102
+Save graph data to: city.data.json
+Computing matrixes used for AI path finding
+Save AI matrixes to: city.AI.json
+Ready to run: blender --background --python cityGen3D.py
+time ./cityGen2D.py -s 140 -r 14000
+createNewScene (numSeeds=140, cityRadius=14000, numBarriers=12, LloydSteps=2
+Using randomSeed 5022
+Creating requested fix regions: ['Temple']
+ * Build Temple as f0_Temple in region 0 pos [ 0.  0.]
+fixing region f0_Temple len 5
+minSeedDistance =  2248.110317577854
+fixing region f0_Temple len 5
+Lloyd Iteration 1 of 2
+dist= 19501.6457849 >= DistanciaMaxima= 17640.0
+dist= 18370.0615094 >= DistanciaMaxima= 17640.0
+dist= 20017.3458936 >= DistanciaMaxima= 17640.0
+dist= 18291.9489676 >= DistanciaMaxima= 17640.0
+dist= 19212.8216057 >= DistanciaMaxima= 17640.0
+dist= 18407.5528218 >= DistanciaMaxima= 17640.0
+dist= 19252.0107513 >= DistanciaMaxima= 17640.0
+fixing region f0_Temple len 5
+Lloyd Iteration 2 of 2
+dist= 19551.7265949 >= DistanciaMaxima= 17640.0
+dist= 17656.3602403 >= DistanciaMaxima= 17640.0
+dist= 18421.0114369 >= DistanciaMaxima= 17640.0
+dist= 20017.3458936 >= DistanciaMaxima= 17640.0
+dist= 17647.973041 >= DistanciaMaxima= 17640.0
+dist= 18296.0407224 >= DistanciaMaxima= 17640.0
+dist= 19326.9471415 >= DistanciaMaxima= 17640.0
+dist= 18407.7437108 >= DistanciaMaxima= 17640.0
+dist= 18017.8612257 >= DistanciaMaxima= 17640.0
+dist= 17738.4373599 >= DistanciaMaxima= 17640.0
+dist= 19331.6367196 >= DistanciaMaxima= 17640.0
+fixing region f0_Temple len 5
+Check and merge pairs of vertex too near...
+Distance from vertex 20 to vertex 35 = 6.70604714009 
+Repacking unusedVertex {35}
+vertexToReuse= [35]
+vertexToRemove= [305]
+Using Vertex 35 instead vertex 305
+numVertex after repacking 305
+internalRegions= 140  externalRegions= 12
+externalPoints: [64, 69, 93, 250, 227, 225, 195, 287, 174, 297, 237, 39, 296, 116, 57, 269, 280, 162, 145, 140, 156, 212, 17, 41, 158, 48, 152, 189, 151, 173, 279, 76, 125, 231, 96, 67, 141, 210, 203, 43, 122]
+Average external radius 21814.2929592
+Current centroid [0 0] Nearest Vertex [-12.5  16. ]
+City Area (inside external boundary): 1475540626.87
+Creating Wall Vertices
+Best corner for a gate 19 near external vertex -> 140
+Save graph data to: city.data.json
+Computing matrixes used for AI path finding
+Save AI matrixes to: city.AI.json
+Ready to run: blender --background --python cityGen3D.py
+time ./cityGen2D.py -s 160 -r 16000
+createNewScene (numSeeds=160, cityRadius=16000, numBarriers=12, LloydSteps=2
+Using randomSeed 85194
+Creating requested fix regions: ['Temple']
+ * Build Temple as f0_Temple in region 0 pos [ 0.  0.]
+fixing region f0_Temple len 5
+minSeedDistance =  2403.331021727968
+fixing region f0_Temple len 5
+Lloyd Iteration 1 of 2
+dist= 22540.6606627 >= DistanciaMaxima= 20160.0
+dist= 22424.7828608 >= DistanciaMaxima= 20160.0
+dist= 20752.6985703 >= DistanciaMaxima= 20160.0
+dist= 23012.9809643 >= DistanciaMaxima= 20160.0
+dist= 21506.5307546 >= DistanciaMaxima= 20160.0
+dist= 20731.0492283 >= DistanciaMaxima= 20160.0
+dist= 20243.8144863 >= DistanciaMaxima= 20160.0
+dist= 20446.9498334 >= DistanciaMaxima= 20160.0
+fixing region f0_Temple len 5
+Lloyd Iteration 2 of 2
+dist= 22246.7905613 >= DistanciaMaxima= 20160.0
+dist= 20222.8492795 >= DistanciaMaxima= 20160.0
+dist= 22412.2269479 >= DistanciaMaxima= 20160.0
+dist= 20892.8352679 >= DistanciaMaxima= 20160.0
+dist= 20476.1663377 >= DistanciaMaxima= 20160.0
+dist= 23088.3336702 >= DistanciaMaxima= 20160.0
+dist= 21558.1381859 >= DistanciaMaxima= 20160.0
+dist= 20945.0453737 >= DistanciaMaxima= 20160.0
+dist= 20351.4243236 >= DistanciaMaxima= 20160.0
+dist= 20566.4805892 >= DistanciaMaxima= 20160.0
+dist= 20494.173 >= DistanciaMaxima= 20160.0
+dist= 20377.6193246 >= DistanciaMaxima= 20160.0
+dist= 20290.5510747 >= DistanciaMaxima= 20160.0
+fixing region f0_Temple len 5
+Check and merge pairs of vertex too near...
+internalRegions= 160  externalRegions= 12
+externalPoints: [160, 269, 46, 252, 274, 89, 190, 291, 217, 271, 233, 240, 321, 235, 206, 265, 303, 211, 188, 47, 132, 152, 2, 42, 306, 113, 57, 41, 15, 184, 329, 225, 297, 226, 13, 173, 110, 204, 70, 236]
+Average external radius 25034.9380956
+Current centroid [0 0] Nearest Vertex [-12.5  16. ]
+City Area (inside external boundary): 1942647457.85
+Creating Wall Vertices
+Best corner for a gate 36 near external vertex -> 110
+Save graph data to: city.data.json
+Computing matrixes used for AI path finding
+Save AI matrixes to: city.AI.json
+Ready to run: blender --background --python cityGen3D.py
+time ./cityGen2D.py -s 180 -r 18000
+createNewScene (numSeeds=180, cityRadius=18000, numBarriers=12, LloydSteps=2
+Using randomSeed 88279
+Creating requested fix regions: ['Temple']
+ * Build Temple as f0_Temple in region 0 pos [ 0.  0.]
+fixing region f0_Temple len 5
+minSeedDistance =  2549.11749434976
+fixing region f0_Temple len 5
+Lloyd Iteration 1 of 2
+dist= 24791.150821 >= DistanciaMaxima= 22680.0
+dist= 23311.1249357 >= DistanciaMaxima= 22680.0
+dist= 25986.3750241 >= DistanciaMaxima= 22680.0
+dist= 22969.9174651 >= DistanciaMaxima= 22680.0
+dist= 23164.7486697 >= DistanciaMaxima= 22680.0
+dist= 25200.4175241 >= DistanciaMaxima= 22680.0
+dist= 23709.7131492 >= DistanciaMaxima= 22680.0
+dist= 22996.8923057 >= DistanciaMaxima= 22680.0
+dist= 25765.6828262 >= DistanciaMaxima= 22680.0
+fixing region f0_Temple len 5
+Lloyd Iteration 2 of 2
+dist= 24865.1570864 >= DistanciaMaxima= 22680.0
+dist= 23325.2584669 >= DistanciaMaxima= 22680.0
+dist= 26023.3497328 >= DistanciaMaxima= 22680.0
+dist= 23068.6125181 >= DistanciaMaxima= 22680.0
+dist= 23210.8493705 >= DistanciaMaxima= 22680.0
+dist= 25323.7971193 >= DistanciaMaxima= 22680.0
+dist= 23768.0863939 >= DistanciaMaxima= 22680.0
+dist= 23065.079736 >= DistanciaMaxima= 22680.0
+dist= 25765.6828262 >= DistanciaMaxima= 22680.0
+fixing region f0_Temple len 5
+Check and merge pairs of vertex too near...
+internalRegions= 180  externalRegions= 12
+externalPoints: [42, 302, 166, 78, 112, 187, 43, 36, 114, 11, 253, 40, 362, 172, 258, 164, 37, 58, 291, 277, 38, 8, 356, 287, 374, 210, 234, 12, 352, 113, 371, 251, 183, 200, 90, 39, 180, 298, 104, 342, 41, 16, 225]
+Average external radius 28090.0897255
+Current centroid [0 0] Nearest Vertex [-12.5  16. ]
+City Area (inside external boundary): 2471761851.31
+Creating Wall Vertices
+Best corner for a gate 27 near external vertex -> 12
+Save graph data to: city.data.json
+Computing matrixes used for AI path finding
+Save AI matrixes to: city.AI.json
+Ready to run: blender --background --python cityGen3D.py
