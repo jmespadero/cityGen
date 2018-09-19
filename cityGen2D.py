@@ -254,6 +254,7 @@ class Delaunay2D:
         return vor_coors, regions
 
 
+
 def forceStaticSeeds(static_seeds, seeds):
     # Force static seeds
     i = 0
