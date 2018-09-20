@@ -561,7 +561,6 @@ def makePolygon(cwd, emptyRegions, cList, num_region, objName="meshObj", meshNam
     nr       -- The number if for thiss region
     seed     -- Coordinates of the seed for this region
     """
-    print(".", end="")
 
     nv = len(cList)
 
@@ -957,6 +956,7 @@ def main():
         print("Data:", [x for x in data]);
         if 'name' in data:
             print("City name:", data['name'])
+
         seeds = data['seeds']
         vertices = [Vector(v) for v in data['vertices']]
         regions = data['regions']
@@ -1120,7 +1120,6 @@ def main():
         # Create paths and polygon for internal regions
         print("Creating Districts")
         for nr, region in enumerate(internalRegions):
-            print(".", end="")
             corners = [vertices3D[i] for i in region]
             makePolygon(cwd, emptyRegions, corners, nr, "houseO", "houseM", height=0.5, reduct=1.0, nr=nr,
                         seed=seeds[nr])
