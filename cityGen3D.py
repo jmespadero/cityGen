@@ -976,13 +976,19 @@ def main():
     # Save a copy of input data as a text buffer in blend file
     if inputFilename in bpy.data.texts:
         bpy.data.texts.remove(bpy.data.texts[inputFilename])
-    bpy.data.texts.load(inputFilename, True)
+    try:
+        bpy.data.texts.load(inputFilename, True)
+    except:
+        pass
 
     # Save a copy of input AI data as a buffer in blend file
     inputFilenameAI = args['inputFilenameAI']
     if inputFilenameAI in bpy.data.texts:
         bpy.data.texts.remove(bpy.data.texts[inputFilenameAI])
-    bpy.data.texts.load(inputFilenameAI, True)
+    try:
+        bpy.data.texts.load(inputFilenameAI, True)
+    except:
+        pass
 
     # Convert vertex from 2D to 3D
     vertices3D = [v.to_3d() for v in vertices]
@@ -1137,7 +1143,8 @@ def main():
             o.select = o.name.startswith("_Region")
         bpy.context.scene.objects.active = bpy.data.objects["_Region"]
         bpy.ops.object.join()
-
+        
+    """
     if args.get('createLeaves', False):
         leaves = 3000
         createLeaves(internalSeeds, internalRegions, vertices, cityRadius, leaves)
@@ -1158,6 +1165,7 @@ def main():
 
         skeleton_list = newRMDFractal(origin, (origin * 3), 0.20, 7, [])
         meshFromSkeleton(skeleton_list, trailWidth, [], [], [], "_Trail", "Sand")
+    """
 
     # Save the current file, if outputCityFilename is set.
     if args.get('outputCityFilename', False):
