@@ -674,7 +674,7 @@ def importLibrary(filename, link=False, destinationLayer=1, importScripts=True):
     importScripts -- Choose to import also the scripts (texts)
     """
     print('Importing objects from file', filename)
-    with bpy.data.libraries.load(filename, link=link) as (data_from, data_to):
+    with bpy.data.libraries.load(os.getcwd() + "\\" + filename, link=link) as (data_from, data_to):
         # Import all objects
         objNames = [o.name for o in bpy.data.objects]
         for objName in data_from.objects:
@@ -857,6 +857,11 @@ def meshFromSkeleton(skeleton, width, river_side_a, river_side_b, faces_data, na
     bpy.context.scene.objects.link(object)
 
 
+def createInternalText(file_name):
+    with open(file_name, 'r') as file:
+        bpy.data.texts.new(file_name)
+        bpy.data.texts[file_name].from_string(file.read())
+
 
 ###########################
 # The one and only... main
@@ -976,19 +981,13 @@ def main():
     # Save a copy of input data as a text buffer in blend file
     if inputFilename in bpy.data.texts:
         bpy.data.texts.remove(bpy.data.texts[inputFilename])
-    try:
-        bpy.data.texts.load(inputFilename, True)
-    except:
-        pass
+    createInternalText(inputFilename)
 
     # Save a copy of input AI data as a buffer in blend file
     inputFilenameAI = args['inputFilenameAI']
     if inputFilenameAI in bpy.data.texts:
         bpy.data.texts.remove(bpy.data.texts[inputFilenameAI])
-    try:
-        bpy.data.texts.load(inputFilenameAI, True)
-    except:
-        pass
+    createInternalText(inputFilenameAI)
 
     # Convert vertex from 2D to 3D
     vertices3D = [v.to_3d() for v in vertices]
@@ -1143,7 +1142,7 @@ def main():
             o.select = o.name.startswith("_Region")
         bpy.context.scene.objects.active = bpy.data.objects["_Region"]
         bpy.ops.object.join()
-        
+
     """
     if args.get('createLeaves', False):
         leaves = 3000
