@@ -467,7 +467,7 @@ def importLibrary(filename, link=False, destinationLayer=1, importScripts=True):
     importScripts -- Choose to import also the scripts (texts) 
     """
     print('Importing objects from file', filename)
-    with bpy.data.libraries.load(filename, link=link) as (data_from, data_to):
+    with bpy.data.libraries.load(os.getcwd() + "\\" + filename, link=link) as (data_from, data_to):
         #Import all objects
         objNames = [o.name for o in bpy.data.objects]
         for objName in data_from.objects:
@@ -556,14 +556,12 @@ def nearestSegment(vector , vertices, vert_coords):
 
 
 
-def createLeaves(seeds, internalRegions, vertices):
-    print("Creating leaves...")
+def createLeaves(seeds, internalRegions, vertices, radius, leaves):
     hojas = 0
-    loops = 0
 
-    while (hojas < 3000):
-        loops = loops + 1
-        vector = Vector((uniform(-300, 300), uniform(-300, 300), 0.1))
+    print("Creating leaves in the streets...")
+    while (hojas < leaves):
+        vector = Vector((uniform(-radius, radius), uniform(-radius, radius), 0.1))
 
         n = nearestSeed(vector, seeds)
         (s, d) = nearestSegment(vector , internalRegions[n], vertices)
@@ -573,8 +571,6 @@ def createLeaves(seeds, internalRegions, vertices):
             g1.location = vector
             g1.rotation_euler = (0, 0, uniform(0, 360))
             hojas = hojas + 1
-
-    print("\nLeaves created (", loops, "loops)")
 
 
 
@@ -790,13 +786,17 @@ def main():
     #Save a copy of input data as a text buffer in blend file
     if inputFilename in bpy.data.texts:
         bpy.data.texts.remove(bpy.data.texts[inputFilename])
-    bpy.data.texts.load(inputFilename, True)
+    with open(inputFilename, 'r') as file:
+        bpy.data.texts.new(inputFilename)
+        bpy.data.texts[inputFilename].from_string(file.read())
     
     #Save a copy of input AI data as a buffer in blend file
     inputFilenameAI = args['inputFilenameAI']
     if inputFilenameAI in bpy.data.texts:
         bpy.data.texts.remove(bpy.data.texts[inputFilenameAI])
-    bpy.data.texts.load(inputFilenameAI, True)
+    with open(inputFilenameAI, 'r') as file:
+        bpy.data.texts.new(inputFilenameAI)
+        bpy.data.texts[inputFilenameAI].from_string(file.read())
     
     # Convert vertex from 2D to 3D
     vertices3D = [ v.to_3d() for v in vertices ]
