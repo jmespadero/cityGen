@@ -561,7 +561,6 @@ def makePolygon(cwd, emptyRegions, cList, num_region, objName="meshObj", meshNam
     nr       -- The number if for thiss region
     seed     -- Coordinates of the seed for this region
     """
-    print(".", end="")
 
     nv = len(cList)
 
@@ -675,7 +674,7 @@ def importLibrary(filename, link=False, destinationLayer=1, importScripts=True):
     importScripts -- Choose to import also the scripts (texts)
     """
     print('Importing objects from file', filename)
-    with bpy.data.libraries.load(filename, link=link) as (data_from, data_to):
+    with bpy.data.libraries.load(os.getcwd() + "\\" + filename, link=link) as (data_from, data_to):
         # Import all objects
         objNames = [o.name for o in bpy.data.objects]
         for objName in data_from.objects:
@@ -858,6 +857,11 @@ def meshFromSkeleton(skeleton, width, river_side_a, river_side_b, faces_data, na
     bpy.context.scene.objects.link(object)
 
 
+def createInternalText(file_name):
+    with open(file_name, 'r') as file:
+        bpy.data.texts.new(file_name)
+        bpy.data.texts[file_name].from_string(file.read())
+
 
 ###########################
 # The one and only... main
@@ -957,6 +961,7 @@ def main():
         print("Data:", [x for x in data]);
         if 'name' in data:
             print("City name:", data['name'])
+
         seeds = data['seeds']
         vertices = [Vector(v) for v in data['vertices']]
         regions = data['regions']
@@ -976,13 +981,13 @@ def main():
     # Save a copy of input data as a text buffer in blend file
     if inputFilename in bpy.data.texts:
         bpy.data.texts.remove(bpy.data.texts[inputFilename])
-    bpy.data.texts.load(inputFilename, True)
+    createInternalText(inputFilename)
 
     # Save a copy of input AI data as a buffer in blend file
     inputFilenameAI = args['inputFilenameAI']
     if inputFilenameAI in bpy.data.texts:
         bpy.data.texts.remove(bpy.data.texts[inputFilenameAI])
-    bpy.data.texts.load(inputFilenameAI, True)
+    createInternalText(inputFilenameAI)
 
     # Convert vertex from 2D to 3D
     vertices3D = [v.to_3d() for v in vertices]
@@ -1120,7 +1125,6 @@ def main():
         # Create paths and polygon for internal regions
         print("Creating Districts")
         for nr, region in enumerate(internalRegions):
-            print(".", end="")
             corners = [vertices3D[i] for i in region]
             makePolygon(cwd, emptyRegions, corners, nr, "houseO", "houseM", height=0.5, reduct=1.0, nr=nr,
                         seed=seeds[nr])
@@ -1139,6 +1143,7 @@ def main():
         bpy.context.scene.objects.active = bpy.data.objects["_Region"]
         bpy.ops.object.join()
 
+    """
     if args.get('createLeaves', False):
         leaves = 3000
         createLeaves(internalSeeds, internalRegions, vertices, cityRadius, leaves)
@@ -1159,6 +1164,7 @@ def main():
 
         skeleton_list = newRMDFractal(origin, (origin * 3), 0.20, 7, [])
         meshFromSkeleton(skeleton_list, trailWidth, [], [], [], "_Trail", "Sand")
+    """
 
     # Save the current file, if outputCityFilename is set.
     if args.get('outputCityFilename', False):
