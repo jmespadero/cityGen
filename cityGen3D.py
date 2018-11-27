@@ -575,7 +575,7 @@ def createLeaves(seeds, internalRegions, vertices, radius, leaves):
 
 
 def createBuildings(seeds, staticRegions):
-    for i, (region, building, region_radius, displacement) in staticRegions.items():
+    for (region, building, region_radius, displacement) in staticRegions.values():
         importLibrary(args['input' + building], destinationLayer=0, importScripts=True)
         object = bpy.data.objects[building]
         object.location.xy = seeds[region]
@@ -620,9 +620,10 @@ def newRMDFractal(origin, end, factor, resolution, skeleton = []):
 
 
 def meshFromSkeleton(skeleton, width, river_side_a, river_side_b, faces_data, name = "mesh", material = None):
-    for index in range(1, len(skeleton) - 1):
+    skeleton = [skeleton[0]]+skeleton
+    for index in range(0, len(skeleton) - 1):
         p0 = skeleton[index]
-        p1 = skeleton[index - 1]
+        p1 = skeleton[index-1]
         p2 = skeleton[index + 1]
 
         # The param 'width' controls the width of the river, after the normalizing of it.
@@ -645,27 +646,26 @@ def meshFromSkeleton(skeleton, width, river_side_a, river_side_b, faces_data, na
         faces_data.append((i, last_index - (i + 1), last_index - i))
 
     mesh = bpy.data.meshes.new(name)
-    object = bpy.data.objects.new(name, mesh)
+    o = bpy.data.objects.new(name, mesh)
     mesh.from_pydata(ordered_points, [], faces_data)
     mesh.update(calc_edges=True)
-    mesh.materials.append(bpy.data.materials[material])
-    bpy.context.scene.objects.link(object)
-
+    if material:
+        mesh.materials.append(bpy.data.materials[material])
+    bpy.context.scene.objects.link(o)
 
 
 def createSandCircle(center, radius):
     #create radius one circle mesh
     angle=2*3.1415927 /24
-    cpoints=[Vector((cos(i*angle),sin(i*angle),0.4)) for i in range(24)]
+    cpoints=[Vector((radius*cos(i*angle),radius*sin(i*angle),0.01)) for i in range(24)]
 
     mesh = bpy.data.meshes.new("gateArena")
     mesh.from_pydata(cpoints, [], [list(range(24))])
     mesh.update(calc_edges=True)
     mesh.materials.append(bpy.data.materials["Sand"])
-    object = bpy.data.objects.new("gateArena", mesh)
-    object.location = center
-    object.scale=Vector((radius, radius, 1))
-    bpy.context.scene.objects.link(object)
+    o = bpy.data.objects.new("gateArena", mesh)
+    o.location = center
+    bpy.context.scene.objects.link(o)
 
 ###########################
 # The one and only... main
@@ -965,16 +965,11 @@ def main():
                                       0.25, 7, [])
         meshFromSkeleton(skeleton_list, 20, [], [], [], "_River", "Water")
 
-
     if args.get('createTrail', False):
-        origin = gateMid.to_3d()
-        trailWidth = 5
-
-        createSandCircle(gateMid.to_3d(), 2*(gate1-gateMid).length)
-        skeleton_list = newRMDFractal(origin, (origin * 3), 0.20, 7, [])
-        meshFromSkeleton(skeleton_list, trailWidth, [], [], [], "_Trail", "Sand")
-
-
+        trailWidth = 3
+        roadSkel3D = [Vector(x).to_3d() for x in data['roadSkel']]        
+        meshFromSkeleton(roadSkel3D, trailWidth, [], [], [], "_Trail", "Sand")
+        createSandCircle(gateMid.to_3d(), (gate1-gateMid).length)
 
     #Save the current file, if outputCityFilename is set.
     if args.get('outputCityFilename', False):
