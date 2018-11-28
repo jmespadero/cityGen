@@ -178,19 +178,15 @@ def knapsack_unbounded_dp(items, C, maxofequalhouse):
         else:
             continue               
                        
-                    
- 
     value, bagged = sack[C]
     numbagged = sum(bagged)
     size = sum(items[i][1]*n for i,n in enumerate(bagged))
     # convert to (iten, count) pairs) in name order
     bagged = sorted((items[i][NAME], n) for i,n in enumerate(bagged) if n)
     
-    
     return value, size, numbagged, bagged
 
-def knapsack_unbounded_dp_control(pathLen, gapSize, objList=None):
-    
+def knapsack_unbounded_dp_control(pathLen, gapSize, objList=None):   
     items = []
     for k in objList:
         objName=k
@@ -1011,7 +1007,7 @@ def main():
         if 'initPos' not in player.game.properties:
             bpy.context.scene.objects.active = player
             bpy.ops.object.game_property_new(name="initPos", type='STRING')
-        player.game.properties['initPos'].value=str(locP)
+        player.game.properties['initPos'].value=str(list(locP.to_tuple()))
 
     #Insert a background music
     if args.get('backgroundMusic', False):
@@ -1024,7 +1020,8 @@ def main():
         bpy.ops.logic.actuator_add(name='playMusic', type='SOUND', object='Player') #Try to link to other object...
         player.game.actuators['playMusic'].sound = bpy.data.sounds[os.path.basename(backgroundMusic)]
         player.game.actuators['playMusic'].mode = 'LOOPEND'
-        player.game.controllers['playMusic'].link(sensor=player.game.sensors['playMusic'], actuator=player.game.actuators['playMusic'])
+        player.game.controllers['playMusic'].link(sensor=player.game.sensors['playMusic'],
+                                                  actuator=player.game.actuators['playMusic'])
             
     #Save the current file, if outputGameFilename is set.
     if args.get('outputTourFilename', False):
@@ -1040,7 +1037,6 @@ def main():
     numMonsters = args.get('numMonsters', 0)
             
     if numMonsters > 0:
-
         #Read all the assets for monsters and non-players
         if not isinstance(args['inputMonsterLibrary'], list):
             args['inputMonsterLibrary'] = [args['inputMonsterLibrary']]
@@ -1114,7 +1110,10 @@ def main():
     # totalTime = (datetime.now()-iniTime).total_seconds()
     # print("Regions:", len(regions), " Total Time:" totalTime)
 
-#Call the main function
+
+###########################################################################
+#        Call the main function
+###########################################################################
 if __name__ == '__main__':
     main()
 
