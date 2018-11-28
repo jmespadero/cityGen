@@ -437,7 +437,7 @@ class CityData(dict):
                 isExternalEdge = i in externalVertex and j in externalVertex
                 # TODO: Avoid a hardcoded value here. Maybe 2*pi*cityRadius / len(externalVertex)
                 if dist < (10.0 + 10.0 * isExternalEdge):
-                    print("Distance from vertex", i, "to vertex", j, "=", dist, "(external edge)" * isExternalEdge)
+                    print("  Distance from vertex", i, "to vertex", j, "=", dist, "(external edge)" * isExternalEdge)
                     # Merge voronoi vertex i and j in the midpoint
                     midpoint = 0.5 * (np.array(vor_vertices[i]) + np.array(vor_vertices[j]))
                     vor_vertices[i] = midpoint
@@ -459,16 +459,16 @@ class CityData(dict):
 
         # Remove usage of unusedVertex
         if unusedVertex:
-            print("Repacking unusedVertex", unusedVertex)
+            print("  Repacking unusedVertex", unusedVertex)
             vertexToReuse = [x for x in unusedVertex if x < nv - len(unusedVertex)]
             if vertexToReuse:
                 vertexToRemove = [x for x in range(nv) if x not in unusedVertex][-len(vertexToReuse):]
-                print("vertexToReuse=",vertexToReuse)
-                print("vertexToRemove=",vertexToRemove)
+                #print("vertexToReuse=",vertexToReuse)
+                #print("vertexToRemove=",vertexToRemove)
 
                 for i, vi in enumerate(vertexToRemove):
                     vj = vertexToReuse[i]
-                    print("Using Vertex", vj, "instead vertex", vi)
+                    #print("Using Vertex", vj, "instead vertex", vi)
                     vor_vertices[vj] = vor_vertices[vi]
                     for r in vor_regions:
                         if vi in vor_regions[r]:
@@ -484,7 +484,7 @@ class CityData(dict):
             # Remove last vertex from vertices
             nv -= len(unusedVertex)
             vor_vertices = vor_vertices[0:nv]
-            print("numVertex after repacking", nv)
+            print("  numVertex after repacking", nv)
             externalRegions = [vor_regions[r] for r in range(numSeeds, len(vor_regions))]
             externalVertex = set([v for v in sum(externalRegions, []) if v != -1])
 
@@ -519,9 +519,7 @@ class CityData(dict):
         
         ###########################################################
         # Smooth externalPoints distance to origin to get a rounder shape.
-        externalRadius = 0
-        for i in externalPoints:
-            externalRadius += np.linalg.norm(vor_vertices[i])
+        externalRadius = sum([np.linalg.norm(vor_vertices[i]) for i in externalPoints])
         externalRadius /= len(externalPoints)
         print("Average external radius", externalRadius)
         
@@ -908,6 +906,52 @@ class CityData(dict):
         with open(filename, "w") as svg_file:
             svg_file.write(svgHeader+svgRegions+'\n</g>\n'+svgLabels+'\n</g>\n'+svgFooter)
             
+def plotVoronoiData(vertices, regions, extraV, filename, radius, labels=False, extraR=False):
+    """Plot a 2D representation of voronoi data as vertices, regions, seeds
+    """   
+    radius = 2*radius
+        
+    svgHeader = '<svg xmlns="http://www.w3.org/2000/svg" width="%d" height="%d" >\n'%(2*radius,2*radius)
+    svgHeader += '<rect id="background" width="100%" height="100%" style="fill:white"/>\n'
+    svgFooter = '<line x1="50%" y1="5%" x2="50%" y2="95%" stroke-dasharray="1, 5" style="stroke:black;" />\n'
+    svgFooter += '<line x1="5%" y1="50%" x2="95%" y2="50%" stroke-dasharray="1, 5" style="stroke:black" />\n'
+    svgFooter += '</svg>\n'
+    
+    svgRegions = '<g id="regions" style="fill:#ffeeaa;stroke:black;stroke-width:1">\n'
+    svgLabels = '<g id="labels" style="fill:black;text-anchor:middle">\n'
+    palette=["#9c9fff", "#ff89b5", "#ffdc89", "#90d4f7", "#71e096", "#f5a26f", "#ed6d79", "#cff381"]
+
+    # Plot voronoi regions
+    for r, region in enumerate(regions):
+        polygon = [(radius+vertices[i][0], radius-vertices[i][1]) for i in region]
+        svgRegions += '  <polygon style="fill:'+palette[r%len(palette)]
+        svgRegions += '" points="' + ' '.join("%g,%g" % v for v in polygon) 
+        svgRegions += '" />\n'
+        if labels:
+            # plot a label for the region in the centroid of the region
+            xy=np.average(polygon, axis=0)
+            svgLabels += '<text x="%g" y="%g">r%d</text>\n' % (xy[0], xy[1], r)
+    
+    # Labels for voronoi vertex 
+    if labels:
+        for i, v in enumerate(vertices):
+            svgLabels += '<text x="%g" y="%g">%d</text>\n' % (radius+v[0], radius-v[1], i)
+
+    #Plot Extra vertex as a polygon
+    if extraR:
+        svgRegions += '  <polyline style="fill:none;stroke:black;stroke-width:2"'
+        svgRegions += ' points="' + ' '.join("%g,%g"%(radius+v[0],radius-v[1]) for v in extraV) 
+        svgRegions += '" />\n'
+        
+    # Plot barrierSeeds/extra data
+    for v in extraV:
+        svgRegions += '<circle cx="%g" cy="%g" r="3" stroke="black" stroke-width="1" fill="red" />' % (radius+v[0], radius-v[1])
+
+    if not filename.endswith('.svg'):
+        filename += ".svg"
+
+    with open(filename, "w") as svg_file:
+        svg_file.write(svgHeader+svgRegions+'\n</g>\n'+svgLabels+'\n</g>\n'+svgFooter)
     
 def newAIData(regions, vertices):
     """Compute the matrices used to drive the AI.
