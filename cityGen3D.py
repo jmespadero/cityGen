@@ -16,14 +16,14 @@ Open blender and type this in the python console:
 
 """
 TODO:
-  * Add cg-temple to cities.
   * Build random houses. Create non-rectangular houses for corners.
   * Procedural generation of starred night sky.
-  * Add roads outside of the city (at least one in near the gate)
 DONE:
   * When importing a blend file (cg-library, etc...) append its "readme.txt" to
     a "readme.txt" in the output. This will honor all the CC-By resources.
   * Fix armatures when set position to an armatured object (see initPos)
+  * Add cg-temple to cities.
+  * Add roads outside of the city (at least one in near the gate)
 """
 import bpy
 import math, json, random, os, sys
@@ -32,6 +32,7 @@ from pprint import pprint
 from mathutils import Vector
 from datetime import datetime
 from random import uniform
+from functools import reduce
 
 #Set default values for args
 args={
@@ -303,63 +304,75 @@ def makeGround(cList=[], objName="meshObj", meshName="mesh", radius=10.0, materi
     me.materials.append(bpy.data.materials[material])
 
 
+def computeEnvelope(vertexList, distance=0):
+    """ Compute the envelope (surrounding polygon at given distance)
+    vertexList -- list of coordinates
+    distance -- Distance to displace the envelope (negative will reduce the polygon)
+    """
+    nv = len(vertexList)
 
-def makePolygon(emptyRegions, cList, num_region, objName="meshObj", meshName="mesh", height=0.0, reduct=0.0, hide=True, nr=None, seed=None):
+    # Compute the unit 2D vector for each side (vertex to its previous)
+    edgeP = [(vertexList[i]-vertexList[i-1]).xy.normalized() for i in range(nv)]
+    #Compute edge vectors (vertex to its next)
+    edgeN=[-edgeP[(i+1)%nv] for i in range(nv)]
+    # Compute the normal to each side rotating each edgeP
+    edgeNormals = [Vector((v[1], -v[0])) for v in edgeP]
+
+    # compute tangent weights as tan((pi - alpha) / 2) = sin(alpha)/(1-cos(alpha))
+    w = [edgeN[i].cross(edgeP[i])/(1.0 - edgeP[i].dot(edgeN[i])) for i in range(nv)]
+    
+    #Compute the weighted external bisector for each vertex
+    bisector = [edgeNormals[i] + w[i]*edgeP[i] for i in range(nv)]
+
+    # Displace the external vertices by the bisector
+    envelope = [vertexList[i].xy + distance * bisector[i] for i in range(nv)]
+    
+    # Check if input is 2D or 3D
+    if len(vertexList[0]) == 2:
+       return envelope
+    else:
+       #Extend to 3D using original Z coordinates
+       return [Vector((envelope[i].x, envelope[i].y, vertexList[i].z)) for i in range(nv)]
+
+            
+def makeDistrict(emptyRegions, cList, num_region, objName="meshObj", meshName="mesh", height=0.0, reduct=0.0, hideWalls=True, nr=None, seed=None):
     """Create a polygon/prism to represent a city block
     cList    -- A list of 3D points with the vertex of the polygon (corners of the city block)
     objName  -- the name of the new object
     meshName -- the name of the new mesh
     height   -- the height of the prism
     reduct   -- a distance to reduce from corner
-    nr       -- The number if for thiss region
+    nr       -- The number if for this region
     seed     -- Coordinates of the seed for this region
     """
-    print(".", end="")
-    
     nv = len(cList)
 
+    #If no seed, use centroid of polygon as seed
     if not seed:
-        #Compute center of voronoi region
-        seed = [0.0,0.0]
-        for v in cList:
-            seed[0] += v[0]
-            seed[1] += v[1]
-        seed[0] /= nv
-        seed[1] /= nv
-    #pprint("seed", seed)
+        seed = sum(cList, Vector((0,0,0)))/nv
 
-    #Compute reduced region coordinates
-    cList2 = []
-    for i in range(nv):
-        dx = cList[i][0]-seed[0]
-        dy = cList[i][1]-seed[1]
-        dist = sqrt(dx*dx+dy*dy)
-        if dist < reduct:
-            cList2.append(cList[i])
-        else:
-            vecx = reduct * dx / dist
-            vecy = reduct * dy / dist
-            cList2.append((cList[i][0]-vecx,cList[i][1]-vecy,cList[i][2]))
+    #Compute the "Onion model" coordinates for curbs, and houses 
+    curbLine = computeEnvelope(cList, -reduct)
+    houseLine = computeEnvelope(curbLine, -reduct)    
+    interiorLine = computeEnvelope(houseLine, -1)
 
     # 1. Create a mesh for streets around this region
-    # This is the space between polygons clist and clist2
+    # This is the space between polygons clist and curbLine
     me = bpy.data.meshes.new("_Street")
     ob = bpy.data.objects.new("_Street", me)
-    streetData = []
-    for i in range(nv):
-        streetData.append(((i-1) % nv, i, nv+i, nv+(i-1) % nv))
+    streetData = [ ((i-1) % nv, i, nv+i, nv+(i-1) % nv) for i in range(nv)]
     # pprint(streetData)
-    me.from_pydata(cList+cList2, [], streetData)
+    me.from_pydata(cList+curbLine, [], streetData)
     me.update(calc_edges=True)
     if (num_region not in emptyRegions):
         me.materials.append(bpy.data.materials['Floor1'])
     bpy.context.scene.objects.link(ob)
 
     # 2. Create a mesh interior of this region
-    # This is the space inside polygon clist2
+    # This is the space inside polygon curbLine
     me = bpy.data.meshes.new("_Region")
     ob = bpy.data.objects.new("_Region", me)
-    me.from_pydata(cList2, [], [tuple(range(nv))])
+    me.from_pydata(curbLine, [], [tuple(range(nv))])
     me.update(calc_edges=True)
     me.materials.append(bpy.data.materials['Floor2'])
     #me.materials.append(bpy.data.materials['Grass'])
@@ -377,67 +390,29 @@ def makePolygon(emptyRegions, cList, num_region, objName="meshObj", meshName="me
     textOb.color = (1,0,0,1)
     textOb.scale = (5,5,5)
     textOb.data.body = str(nr)
-    bpy.context.scene.objects.link(textOb)
+    bpy.context.scene.objects.link(textOb)    
+
+    # 4. Fill boundary of region curbLine with curbs
+    for i in range(nv):
+        duplicateAlongSegment(curbLine[i-1], curbLine[i], "Curb", 0.1)
     
-
-    # 4. Fill boundary of region with Curbs
+    # 5. Fill boundary of region houseLine with houses
     for i in range(nv):
-        duplicateAlongSegment(cList2[i-1], cList2[i], "Curb", 0.1)
-    
-    # 5. Create Houses
+        duplicateAlongSegmentMix (houseLine[i-1], houseLine[i], 1 ,args["inputHouses"])
 
-
-    #Compute new reduced region coordinates
-    cList3 = []
-    cList4 = []
-    reduct = reduct * 6
-    for i in range(nv):
-        dx = cList[i][0]-seed[0]
-        dy = cList[i][1]-seed[1]
-        dist = sqrt(dx*dx+dy*dy)
-        if dist < reduct:
-            cList3.append(cList[i])
-        else:
-            vecx = reduct * dx / dist
-            vecy = reduct * dy / dist
-            vecxM = reduct * 1.5 * dx / dist
-            vecyM = reduct * 1.5 * dy / dist
-            cList3.append((cList[i][0]-vecx,cList[i][1]-vecy,cList[i][2]))
-            cList4.append((cList[i][0]-vecxM,cList[i][1]-vecyM,cList[i][2]))
-
-    for i in range(nv):
-        duplicateAlongSegmentMix (cList3[i-1], cList3[i], 1 ,args["inputHouses"])
-        duplicateAlongSegment(cList4[i-1], cList4[i], "WallHouse", 0, True )
-
-    """
-    #Create a mesh for colision
-    me = bpy.data.meshes.new(meshName)   # create a new mesh
-    ob = bpy.data.objects.new(objName, me) # create an object with that mesh
-    bpy.context.scene.objects.link(ob)  # Link object to scene
-
-    # Fill the mesh with verts, edges, faces
-    me.from_pydata(cList2,[],[tuple(range(len(cList2)))])   # (0,1,2,3..N)
-    me.update(calc_edges=True)    # Update mesh with new data
-
-    #Avoid extrusion if height == 0
-    if (not height):
-        return
-
-    #Extrude the mesh in the direction of +Z axis
-    if (bpy.context.scene.objects.active):
-        bpy.context.scene.objects.active.select = False
-    bpy.context.scene.objects.active = ob
-    ob.select = True
-    bpy.ops.object.mode_set(mode = 'EDIT')
-    hVec=Vector((0.0,0.0,height))
-    bpy.ops.mesh.extrude_region_move(TRANSFORM_OT_translate={"value":hVec})
-    me.update(calc_edges=True)    # Update mesh with new data
-    bpy.ops.object.mode_set(mode = 'OBJECT')
-
-    ob.select = False
-    #Hide this region
-    ob.hide = hide
-    """
+    # 6. Create a collision mesh avoid enter beyond interiorLine
+    if (num_region not in emptyRegions):
+        interiorLine2 = [v + Vector((0,0,10)) for v in curbLine]
+        me = bpy.data.meshes.new("_CollisionW")
+        ob = bpy.data.objects.new("_CollisionW", me)    
+        wallData = [ ((i-1) % nv, i, nv+i, nv+(i-1) % nv) for i in range(nv)]
+        me.from_pydata(houseLine+interiorLine2, [], wallData)
+        me.update(calc_edges=True)
+        #Make this mesh invisible for BGE
+        me.materials.append(bpy.data.materials['Invisible'])
+        #Make this object hidden in Blender Editor
+        ob.hide = hideWalls
+        bpy.context.scene.objects.link(ob)
 
 def updateExternalTexts():
     """ Check modified external scripts in the scene and update if possible
@@ -462,7 +437,7 @@ def importLibrary(filename, link=False, destinationLayer=1, importScripts=True):
     destinationLayer  -- The destination layer where to copy the objects
     importScripts -- Choose to import also the scripts (texts) 
     """
-    print('Importing objects from file', filename)
+    print('Importing objects from file', filename, 'into layer', destinationLayer)
     with bpy.data.libraries.load(os.getcwd() + "\\" + filename, link=link) as (data_from, data_to):
         #Import all objects
         objNames = [o.name for o in bpy.data.objects]
@@ -500,11 +475,15 @@ def importLibrary(filename, link=False, destinationLayer=1, importScripts=True):
     for o in bpy.data.objects :
         if o.users_scene == () :
             bpy.context.scene.objects.link(o)
-            #Set the layer
+            #Set the destination layer. 
             if destinationLayer:
                 o.layers[destinationLayer] = True
                 o.layers[0] = False
-
+                #Bring to layer 0 objects whose name ends with "Manager"
+                if o.name.endswith("Manager"):
+                    print('  + Move', o.name, 'object to layer 0')
+                    o.layers[0] = True
+                    
     updateExternalTexts()
 
 
@@ -557,14 +536,14 @@ def createLeaves(seeds, internalRegions, vertices, radius, leaves):
 
     print("Creating leaves in the streets...")
     while (hojas < leaves):
-        vector = Vector((uniform(-radius, radius), uniform(-radius, radius), 0.1))
+        v = Vector((uniform(-radius, radius), uniform(-radius, radius), 0.1))
 
-        n = nearestSeed(vector, seeds)
-        (s, d) = nearestSegment(vector , internalRegions[n], vertices)
+        n = nearestSeed(v, seeds)
+        (s, d) = nearestSegment(v , internalRegions[n], vertices)
 
         if (d < 4.5 and d > 1.5):
             g1 = duplicateObject(bpy.data.objects["DryLeaf"], "_leave_" + str(hojas))
-            g1.location = vector
+            g1.location = v
             g1.rotation_euler = (0, 0, uniform(0, 360))
             hojas = hojas + 1
 
@@ -929,7 +908,7 @@ def main():
         for nr, region in enumerate(internalRegions):
             print(".", end="")
             corners = [vertices3D[i] for i in region]
-            makePolygon(emptyRegions, corners, nr, "houseO", "houseM", height=0.5, reduct=1.0, nr=nr, seed=seeds[nr])
+            makeDistrict(emptyRegions, corners, nr, "houseO", "houseM", height=0.5, reduct=1.0, nr=nr, seed=seeds[nr])
         print(".")
 
         # Merge streets meshes in one object
@@ -1046,10 +1025,7 @@ def main():
         if 'AI_Manager' not in bpy.data.objects:
             print("AI_Manager object not found in libraries")
             return            
-        AI_Manager = bpy.data.objects['AI_Manager']
-        
-        #Bring AI_Manager to layer 0
-        AI_Manager.layers[0] = True        
+        AI_Manager = bpy.data.objects['AI_Manager']        
         
         #Inject a new python controller to the object, linked to an existing text
         #This is a trick so BGE can find a text object
