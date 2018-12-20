@@ -18,6 +18,7 @@ Open blender and type this in the python console:
 TODO:
   * Build random houses. Create non-rectangular houses for corners.
   * Procedural generation of starred night sky.
+  * Remove that ugly knapsack_unbounded_dp method()
 DONE:
   * When importing a blend file (cg-library, etc...) append its "readme.txt" to
     a "readme.txt" in the output. This will honor all the CC-By resources.
@@ -25,13 +26,13 @@ DONE:
   * Add cg-temple to cities.
   * Add roads outside of the city (at least one in near the gate)
 """
-import bpy
+import bpy, bmesh
 import math, json, random, os, sys
-from math import sqrt, acos, sin, cos
+from math import sqrt, acos, sin, cos, ceil
 from pprint import pprint
 from mathutils import Vector
 from datetime import datetime
-from random import uniform
+from random import random, uniform, choice, shuffle
 from functools import reduce
 
 #Set default values for args
@@ -48,10 +49,10 @@ args={
 'createDefenseWall' : True,  # Create exterior boundary of the city
 'createGround' : True,       # Create ground boundary of the city
 'createStreets' : True,      # Create streets of the city
-'createLeaves' : False,      # Create leaves on the streets
+'createLeaves' : True,      # Create leaves on the streets
 'createRiver' : True,        # Create river
 'createTrail' : True,        # Create trail
-'createBuildings' : True,    # Create buildings on specific regions
+'createEspecialBuildings' : True,    # Create buildings on specific regions
 'numMonsters' : 4,
 'outputCityFilename' : 'outputcity.blend', #Output file with just the city
 'outputTourFilename' : 'outputtour.blend', #Output file with complete game
@@ -60,6 +61,36 @@ args={
                
 #################################################################
 # Functions to create a new cityMap scene (does need run inside blender)
+
+def joinObjectsByName(rootName):
+    """Join a every blender object whose name match a string in one unique object
+    """
+    for o in bpy.data.objects:
+        o.select = o.name.startswith(rootName)
+    if rootName in bpy.data.objects:
+        bpy.context.scene.objects.active = bpy.data.objects[rootName]
+    else:
+        for o in bpy.data.objects:
+            if o.select:
+                bpy.context.scene.objects.active = o
+                break
+    bpy.ops.object.join()
+    bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
+    bpy.context.scene.objects.active.select = False
+    bpy.context.scene.objects.active = None
+
+def joinObjectsList(objList):
+    """Join a list of blender object in one unique object
+    """
+    for o in objList:
+        o.select = (o.type == 'MESH')
+    bpy.context.scene.objects.active = objList[0]
+    bpy.ops.object.join()
+    bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
+    #Clean selected objects        
+    bpy.context.scene.objects.active.select = False
+    bpy.context.scene.objects.active = None
+    return objList[0]
 
 def duplicateObject(sourceObj, objName="copy", select=False, scene=bpy.context.scene):
     """Duplicate a object in the scene.
@@ -83,16 +114,13 @@ def duplicateObject(sourceObj, objName="copy", select=False, scene=bpy.context.s
     return ob_new
 
 
-def duplicateAlongSegment(pt1, pt2, objName, gapSize, force=False):
+def duplicateAlongSegment(pt1, pt2, objName, gapSize, join=True, force=False):
     """Duplicate an object several times along a path
     pt1 -- First extreme of the path
     pt2 -- Second extreme of the path
     objName -- the name of blender obj to be copied
     gapSize -- Desired space between objects. Will be adjusted to fit path
     """
-
-    pt1 = Vector(pt1)
-    pt2 = Vector(pt2)
 
     # Compute the direction of the segment
     pathVec = pt2-pt1
@@ -138,12 +166,20 @@ def duplicateAlongSegment(pt1, pt2, objName, gapSize, force=False):
         g1.rotation_euler = (0, 0, ang)
         g1.location = loc
         objList.append(g1)
+        #Make a real duplicate of the first object only
+        if join and len(objList) == 1:
+            g1.data = ob.data.copy()
+            ob = g1
     if force:
             loc = pt2 - stepVec * 0.5
             g1 = duplicateObject(ob, "_%s" % (objName))
             g1.rotation_euler = (0, 0, ang)
             g1.location = loc
             objList.append(g1)
+
+    if join and objList:
+        joinObjectsList(objList)
+        objList = [objList[0]]
 
     return objList
 
@@ -197,30 +233,7 @@ def knapsack_unbounded_dp_control(pathLen, gapSize, objList=None):
         item = ((objName, int(totalSize*10), int(totalSize*10)))
         items.append(item)
 
-    maxofequalhouse=20
-    """
-    fin=False
-    x = 0
-    while fin!=True:
-        x+=1
-        fin=True
-        if maxofequalhouse!=1:
-            a,b,c,d = knapsack_unbounded_dp(items,pathLen,maxofequalhouse)
-            for k in d:
-                for j in d:
-                    if j[1]/k[1]>3:
-                        maxofequalhouse -=1
-                        fin=False     
-                    
-        if x==40:
-            fin=True
-            print(knapsack_unbounded_dp(items,pathLen,maxofequalhouse))
-            print(items[0][1])
-            print(items[1][1])
-            print(items[2][1])
-            print("ERRROR")        
-    """
-    
+    maxofequalhouse=20    
     #print("House Built")
     #print("value, size, numbagged, bagged")
     #print(knapsack_unbounded_dp(items,pathLen,maxofequalhouse))  
@@ -263,7 +276,7 @@ def duplicateAlongSegmentMix(pt1, pt2, gapSize, objList=None):
     if objList == []:
         return
 
-    random.shuffle(objList)
+    shuffle(objList)
     
     delta = (int(pathLen*10)-spaceUsed)/(10*len(objList))    
     iniPoint = pt1
@@ -277,9 +290,9 @@ def duplicateAlongSegmentMix(pt1, pt2, gapSize, objList=None):
         g1.location = iniPoint
         iniPoint = iniPoint + pathVec * totalSize
 
-def makeGround(cList=[], objName="meshObj", meshName="mesh", radius=10.0, material='Floor3'):
+def makeGround(corners=[], objName="meshObj", meshName="mesh", radius=10.0, material='Floor3'):
     """Create a polygon to represent the ground around a city 
-    cList    -- A list of 3D points with the vertex of the polygon (corners of the city block)
+    corners    -- A list of 3D points with the vertex of the polygon (corners of the city block)
     objName  -- the name of the new object
     meshName -- the name of the new mesh
     radius   -- radius around the city
@@ -291,8 +304,8 @@ def makeGround(cList=[], objName="meshObj", meshName="mesh", radius=10.0, materi
     bpy.context.scene.objects.link(ob)  # Link object to scene
 
     # Fill the mesh with verts, edges, faces
-    if cList:
-        vectors = [vertices3D[i] for i in cList]
+    if corners:
+        vectors = [vertices3D[i] for i in corners]
     else:
         #Create a 16-sides polygon centered on (0,0,0)
         step = 2 * math.pi / 16
@@ -335,25 +348,76 @@ def computeEnvelope(vertexList, distance=0):
        return [Vector((envelope[i].x, envelope[i].y, vertexList[i].z)) for i in range(nv)]
 
             
-def makeDistrict(emptyRegions, cList, num_region, objName="meshObj", meshName="mesh", height=0.0, reduct=0.0, hideWalls=True, nr=None, seed=None):
-    """Create a polygon/prism to represent a city block
-    cList    -- A list of 3D points with the vertex of the polygon (corners of the city block)
-    objName  -- the name of the new object
-    meshName -- the name of the new mesh
-    height   -- the height of the prism
-    reduct   -- a distance to reduce from corner
-    nr       -- The number if for this region
-    seed     -- Coordinates of the seed for this region
+def bilinear_interpolation(u, v, points):
+    """Bilinear interpolation of values associated with four points.
+       Values for u, v are expected to be in 0..1
+       The points are values taken at (0,0), (0,1), (1,0), (1,1)       
+       See https://en.wikipedia.org/wiki/Bilinear_interpolation#Unit_square
     """
-    nv = len(cList)
+    # Precompute (1-u) and (1-v)
+    _u = 1 - u
+    _v = 1 - v
+    return _u * _v * points[0] + _u * v * points[1] + u * _v * points[2] + u * v * points[3] 
+           
+def createLeaves2(corners, min=0.0, max=1.0, density=0.1, height=0.02, objNames=["DryLeaf"], changeScale=0):
+    """Scatter objects in random locations inside a region 
+    corners     -- A list of 3D points with the vertex of the region (corners of the city district)
+    min         -- minimum distance from region boundary (usually, the used as curbLine)
+    max         -- maximum distance from region boundary (usually, the used as housesLine)
+    density     -- Number of object to scatter per unit area
+    objNames    -- Names of the objects to scatter
+    changeScale -- Randomize the scale of the objects in interval [1-changeScale .. 1+changeScale]
+    """    
+    if not isinstance(objNames, list):
+        objNames = [objNames]
 
-    #If no seed, use centroid of polygon as seed
-    if not seed:
-        seed = sum(cList, Vector((0,0,0)))/nv
+    #Compute the "Onion model" coordinates for min and max lines
+    zDispl = Vector((0,0,height))
+    minLine = [v + zDispl for v in computeEnvelope(corners, -min)]
+    maxLine = [v + zDispl for v in computeEnvelope(corners, -max)]
+
+    scene=bpy.context.scene            
+    obs = []
+    
+    #for each side of the region    
+    for i in range(len(corners)):
+        # Get the four corners for this trapezoidal subregion
+        pnts = [minLine[i-1], minLine[i], maxLine[i-1], maxLine[i]]
+        # Compute the area of the trapezoid as (a+b) * h / 2
+        area = ((pnts[0]-pnts[1]).length + (pnts[2]-pnts[3]).length) * (max-min) / 2
+        # Compute the number of objects to scatter
+        #print("subregion=", i, "area=", area, "num_objs=", round(density * area) )
+        for _ in range(round(density * area)):
+            #o = duplicateObject(bpy.data.objects[choice(objNames)], "_leaf")
+            o = bpy.data.objects[choice(objNames)].copy()
+            o.name = "_leaf"
+            o.data = o.data.copy()
+            # Create a random position inside this trapezoidal subregion            
+            o.location = bilinear_interpolation(random(), random(), pnts)
+            # Randomize orientation in [0 .. 2*pi]
+            o.rotation_euler = (0, 0, 6.28 * random())
+            # Randomize scale in interval [1-changeScale .. 1+changeScale]
+            scale = uniform(1-changeScale, 1+changeScale)
+            o.scale = (scale, scale, scale)
+            scene.objects.link(o)            
+            obs.append(o)
+
+    if obs:
+        joinObjectsList(obs)
+            
+def makeDistrict(corners, curbReduct=1, houseReduct=1.5, regionID=None, hideWalls=True):
+    """Create a polygon/prism to represent a city block
+    corners     -- List of 3D points with the vertex of the polygon (corners of the city block)
+    curbReduct  -- Distance from streetLine to curbs
+    houseReduct -- Distance from curbs to houses
+    regionID    -- The ID of this region. Set to None for emptyRegions/specialBuildings
+    hideWalls   -- Assign invisible material to collisionWalls
+    """
+    nv = len(corners)
 
     #Compute the "Onion model" coordinates for curbs, and houses 
-    curbLine = computeEnvelope(cList, -reduct)
-    houseLine = computeEnvelope(curbLine, -reduct)    
+    curbLine = computeEnvelope(corners, -curbReduct)
+    houseLine = computeEnvelope(curbLine, -houseReduct)    
     interiorLine = computeEnvelope(houseLine, -1)
 
     # 1. Create a mesh for streets around this region
@@ -362,10 +426,9 @@ def makeDistrict(emptyRegions, cList, num_region, objName="meshObj", meshName="m
     ob = bpy.data.objects.new("_Street", me)
     streetData = [ ((i-1) % nv, i, nv+i, nv+(i-1) % nv) for i in range(nv)]
     # pprint(streetData)
-    me.from_pydata(cList+curbLine, [], streetData)
+    me.from_pydata(corners+curbLine, [], streetData)
     me.update(calc_edges=True)
-    if (num_region not in emptyRegions):
-        me.materials.append(bpy.data.materials['Floor1'])
+    me.materials.append(bpy.data.materials['Floor1'])
     bpy.context.scene.objects.link(ob)
 
     # 2. Create a mesh interior of this region
@@ -378,41 +441,81 @@ def makeDistrict(emptyRegions, cList, num_region, objName="meshObj", meshName="m
     #me.materials.append(bpy.data.materials['Grass'])
     bpy.context.scene.objects.link(ob)
 
-
-    # Check if the region has to have curbs and houses.
-    if (num_region in emptyRegions):
-        return
-
-     # Debug: Create a text object with the number of the region
-    textCurve = bpy.data.curves.new(type="FONT",name="_textCurve")
-    textOb = bpy.data.objects.new("_textOb",textCurve)
-    textOb.location = (seed[0], seed[1], 0.3)
-    textOb.color = (1,0,0,1)
-    textOb.scale = (5,5,5)
-    textOb.data.body = str(nr)
-    bpy.context.scene.objects.link(textOb)    
-
     # 4. Fill boundary of region curbLine with curbs
+    curbList = []
     for i in range(nv):
-        duplicateAlongSegment(curbLine[i-1], curbLine[i], "Curb", 0.1)
+        curbList += duplicateAlongSegment(curbLine[i-1], curbLine[i], "Curb", gapSize=0.1, join=True)
+    joinObjectsList(curbList)
+
+    """ WIP: Work in progress
+    # 4. Fill boundary of region curbLine with curbs
+    curbLine1 = [v + Vector((0,0,.01)) for v in computeEnvelope(curbLine, 0.1)]
+    curbLine2 = [v + Vector((0,0,.01)) for v in computeEnvelope(curbLine, -0.1)]
     
-    # 5. Fill boundary of region houseLine with houses
+    #Create a mesh for each curb
     for i in range(nv):
-        duplicateAlongSegmentMix (houseLine[i-1], houseLine[i], 1 ,args["inputHouses"])
+        # Compute the number of virtual curbs in this mesh
+        l1 = (curbLine1[i]-curbLine1[i-1]).length
+        l2 = (curbLine2[i]-curbLine2[i-1]).length
+        numCurbs1 = ceil(0.25 * l1)
+        numCurbs2 = (numCurbs1 * l2) / l1
+        #Prepare coordinates and UVs
+        xyz = [curbLine1[i-1], curbLine1[i], curbLine2[i], curbLine2[i-1] ]
+        uvs = [(0.5*(numCurbs2-numCurbs1),1), (numCurbs1,1), (numCurbs2+0.5*(numCurbs1-numCurbs2),0), (0.5*(numCurbs2-numCurbs1),0) ]
+        me = bpy.data.meshes.new("Curb")
+        ob = bpy.data.objects.new("Curb", me)
+        me.from_pydata(xyz, [], [(0,1,2,3)])
+        me.update(calc_edges=True)
+        me.materials.append(bpy.data.materials['Curb2'])
+        bpy.context.scene.objects.link(ob)
+
+        bm = bmesh.new()
+        bm.from_mesh(me)
+        uv_layer = bm.loops.layers.uv.verify()
+        bm.faces.layers.tex.verify()
+        for f in bm.faces:
+            for l in f.loops:
+                # We're giving the uvs index list value for each uv coordinates
+                l[uv_layer].uv = uvs[l.vert.index]
+                
+        bm.to_mesh(me)
+        bm.free()
+
+    """
+    
+    # Avoid adding any more objects if the region has no ID
+    if regionID is None:
+        return
+        
+    # 5. Fill boundary of region houseLine with houses (Old method)
+    for i in range(nv):
+        #This is a silly bugfix to avoid houses in corners 
+        A = 0.97 * houseLine[i-1] + 0.03 * houseLine[i]
+        B = 0.03 * houseLine[i-1] + 0.97 * houseLine[i]        
+        duplicateAlongSegmentMix (A, B, 0.5, args["inputHouses"])
 
     # 6. Create a collision mesh avoid enter beyond interiorLine
-    if (num_region not in emptyRegions):
-        interiorLine2 = [v + Vector((0,0,10)) for v in curbLine]
-        me = bpy.data.meshes.new("_CollisionW")
-        ob = bpy.data.objects.new("_CollisionW", me)    
-        wallData = [ ((i-1) % nv, i, nv+i, nv+(i-1) % nv) for i in range(nv)]
-        me.from_pydata(houseLine+interiorLine2, [], wallData)
-        me.update(calc_edges=True)
-        #Make this mesh invisible for BGE
-        me.materials.append(bpy.data.materials['Invisible'])
-        #Make this object hidden in Blender Editor
-        ob.hide = hideWalls
-        bpy.context.scene.objects.link(ob)
+    interiorLine2 = [v + Vector((0,0,10)) for v in curbLine]
+    me = bpy.data.meshes.new("_CollisionW")
+    ob = bpy.data.objects.new("_CollisionW", me)    
+    wallData = [ ((i-1) % nv, i, nv+i, nv+(i-1) % nv) for i in range(nv)]
+    me.from_pydata(houseLine+interiorLine2, [], wallData)
+    me.update(calc_edges=True)
+    #Make this mesh invisible for BGE
+    me.materials.append(bpy.data.materials['Invisible'])
+    #Make this object hidden in Blender Editor
+    ob.hide = hideWalls
+    bpy.context.scene.objects.link(ob)
+
+    # Debug: Create a text label with the number of the region
+    centroid = sum(corners, Vector((0,0,0)))/nv
+    textCurve = bpy.data.curves.new(type="FONT",name="_textCurve")
+    textOb = bpy.data.objects.new("_textOb",textCurve)
+    textOb.location = (centroid[0], centroid[1], 0.3)
+    textOb.color = (1,0,0,1)
+    textOb.scale = (5,5,5)
+    textOb.data.body = str(regionID)
+    bpy.context.scene.objects.link(textOb)    
 
 def updateExternalTexts():
     """ Check modified external scripts in the scene and update if possible
@@ -488,18 +591,21 @@ def importLibrary(filename, link=False, destinationLayer=1, importScripts=True):
 
 
 
-def nearestSeed(vector, seeds):
+def nearestSeed(v, seeds):
+    """Search the nearest seed to point v"""
     distance = float('inf')
+    v = v.xy
     for s in seeds:
-        d = (vector.xy - s).length
+        d = (v - s).length
         if (d < distance):
             distance = d
-            seed = seeds.index(s)
-    return seed
+            minSeed = seeds.index(s)
+    return minSeed
 
 
 
 def nearestSegment(vector , vertices, vert_coords):
+    """Search the nearest segment to point vector"""
     distance = float('inf')
     for v in vertices:
         d = (vector.xy - vert_coords[v]).length
@@ -528,35 +634,6 @@ def nearestSegment(vector , vertices, vert_coords):
         return (segment1, dist1)
     else:
         return (segment2, dist2)
-
-
-
-def createLeaves(seeds, internalRegions, vertices, radius, leaves):
-    hojas = 0
-
-    print("Creating leaves in the streets...")
-    while (hojas < leaves):
-        v = Vector((uniform(-radius, radius), uniform(-radius, radius), 0.1))
-
-        n = nearestSeed(v, seeds)
-        (s, d) = nearestSegment(v , internalRegions[n], vertices)
-
-        if (d < 4.5 and d > 1.5):
-            g1 = duplicateObject(bpy.data.objects["DryLeaf"], "_leave_" + str(hojas))
-            g1.location = v
-            g1.rotation_euler = (0, 0, uniform(0, 360))
-            hojas = hojas + 1
-
-
-
-def createBuildings(seeds, staticRegions):
-    for (region, building, region_radius, displacement) in staticRegions.values():
-        importLibrary(args['input' + building], destinationLayer=0, importScripts=True)
-        object = bpy.data.objects[building]
-        object.location.xy = seeds[region]
-        print("Locating " + building + " in region " + str(region))
-
-
 
 def newRMDFractalPoint(p1, p2, factor, list, res):
     """ New recursive level of the RMD Fractal algorithm
@@ -817,32 +894,33 @@ def main():
     # Create exterior boundary of the city
     if args.get('createDefenseWall', False):
         print("Creating External Boundary of the City, Defense Wall")
-        wallVertices = data['wallVertices']
+        # Convert input data to 3D vectors
+        wallVertices = [Vector(v).to_3d() for v in data['wallVertices']]
 
         # place defense wall. Avoid extreme corners
-        axisX = Vector((1.0, 0.0))
+        axisX = Vector((1, 0))
 
         #Compute the position of the gate
-        gate1 = Vector(wallVertices[0])
-        gate2 = Vector(wallVertices[-1])
+        gate1 = wallVertices[0]
+        gate2 = wallVertices[-1]
         gateMid = (gate1+gate2) * 0.5
 
         # Compute orientation of gate with axisX
-        angGate = (gate1-gate2).angle_signed(axisX)-math.pi/2
-        #Insert a gate at position gateMid
+        angGate = (gate1-gate2).xy.angle_signed(axisX)-math.pi/2
+        #Insert a StoneGate object at position gateMid
         for o in bpy.data.groups["StoneGate"].objects:
             g1 = duplicateObject(o, "_Gate1_"+o.name)
-            g1.location = (gateMid[0], gateMid[1], 0)
+            g1.location = gateMid
             g1.rotation_euler = (0, 0, angGate)
         
         #Insert one tower at gate1
         g1 = duplicateObject(bpy.data.objects["StoneTower"], "_Gate1_Tower1")
-        g1.location = (gate1[0], gate1[1], 0)
+        g1.location = gate1
         g1.rotation_euler = (0, 0, angGate)
         
         # Place a door on point gate1, oriented to angR (next section of wall)
         g1 = duplicateObject(bpy.data.objects["StoneTowerDoor"], "_Door%03d_B" % i)
-        g1.location = (gate1[0], gate1[1], 0)
+        g1.location = gate1
         g1.rotation_euler = (0, 0, angGate+math.pi/2)
                 
         # Build the defense wall around the city
@@ -850,43 +928,39 @@ def main():
             v1 = wallVertices[i-1]
             v2 = wallVertices[i]
             v3 = wallVertices[(i+1) % len(wallVertices) ]
-            v_1_2 = Vector((v1[0]-v2[0], v1[1]-v2[1]))
-            v_3_2 = Vector((v3[0]-v2[0], v3[1]-v2[1]))
+            
             # Compute orientation of both walls with axisX
-            angL = v_1_2.angle_signed(axisX)
-            angR = v_3_2.angle_signed(axisX)
+            angL = (v1-v2).xy.angle_signed(axisX)
+            angR = (v3-v2).xy.angle_signed(axisX)
             # Force angR > angL, so ensure that angL < average < angR
             if (angL > angR):
                 angR += 6.283185307
-
-            # Compute the average of angL , angR
-            ang = (angL+angR)*0.5
             
             # Place a new tower on point v2 (the endpoint of this section of wall)
             g1 = duplicateObject(bpy.data.objects["StoneTower"], "_Tower%03d" % i)
-            g1.location = (v2[0], v2[1], 0)
-            g1.rotation_euler = (0, 0, ang)
+            g1.location = v2
+            g1.rotation_euler = (0, 0, (angL+angR)*0.5 )
             # g1.show_name = True #Debug info
             # Place a new door on point v2, oriented to angL (this section of wall)
             g1 = duplicateObject(bpy.data.objects["StoneTowerDoor"], "_Door%03d_A" % i)
-            g1.location = (v2[0], v2[1], 0)
+            g1.location = v2
             g1.rotation_euler = (0, 0, angL)
 
             # Place a second door on point v2, oriented to angR (next section of wall)
             if i < len(wallVertices)-1:
                 g1 = duplicateObject(bpy.data.objects["StoneTowerDoor"], "_Door%03d_B" % i)
-                g1.location = (v2[0], v2[1], 0)
+                g1.location = v2
                 g1.rotation_euler = (0, 0, angR)
             
             # Fill this section of wall with wallBlocks
-            sw = duplicateAlongSegment(v1, v2, "StoneWall", 0.0)
-            # print("New StoneWall section", v1, "->", v2, "Size: ", len(sw) )
+            sw = duplicateAlongSegment(v1, v2, "StoneWall", gapSize=0.0, join=True)
+            # print("New StoneWall section", v1.xy, "->", v2.xy, "Size: ", len(sw) )
                 
             # Create a quad-mesh for streets near of this section of wall
             me = bpy.data.meshes.new("_Street")
             ob = bpy.data.objects.new("_Street", me)
             # Create a list with the four vertex of this quad
-            myVertex = [(v1[0], v1[1], 0), (v2[0], v2[1], 0), vertices3D[externalPoints[i]], vertices3D[externalPoints[i-1]]]            
+            myVertex = [v1, v2, vertices3D[externalPoints[i]], vertices3D[externalPoints[i-1]]]            
             me.from_pydata(myVertex, [], [(0,1,2,3)])
             me.update(calc_edges=True)
             me.materials.append(bpy.data.materials['Floor1'])
@@ -902,36 +976,36 @@ def main():
     emptyRegions = [x[0] for x in staticRegions.values()]
 
 
-    if args.get('createStreets', False):
-        # Create paths and polygon for internal regions
-        print("Creating Districts")
-        for nr, region in enumerate(internalRegions):
-            print(".", end="")
-            corners = [vertices3D[i] for i in region]
-            makeDistrict(emptyRegions, corners, nr, "houseO", "houseM", height=0.5, reduct=1.0, nr=nr, seed=seeds[nr])
-        print(".")
+    # Create paths and polygon for internal regions
+    print("Processing", len(internalRegions), "internalRegions")
+    for nr, region in enumerate(internalRegions):
+        print(nr, end=" ", flush=True)
+        corners = [vertices3D[i] for i in region]
+        if args.get('createStreets', False):
+            if nr in emptyRegions:
+                makeDistrict(corners, 1.0, 1.5, regionID=None)
+            else:            
+                makeDistrict(corners, 1.0, 1.5, regionID=nr)
+                
+        if args.get('createLeaves', False):
+            createLeaves2(corners, 1.0, 2.5, density=0.4, height=0.02, objNames=["DryLeaf"], changeScale=0.4)
+            # Another posible usage is to scatter obstacles all the way like
+            #createLeaves2(corners, 0.0, 2.0, density=0.2, height=0.02, objNames=["DryLeaf", "Valla"], changeScale=0.3)
+            
+    print("\nDone internalRegions", datetime.now().time())
 
-        # Merge streets meshes in one object
-        streets = [x for x in bpy.data.objects if x.name.startswith("_Street")]
-        for o in bpy.data.objects:
-            o.select = (o in streets)
-        bpy.context.scene.objects.active = streets[0]
-        bpy.ops.object.join()
-        
-        # Merge region meshes in one object
-        for o in bpy.data.objects:
-            o.select = o.name.startswith("_Region")
-        bpy.context.scene.objects.active = bpy.data.objects["_Region"]
-        bpy.ops.object.join()
+    """
+    # Merge families of objects in one object
+    for objName in [ "_Street"]:
+        print("Join object named", objName)
+        joinObjectsByName(objName)
+    """
 
-
-    #if args.get('createLeaves', False):
-        #createLeaves(internalSeeds, internalRegions, vertices)
-
-
-    if args.get('createBuildings', False):
-        createBuildings(internalSeeds, staticRegions)
-
+    if args.get('createEspecialBuildings', False):
+        for (region, building, region_radius, displacement) in staticRegions.values():
+            print("createEspecialBuildings", building, "in region", region)
+            importLibrary(args['input' + building], destinationLayer=0, importScripts=True)
+            bpy.data.objects[building].location.xy = internalSeeds[region]
 
     if args.get('createRiver', False):
         distance = cityRadius * 2

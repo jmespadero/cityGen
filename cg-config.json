@@ -5,12 +5,17 @@
 
 "inputLibraries": ["cg-library.blend"],
 "inputLibraries": ["cg-libraryLite.blend"],
-"inputHouses" : ["House7", "House3","House4","House5","House6"],
+"inputHouses" : ["House7","House3","House5","House6"],
 
 "createGlobalLight": true,
 "createDefenseWall": true,
 "createGround": true,
 "createStreets": true,
+"createLeaves" : true,
+"createRiver" : false,
+"createTrail" : true,
+"createEspecialBuildings" : true,
+
 "debugVisibleTokens": true,
 
 "inputSkyDome": "cg-skyDomeDay.blend",
