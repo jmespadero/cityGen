@@ -15,6 +15,7 @@
 "createRiver" : false,
 "createTrail" : true,
 "createEspecialBuildings" : true,
+"enableMist" : false,
 
 "debugVisibleTokens": true,
 

@@ -658,21 +658,16 @@ def newRMDFractalPoint(p1, p2, factor, list, res):
 
 
 
-def newRMDFractal(origin, end, factor, resolution, skeleton = []):
+def newRMDFractal(origin, end, factor, resolution):
     """ Create a polyline using the Random Midpoint Displacement Fractal algorithm
         origin    -- The origin of the curve
         end    -- The end of the curve
         factor    -- the percentage of lateral dispersion for the curve
         resolution    -- number of recursive levels (the exponent in base 2 for number of edges of the curve)
-        skeleton    -- the list of points (must be empty)
         """
-    skeleton.append(origin)
-    # Adding the new point here (calling the recursive step), the list will be ordered
+    skeleton = []
     newRMDFractalPoint(origin, end, factor, skeleton, resolution)
-    skeleton.append(end)
-
-    return skeleton
-
+    return [origin] + skeleton + [end]
 
 
 def meshFromSkeleton(skeleton, width, river_side_a, river_side_b, faces_data, name = "mesh", material = None):
@@ -887,11 +882,10 @@ def main():
         importLibrary("cg-skyboxshader.blend", link=False, destinationLayer=0, importScripts=True)
         """
        
-        """ OK. If you want mist
-        #Add mist
+    # Enable mist in BGE graphic engine
+    if args.get('enableMist', False):
         bpy.context.scene.world.mist_settings.use_mist = True
         bpy.context.scene.world.horizon_color = (0.685146, 0.800656, 0.728434)
-        #"""
                 
     # Create exterior boundary of the city
     if args.get('createDefenseWall', False):
