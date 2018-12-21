@@ -1,9 +1,11 @@
 """
 Game generator from project citygen
 Reads a .json file generated with cityGen2D.py, and build a 3D model of the city
+The process is fully configurable using the file cg-config.json
 
 Copyright 2014 Jose M. Espadero <josemiguel.espadero@urjc.es>
 Copyright 2014 Juan Ramos <juanillo07@gmail.com>
+Copyright 2017 Sergio Fernandez <serfervic@gmail.com>
 
 Run option 1:
 blender --background --python cityGen3D.py
@@ -35,7 +37,7 @@ from datetime import datetime
 from random import random, uniform, choice, shuffle
 from functools import reduce
 
-#Set default values for args
+#Set default values for args. Will be overwritten with values at cg-config.json
 args={
 'cleanLayer0' : True,       # Clean all objects in layer 0
 'createGlobalLight' : True,         # Add new light to scene
@@ -58,7 +60,10 @@ args={
 'outputTourFilename' : 'outputtour.blend', #Output file with complete game
 'outputGameFilename' : 'outputgame.blend', #Output file with complete game
 }
-               
+
+#global timer to profile 
+initTime = datetime.now()
+
 #################################################################
 # Functions to create a new cityMap scene (does need run inside blender)
 
@@ -240,9 +245,6 @@ def knapsack_unbounded_dp_control(pathLen, gapSize, objList=None):
     a,b,c,d = knapsack_unbounded_dp(items,pathLen,maxofequalhouse)
                       
     return d,b
-
-        
-
             
 def duplicateAlongSegmentMix(pt1, pt2, gapSize, objList=None):
     """Duplicate an object several times along a path
@@ -297,7 +299,6 @@ def makeGround(corners=[], objName="meshObj", meshName="mesh", radius=10.0, mate
     meshName -- the name of the new mesh
     radius   -- radius around the city
     """
-    print("makeGround", datetime.now().time())
     #Create a mesh and an object
     me = bpy.data.meshes.new(meshName)
     ob = bpy.data.objects.new(objName, me)
@@ -451,37 +452,40 @@ def makeDistrict(corners, curbReduct=1, houseReduct=1.5, regionID=None, hideWall
     # 4. Fill boundary of region curbLine with curbs
     curbLine1 = [v + Vector((0,0,.01)) for v in computeEnvelope(curbLine, 0.1)]
     curbLine2 = [v + Vector((0,0,.01)) for v in computeEnvelope(curbLine, -0.1)]
+    # Repeat last coordinate to avoid overflow coordinate indexes
+    curbLine1.append(curbLine1[0])
+    curbLine2.append(curbLine2[0])
     
-    #Create a mesh for each curb
+    me = bpy.data.meshes.new("_NewCurb")
+    ob = bpy.data.objects.new("_NewCurb", me)
+    streetData = [(i, i+1, nv+2+i, nv+1+i) for i in range(nv)]
+    # pprint(streetData)
+    me.from_pydata(curbLine1+curbLine2, [], streetData)
+    me.update(calc_edges=True)
+    me.materials.append(bpy.data.materials['Curb2'])
+    bpy.context.scene.objects.link(ob)
+    
+    # Compute accumulative linear distances for curbLine    
+    coordU = [0]
     for i in range(nv):
-        # Compute the number of virtual curbs in this mesh
-        l1 = (curbLine1[i]-curbLine1[i-1]).length
-        l2 = (curbLine2[i]-curbLine2[i-1]).length
-        numCurbs1 = ceil(0.25 * l1)
-        numCurbs2 = (numCurbs1 * l2) / l1
-        #Prepare coordinates and UVs
-        xyz = [curbLine1[i-1], curbLine1[i], curbLine2[i], curbLine2[i-1] ]
-        uvs = [(0.5*(numCurbs2-numCurbs1),1), (numCurbs1,1), (numCurbs2+0.5*(numCurbs1-numCurbs2),0), (0.5*(numCurbs2-numCurbs1),0) ]
-        me = bpy.data.meshes.new("Curb")
-        ob = bpy.data.objects.new("Curb", me)
-        me.from_pydata(xyz, [], [(0,1,2,3)])
-        me.update(calc_edges=True)
-        me.materials.append(bpy.data.materials['Curb2'])
-        bpy.context.scene.objects.link(ob)
+        coordU.append(coordU[-1] + (curbLine[(i+1)%nv]-curbLine[i]).length)        
+    #Scale texture by 0.2 and scale U Coorfinates so last coordinate is integer
+    #This makes the texture seamless beause any U integer is equal to U=0
+    scale = round(0.2 * coordU[-1]) / coordU[-1]
+    uvs = [(u*scale, 0.05) for u in coordU]+[(u*scale, 0.95) for u in coordU]
 
-        bm = bmesh.new()
-        bm.from_mesh(me)
-        uv_layer = bm.loops.layers.uv.verify()
-        bm.faces.layers.tex.verify()
-        for f in bm.faces:
-            for l in f.loops:
-                # We're giving the uvs index list value for each uv coordinates
-                l[uv_layer].uv = uvs[l.vert.index]
-                
-        bm.to_mesh(me)
-        bm.free()
+    bm = bmesh.new()
+    bm.from_mesh(me)
+    uv_layer = bm.loops.layers.uv.verify()
+    bm.faces.layers.tex.verify()
+    for f in bm.faces:
+        for l in f.loops:
+            # We're giving the uvs index list value for each uv coordinates
+            l[uv_layer].uv = uvs[l.vert.index]            
+    bm.to_mesh(me)
+    bm.free()
+    # """
 
-    """
     
     # Avoid adding any more objects if the region has no ID
     if regionID is None:
@@ -722,8 +726,6 @@ def createSandCircle(center, radius):
 ###########################
 # The one and only... main
 def main():
-    # Current time
-    iniTime = datetime.now()
     filepath = bpy.data.filepath
     if filepath:
         print("Current blender file:", filepath)
@@ -971,6 +973,7 @@ def main():
         createGround = args['createGround']
         groundRadius = 50 + max([v.length for v in vertices])
         makeGround([], '_groundO', '_groundM', radius=groundRadius, material='Floor3')
+        print("\nDone makeGround", (datetime.now()-initTime).total_seconds() )
 
 
     emptyRegions = [x[0] for x in staticRegions.values()]
@@ -992,7 +995,7 @@ def main():
             # Another posible usage is to scatter obstacles all the way like
             #createLeaves2(corners, 0.0, 2.0, density=0.2, height=0.02, objNames=["DryLeaf", "Valla"], changeScale=0.3)
             
-    print("\nDone internalRegions", datetime.now().time())
+    print("\nDone internalRegions", (datetime.now()-initTime).total_seconds() )
 
     """
     # Merge families of objects in one object
@@ -1157,8 +1160,7 @@ def main():
         bpy.ops.wm.save_as_mainfile(filepath=cwd+outputGameFilename, compress=True, copy=False)
         print ("Ready to run: blenderplayer", outputGameFilename);
             
-    # totalTime = (datetime.now()-iniTime).total_seconds()
-    # print("Regions:", len(regions), " Total Time:" totalTime)
+    print("\nTotal Time:", (datetime.now()-initTime).total_seconds() )
 
 
 ###########################################################################
