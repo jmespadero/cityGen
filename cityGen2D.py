@@ -335,9 +335,9 @@ class CityData(dict):
                 pos = np.asarray([0.0, 0.0])
                 if len(staticRegions) > 0:
                     # Compute distances from point pos to center of previous regions
-                    # print("previous fixed regions", [r[3] for r in staticRegions.values()])
-                    # r[3] is position of fixedRegion. r[2] is radius of fixedRegion
-                    while (min([np.linalg.norm(r[3] - pos) - r[2] for r in staticRegions.values()]) < radius):
+                    # print("previous fixed regions", [r[2] for r in staticRegions.values()])
+                    # r[2] is position of fixedRegion. r[1] is radius of fixedRegion
+                    while (min([np.linalg.norm(r[2] - pos) - r[1] for r in staticRegions.values()]) < radius):
                         # print("Invalid pos. Repeat...")
                         pos = (1.5 * cityRadius * np.random.random(2) - cityRadius / 2).round(2)
 
@@ -346,12 +346,8 @@ class CityData(dict):
 
                 # Debug info
                 print(" * Build", name, "in region", numFixedSeeds, "position", pos, "radius", radius)
-                staticRegions[len(staticRegions)] = [numFixedSeeds, name, radius, pos]
-                numFixedSeeds += len(regionSeeds)
-
-        # Convert numpy positions to plain lists to be able to dump as json
-        for r in staticRegions.values():
-            r[3] = r[3].tolist()
+                staticRegions[numFixedSeeds] = [name, radius, pos]
+                numFixedSeeds += len(regionSeeds)        
             
         # TODO: Try a method to create points not relaying in while(random) 
         # Generate the non-fixed seeds and check none is too near of previous seeds
@@ -834,7 +830,7 @@ class CityData(dict):
         'externalPoints': externalPoints,
         'wallVertices': wallVertices.tolist(),
         'roadSkel':roadSkel.tolist(),
-        'staticRegions': staticRegions,
+        'staticRegions': { k:v[0] for k,v in staticRegions.items() }  ,
         'cityRadius': cityRadius,
         }
         self.update(data)

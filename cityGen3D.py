@@ -818,14 +818,14 @@ def main():
             print("City name:", data['name'])
         seeds = data['seeds']
         vertices = [Vector(v) for v in data['vertices'] ]
-        regions = data['regions']
         internalRegions = data['internalRegions']
         externalPoints = data['externalPoints']
-        staticRegions = data['staticRegions']
         cityRadius = data['cityRadius']
         # This is a hack to convert dictionaries with string keys to integer.
-        # Necessary because json.dump() saves integer keys as strings
-        regions = { int(k):v for k,v in regions.items() }
+        # Necessary because json.dump() store integer keys as strings
+        regions = { int(k):v for k,v in data['regions'].items() }
+        # Same hack to convert dictionaries keys to integer.
+        staticRegions = { int(k):v for k,v in data['staticRegions'].items() } 
         internalSeeds = [Vector(s) for s in seeds[:len(internalRegions)]]
 
     ###########################################################################
@@ -969,17 +969,14 @@ def main():
         makeGround([], '_groundO', '_groundM', radius=groundRadius, material='Floor3')
         print("\nDone makeGround", (datetime.now()-initTime).total_seconds() )
 
-
-    emptyRegions = [x[0] for x in staticRegions.values()]
-
-
     # Create paths and polygon for internal regions
     print("Processing", len(internalRegions), "internalRegions")
     for nr, region in enumerate(internalRegions):
         print(nr, end=" ", flush=True)
         corners = [vertices3D[i] for i in region]
         if args.get('createStreets', False):
-            if nr in emptyRegions:
+            if nr in staticRegions:
+                #Avoid creation of collisionWall, houses and regionLabels 
                 makeDistrict(corners, 1.0, 1.5, regionID=None)
             else:            
                 makeDistrict(corners, 1.0, 1.5, regionID=nr)
@@ -999,7 +996,7 @@ def main():
     """
 
     if args.get('createEspecialBuildings', False):
-        for (region, building, region_radius, displacement) in staticRegions.values():
+        for region, building in staticRegions.items() :
             print("createEspecialBuildings", building, "in region", region)
             importLibrary(args['input' + building], destinationLayer=0, importScripts=True)
             bpy.data.objects[building].location.xy = internalSeeds[region]
