@@ -15,6 +15,9 @@ python3 cityGen2D.py
 Run option 2: (using python bundled with blender)
 blender --background --python cityGen2D.py
 
+TODO:
+* Try a Poison-disk sampling for generating the random seeds
+  see: https://sighack.com/post/poisson-disk-sampling-bridsons-algorithm
 """
 
 import math, json, importlib, random

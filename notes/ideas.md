@@ -1,4 +1,14 @@
+Procedural Generation: Where do I start?
+========================================
+Reddit has a channel with lots of ideas and a community that helps
+* https://www.reddit.com/r/proceduralgeneration/
+* https://www.reddit.com/r/proceduralgeneration/comments/a7b3vr/where_do_i_start/
+A blog about drawing maps
+* https://heredragonsabound.blogspot.com/
 
+
+Medieval city generator 
+=======================
 Algorithm used in
 https://www.reddit.com/r/proceduralgeneration/comments/668sqb/fantasy_medieval_cities_for_the_monthly_challenge/
 
@@ -16,3 +26,28 @@ https://www.reddit.com/r/proceduralgeneration/comments/668sqb/fantasy_medieval_c
    beyond city limits.
 6. The last step is creating an inner structure of each ward. In most cases I just
    cut a ward into smaller pieces with or without gaps between them (with different parameters).
+
+Now, there is an entire channel dedicated to this project
+https://www.reddit.com/r/FantasyCities/
+
+
+Chaikin curves
+==============
+
+There is a lot of tutorials in the blog:
+https://sighack.com/
+
+Introduction and usages of Chaikin curves
+https://sighack.com/post/chaikin-curves
+
+
+ProcJam
+=======
+
+http://www.procjam.com/
+PROCJAM is a fun, friendly community of people who like getting computers to make things
+like art, games, toys, tools, music, stories, poetry, mistakes, languages, maps, patterns, 
+recipes and more. We get together for events we call jams where we make new things, finish 
+old things and share ideas, all in the same week.
+They publish a annual fan-zine at http://www.procjam.com/seeds/
+
