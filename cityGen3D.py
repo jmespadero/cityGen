@@ -416,10 +416,8 @@ def makeDistrict(corners, curbReduct=1, houseReduct=1.5, regionID=None, hideWall
     """
     nv = len(corners)
 
-    #Compute the "Onion model" coordinates for curbs, and houses 
+    #Compute the "Onion model" coordinates for curbs
     curbLine = computeEnvelope(corners, -curbReduct)
-    houseLine = computeEnvelope(curbLine, -houseReduct)    
-    interiorLine = computeEnvelope(houseLine, -1)
 
     # 1. Create a mesh for streets around this region
     # This is the space between polygons clist and curbLine
@@ -490,6 +488,9 @@ def makeDistrict(corners, curbReduct=1, houseReduct=1.5, regionID=None, hideWall
     # Avoid adding any more objects if the region has no ID
     if regionID is None:
         return
+
+    #Compute the "Onion model" coordinates for houses
+    houseLine = computeEnvelope(corners, -houseReduct)    
         
     # 5. Fill boundary of region houseLine with houses (Old method)
     for i in range(nv):
@@ -498,12 +499,13 @@ def makeDistrict(corners, curbReduct=1, houseReduct=1.5, regionID=None, hideWall
         B = 0.03 * houseLine[i-1] + 0.97 * houseLine[i]        
         duplicateAlongSegmentMix (A, B, 0.5, args["inputHouses"])
 
-    # 6. Create a collision mesh avoid enter beyond interiorLine
-    interiorLine2 = [v + Vector((0,0,10)) for v in curbLine]
+    # 6. Create a collision mesh avoid enter beyond houseLine
+    zDisp = Vector((0,0,10))
+    upperLine = [v + zDisp for v in computeEnvelope(houseLine, 0.2) ]
     me = bpy.data.meshes.new("_CollisionW")
     ob = bpy.data.objects.new("_CollisionW", me)    
     wallData = [ ((i-1) % nv, i, nv+i, nv+(i-1) % nv) for i in range(nv)]
-    me.from_pydata(houseLine+interiorLine2, [], wallData)
+    me.from_pydata(houseLine+upperLine, [], wallData)
     me.update(calc_edges=True)
     #Make this mesh invisible for BGE
     me.materials.append(bpy.data.materials['Invisible'])
@@ -511,15 +513,16 @@ def makeDistrict(corners, curbReduct=1, houseReduct=1.5, regionID=None, hideWall
     ob.hide = hideWalls
     bpy.context.scene.objects.link(ob)
 
-    # Debug: Create a text label with the number of the region
-    centroid = sum(corners, Vector((0,0,0)))/nv
-    textCurve = bpy.data.curves.new(type="FONT",name="_textCurve")
-    textOb = bpy.data.objects.new("_textOb",textCurve)
-    textOb.location = (centroid[0], centroid[1], 0.3)
-    textOb.color = (1,0,0,1)
-    textOb.scale = (5,5,5)
-    textOb.data.body = str(regionID)
-    bpy.context.scene.objects.link(textOb)    
+    # 7. Debug: Create a visible text label with the regionID
+    if args.get('debugVisibleTokens', False):    
+        centroid = sum(corners, Vector((0,0,0)))/nv
+        textCurve = bpy.data.curves.new(type="FONT",name="_textCurve")
+        textOb = bpy.data.objects.new("_textOb",textCurve)
+        textOb.location = (centroid[0], centroid[1], 0.3)
+        textOb.color = (1,0,0,1)
+        textOb.scale = (5,5,5)
+        textOb.data.body = str(regionID)
+        bpy.context.scene.objects.link(textOb)    
 
 def updateExternalTexts():
     """ Check modified external scripts in the scene and update if possible
@@ -977,9 +980,9 @@ def main():
         if args.get('createStreets', False):
             if nr in staticRegions:
                 #Avoid creation of collisionWall, houses and regionLabels 
-                makeDistrict(corners, 1.0, 1.5, regionID=None)
+                makeDistrict(corners, 1.0, 2.5, regionID=None)
             else:            
-                makeDistrict(corners, 1.0, 1.5, regionID=nr)
+                makeDistrict(corners, 1.0, 2.5, regionID=nr)
                 
         if args.get('createLeaves', False):
             createLeaves2(corners, 1.0, 2.5, density=0.4, height=0.02, objNames=["DryLeaf"], changeScale=0.4)
@@ -1041,7 +1044,7 @@ def main():
         print('Player starts at vertex:', playerVertex, 'position:', locP.to_tuple())
         
         # Show/hide the token that marks the nearest street point to the player
-        if 'debugVisibleTokens' in args and 'Target' in bpy.data.objects:
+        if 'Target' in bpy.data.objects:
             bpy.data.objects['Target'].hide_render = not args['debugVisibleTokens']
 
         #Inject a new string property to the player object
@@ -1141,6 +1144,9 @@ def main():
         bpy.ops.object.game_property_new(name="iniMonsters", type='STRING')
         AI_Manager.game.properties['iniMonsters'].value=str(monsterVertex)           
 
+        if 'PlayerTarget' in bpy.data.objects:
+            bpy.data.objects['PlayerTarget'].hide_render = not args['debugVisibleTokens']
+            
     # Check modified external scripts and update if necessary
     updateExternalTexts()
 
