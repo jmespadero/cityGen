@@ -226,7 +226,7 @@ class Delaunay2D:
         vor_coors = []
         index={}
         # Build a list of coordinates and a index per triangle/region
-        for tidx, (a, b, c) in enumerate(self.triangles):
+        for tidx, (a, b, c) in enumerate(sorted(self.triangles)):
             vor_coors.append(self.circles[(a,b,c)][0])
             # Insert triangle, rotating it so the key is the "last" vertex 
             useVertex[a]+=[(b, c, a)]
