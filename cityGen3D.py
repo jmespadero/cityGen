@@ -1061,8 +1061,13 @@ def main():
 
         #If there is a compass, configure it to point to the gate
         if 'CompassWise' in bpy.data.objects:
+            # Create an empty object in the position of gate
+            o = bpy.data.objects.new( "North", None )
+            o.location = gateMid
+            bpy.context.scene.objects.link( o )
+            # Configure compass to point to our object
             compass = bpy.data.objects['CompassWise']
-            compass.game.properties['North'].value= "_Gate1_StoneGate.Flag.ext"
+            compass.game.properties['North'].value= o.name
             print('Compass configured to point to object:', compass.game.properties['North'].value)
 
 
