@@ -24,6 +24,7 @@
 
 "inputPlayer": "cg-playerScarecrow.blend",
 "inputPlayer": "cg-playerBoy.blend",
+"inputPlayer": "cg-playerHUD.blend",
 
 "inputMonsterLibrary": ["cg-monsters.blend"],
 "numMonsters": 4 ,
