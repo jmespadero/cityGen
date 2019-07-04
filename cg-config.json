@@ -26,7 +26,7 @@
 "inputPlayer": "cg-playerBoy.blend",
 "inputPlayer": "cg-playerHUD.blend",
 
-"inputMonsterLibrary": ["cg-monsters.blend"],
+"inputMonsterLibrary": ["cg-monsters.blend", "cg-vampires.blend"],
 "numMonsters": 4 ,
 
 "backgroundMusic": "sounds/AngevinB.mp3",
