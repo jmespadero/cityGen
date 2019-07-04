@@ -1,20 +1,20 @@
 ver ../notas/separarRecursos.blend.odt 
 
 Método 1: Ejecutar desde una shell:
-blender --background --python cg-GenGame01.py
+blender --background --python cityGen3D.py
 
 
 Método 2:
 Crear un archivo nuevo/vacio de blender y ejecutar en la consola
 el comando:
-exec(compile(open("cg-GenGame01.py").read(), "cg-GenGame01.py", 'exec'))
+exec(compile(open("cityGen3D.py").read(), "cityGen3D.py", 'exec'))
 
 
 
 DONE:
 
 Para Insertar diccionarios tipo json como controladores tipo python y 
-leerlos con codigo como este.
+leerlos con código como este.
 
 """Our generator added a controller of type 'PYTHON' to object 
 'Player' named 'cg-data.json'
@@ -28,7 +28,7 @@ if 'cg-data.json' not in globalDict :
         globalDict.update(data)
         globalDict['cg-data.json'] = 'From internal text'
 
-cg-GenGame01.py -> importLibrary 
+cityGen3D.py -> importLibrary 
 --> Los objetos cuyo nombre comienza por "_" no son importados
     Esto es útil para ignorar luces y otros objetos.
 
