@@ -551,6 +551,7 @@ def importLibrary(filename, link=False, destinationLayer=1, importScripts=True):
     with bpy.data.libraries.load(os.getcwd() + "\\" + filename, link=link) as (data_from, data_to):
         #Import all objects
         objNames = [o.name for o in bpy.data.objects]
+
         for objName in data_from.objects:
             if objName.startswith('_'):
                 print('  - Ignore', filename, '->', objName, '(name starts with _)')
@@ -1162,6 +1163,20 @@ def main():
     # Check modified external scripts and update if necessary
     updateExternalTexts()
 
+    # Dump and check scenes
+    for s in bpy.data.scenes:
+        # print(" * Scene:", s.name, s.render.engine, s.game_settings.material_mode)
+        if "MainScene" in s.objects:
+            # Set the active scene as the "Main" scene.
+            bpy.context.screen.scene = s
+            print(s.name + " set as main scene")
+            
+        # Check render parameters for each scene
+        if s.render.engine != 'BLENDER_GAME':
+            raise Exception(s.name + ": Scene render.engine is not BLENDER_GAME")
+        if s.game_settings.material_mode != 'GLSL':
+            raise Exception(s.name + ": Scene game_settings.material_mode is not GLSL")
+                
     #Save the current file, if outputGameFilename is set.
     if args.get('outputGameFilename', False):
         outputGameFilename = args['outputGameFilename']
