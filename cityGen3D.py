@@ -1106,23 +1106,23 @@ def main():
         for l,lib in enumerate(args['inputMonsterLibrary']):            
             importLibrary(lib, link=False, destinationLayer=10+l, importScripts=True)
 
-        if 'AI_Manager' not in bpy.data.objects:
-            print("AI_Manager object not found in libraries")
+        if 'Monsters_Manager' not in bpy.data.objects:
+            print("Monsters_Manager object not found in libraries")
             return            
-        AI_Manager = bpy.data.objects['AI_Manager']        
+        Monsters_Manager = bpy.data.objects['Monsters_Manager']        
         
         #Inject a new python controller to the object, linked to an existing text
         #This is a trick so BGE can find a text object
         #http://blenderartists.org/forum/showthread.php?226148-reading-text-datablocks-via-python
         #See leeme.txt to find an example to search and parse a complex json-text
-        bpy.context.scene.objects.active = AI_Manager
+        bpy.context.scene.objects.active = Monsters_Manager
         bpy.ops.logic.controller_add(name='cg-data.json', type='PYTHON')
-        AI_Manager.game.controllers['cg-data.json'].text = bpy.data.texts[inputFilename]        
+        Monsters_Manager.game.controllers['cg-data.json'].text = bpy.data.texts[inputFilename]        
         
         #Inject a new python controller to the object, linked to inputFilenameAI
-        bpy.context.scene.objects.active = AI_Manager
+        bpy.context.scene.objects.active = Monsters_Manager
         bpy.ops.logic.controller_add(name='cg-ia.json', type='PYTHON')
-        AI_Manager.game.controllers['cg-ia.json'].text = bpy.data.texts[inputFilenameAI]
+        Monsters_Manager.game.controllers['cg-ia.json'].text = bpy.data.texts[inputFilenameAI]
         
         AIData={}
         print("Read AI data from:", inputFilenameAI)
@@ -1153,9 +1153,9 @@ def main():
         print("Starting vertex for monsters", monsterVertex)
 
         #Set the list of vertex where monsters spawn as a game property of AI
-        bpy.context.scene.objects.active = AI_Manager
+        bpy.context.scene.objects.active = Monsters_Manager
         bpy.ops.object.game_property_new(name="iniMonsters", type='STRING')
-        AI_Manager.game.properties['iniMonsters'].value=str(monsterVertex)           
+        Monsters_Manager.game.properties['iniMonsters'].value=str(monsterVertex)           
 
         if 'PlayerTarget' in bpy.data.objects:
             bpy.data.objects['PlayerTarget'].hide_render = not args['debugVisibleTokens']
