@@ -51,3 +51,12 @@ recipes and more. We get together for events we call jams where we make new thin
 old things and share ideas, all in the same week.
 They publish a annual fan-zine at http://www.procjam.com/seeds/
 
+
+Implementing doors in BGE:
+=========================
+
+Door Open and Close System 
+https://www.youtube.com/watch?v=Lg1s6NbBUTE
+
+Blender Game Engine Basics Tutorial #22: Doors & Keys
+https://www.youtube.com/watch?v=djx3YzGaG8E
