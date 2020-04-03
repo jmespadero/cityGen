@@ -769,7 +769,7 @@ def main():
     bpy.ops.file.autopack_toggle()
     #print("bpy.data.use_autopack ", bpy.data.use_autopack )
     # Enable this if you need debug properties on screen
-    bpy.context.scene.game_settings.show_debug_properties = True
+    bpy.context.scene.game_settings.show_debug_properties = args.get('show_debug_properties', False)
     #bpy.context.scene.game_settings.show_physics_visualization = True
 
 

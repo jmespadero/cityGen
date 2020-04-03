@@ -17,6 +17,7 @@
 "createEspecialBuildings" : true,
 "enableMist" : false,
 
+"show_debug_properties": true,
 "debugVisibleTokens": false,
 
 "inputSkyDome": "cg-skyDomeDay.blend",
